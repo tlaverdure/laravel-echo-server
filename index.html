@@ -1,0 +1,41 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title></title>
+</head>
+
+<body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.6/socket.io.js"></script>
+  <script>
+    // var echo = new Echo({
+    //   host: 'http://babyhandle.dev',
+    //   port: 6001,
+    //   channel: 'private-channel'
+    // });
+    //
+    // echo.listen('notify', function() {
+    //   //
+    // });
+    //
+    socket = io('http://api.babyhandle.dev:6001', {});
+
+    socket.on('connect', function() {
+      socket.emit('join-channel', {
+        channel: 'private-channel',
+        auth: {
+          headers: {
+            'Authorization': 'Bearer TOKEN'
+          }
+        }
+      });
+    });
+
+    socket.on('notifications', function(data) {
+      console.log(data);
+      //socket.emit('my other event', { my: 'data' });
+    });
+  </script>
+</body>
+
+</html>
