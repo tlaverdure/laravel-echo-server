@@ -8,7 +8,6 @@ Install npm package
 
 ```
 npm install laravel-echo-server --save
-
 ```
 
 Create a server.js file and include the following.
