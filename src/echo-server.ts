@@ -95,7 +95,6 @@ export class EchoServer {
    * Join a channel
    * @param  {object} socket
    * @param  {data}   data
-   * @return {[type]}
    */
   joinChannel(socket, data) {
     if (data.channel) {
@@ -167,7 +166,6 @@ export class EchoServer {
    * Console log a message
    * @param  {string} message
    * @param  {string} status
-   * @return {[type]}         [description]
    */
   log(message: string, status: string = 'success') {
     if (status == 'success') {
