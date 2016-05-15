@@ -33,11 +33,13 @@ class EchoServer {
         this._redis.psubscribe('*', (err, count) => { });
         this._redis.on('pmessage', (subscribed, channel, message) => {
             message = JSON.parse(message);
+            this.log(message);
             this._io.on(channel).emit(message.event, message.data);
         });
     }
     joinChannel(socket, data) {
         if (data.channel) {
+            this.log('Private:' + this.isPrivateChannel(data.channel));
             if (this.isPrivateChannel(data.channel)) {
                 this.joinPrivateChannel(socket, data);
             }
@@ -47,6 +49,7 @@ class EchoServer {
         }
     }
     joinPrivateChannel(socket, data) {
+        this.log('Authentication:' + this.channelAuthentication(data));
         if (this.channelAuthentication(data)) {
             socket.join(data.channel);
         }
@@ -72,7 +75,17 @@ class EchoServer {
             headers: (data.auth && data.auth.headers) ? data.auth.headers : null
         };
         this._request.post(options, (error, response, body, next) => {
-            return (!error && response.statusCode == 200) ? response.body : false;
+            if (error) {
+                this.log(error, 'error');
+                return false;
+            }
+            if ((!error && response.statusCode == 200)) {
+                return response.body;
+            }
+            else {
+                this.log(response.statusCode + ' - ' + response.body, 'error');
+                return false;
+            }
         });
     }
     log(message, status = 'success') {

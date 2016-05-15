@@ -29,7 +29,7 @@ Edit the default configuration of the server.
 var echo = require('laravel-echo-server');
 
 var options = {
-  host: 'example.dev',
+  host: 'http://example.dev',
   authPath: '/broadcasting/auth'
 };
 
