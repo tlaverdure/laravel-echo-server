@@ -14,7 +14,7 @@ Create a server.js file and include the following.
 
 ```js
 
-var require = require('laravel-echo-server');
+var echo = require('laravel-echo-server');
 
 echo.run();
 
@@ -26,7 +26,7 @@ echo.run();
 Edit the default configuration of the server.
 
 ```js
-var require = require('laravel-echo-server');
+var echo = require('laravel-echo-server');
 
 var options = {
   host: 'example.dev',
