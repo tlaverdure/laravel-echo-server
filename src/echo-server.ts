@@ -88,7 +88,7 @@ export class EchoServer {
     this._redis.on('pmessage', (subscribed, channel, message) => {
       message = JSON.parse(message);
       this.log(message);
-      this._io.on(channel).emit(message.event, message.data);
+      this._io.to(channel).emit(message.event, message.data);
     });
   }
 
@@ -99,7 +99,6 @@ export class EchoServer {
    */
   joinChannel(socket, data) {
     if (data.channel) {
-      this.log('Private:' + this.isPrivateChannel(data.channel));
       if (this.isPrivateChannel(data.channel)) {
         this.joinPrivateChannel(socket, data);
       } else {
@@ -114,13 +113,12 @@ export class EchoServer {
    * @param  {object} data
    */
   joinPrivateChannel(socket, data) {
-    this.log('Authentication:' + this.channelAuthentication(data));
-    if (this.channelAuthentication(data)) {
+    this.channelAuthentication(data).then(res => {
       socket.join(data.channel);
       // TODO: Send data back for presence channels
-    } else {
-      //
-    }
+    }, error => {
+
+    })
   }
 
   /**
@@ -140,40 +138,33 @@ export class EchoServer {
   }
 
   /**
-   * Check to see if user can authenticate to private channel
-   * @param  {object} data
-   * @return {function}
-   */
-  private channelAuthentication(data) {
-    return this.authenticationRequest(data);
-  }
-
-  /**
    * Send authentication request to application server
    * @param  {string} channel
    * @return {mixed}
    */
-  private authenticationRequest(data) {
+  private channelAuthentication(data) {
     let options = {
       url: this.options.host + this.options.authEndpoint,
-      form: { channel: data.channel },
+      form: { channel_name: data.channel },
       headers: (data.auth && data.auth.headers) ? data.auth.headers : null
     };
 
-    this._request.post(options, (error, response, body, next) => {
-      if (error) {
-        this.log(error, 'error');
+    return new Promise<any>((resolve, reject) => {
+      this._request.post(options, (error, response, body, next) => {
+        if (error) {
+          this.log(error, 'error');
 
-        return false;
-      }
+          reject(error);
+        }
 
-      if ((!error && response.statusCode == 200)) {
-        return response.body;
-      } else {
-        this.log(response.statusCode + ' - ' + response.body, 'error');
+        if ((!error && response.statusCode == 200)) {
+          resolve(true);
+        } else {
+          this.log('Error: ' + response.statusCode, 'error');
 
-        return false;
-      }
+          reject(false);
+        }
+      });
     });
   }
 

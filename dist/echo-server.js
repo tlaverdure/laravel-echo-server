@@ -34,12 +34,11 @@ class EchoServer {
         this._redis.on('pmessage', (subscribed, channel, message) => {
             message = JSON.parse(message);
             this.log(message);
-            this._io.on(channel).emit(message.event, message.data);
+            this._io.to(channel).emit(message.event, message.data);
         });
     }
     joinChannel(socket, data) {
         if (data.channel) {
-            this.log('Private:' + this.isPrivateChannel(data.channel));
             if (this.isPrivateChannel(data.channel)) {
                 this.joinPrivateChannel(socket, data);
             }
@@ -49,12 +48,10 @@ class EchoServer {
         }
     }
     joinPrivateChannel(socket, data) {
-        this.log('Authentication:' + this.channelAuthentication(data));
-        if (this.channelAuthentication(data)) {
+        this.channelAuthentication(data).then(res => {
             socket.join(data.channel);
-        }
-        else {
-        }
+        }, error => {
+        });
     }
     isPrivateChannel(channel) {
         let isPrivateChannel;
@@ -66,26 +63,25 @@ class EchoServer {
         return isPrivateChannel;
     }
     channelAuthentication(data) {
-        return this.authenticationRequest(data);
-    }
-    authenticationRequest(data) {
         let options = {
             url: this.options.host + this.options.authEndpoint,
-            form: { channel: data.channel },
+            form: { channel_name: data.channel },
             headers: (data.auth && data.auth.headers) ? data.auth.headers : null
         };
-        this._request.post(options, (error, response, body, next) => {
-            if (error) {
-                this.log(error, 'error');
-                return false;
-            }
-            if ((!error && response.statusCode == 200)) {
-                return response.body;
-            }
-            else {
-                this.log(response.statusCode + ' - ' + response.body, 'error');
-                return false;
-            }
+        return new Promise((resolve, reject) => {
+            this._request.post(options, (error, response, body, next) => {
+                if (error) {
+                    this.log(error, 'error');
+                    reject(error);
+                }
+                if ((!error && response.statusCode == 200)) {
+                    resolve(true);
+                }
+                else {
+                    this.log('Error: ' + response.statusCode, 'error');
+                    reject(false);
+                }
+            });
         });
     }
     log(message, status = 'success') {
