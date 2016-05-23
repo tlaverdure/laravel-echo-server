@@ -36,10 +36,9 @@ var echo = require('laravel-echo-server');
 
 var options = {
   host: 'http://example.dev',
-  port: 6001
-  authPath: '/broadcasting/auth'
+  port: 6001,
+  authPath: '/broadcasting/auth',
   socketPath: '/broadcasting/socket'
-  headers: ['Authorization', 'Cookie']
 };
 
 echo.run(options);
@@ -51,4 +50,3 @@ echo.run(options);
 | `port` | `6001` | The port that the socket.io server should run on |
 | `authPath` | `/broadcasting/auth` | The route that authenticates private channels  |
 | `socketPath` | `/broadcasting/socket` | The route that stores socket identifiers |
-| `headers` | `[Authorization, Cookie]` | The headers added to app server requests |

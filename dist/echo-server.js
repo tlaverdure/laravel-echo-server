@@ -57,7 +57,7 @@ class EchoServer {
         }
     }
     joinPrivateChannel(socket, data) {
-        this.channelAuthentication(data, socket).then(res => {
+        this.channelAuthentication(socket, data).then(res => {
             res = JSON.parse(res);
             let privateSocket = socket.join(data.channel);
             if (this.isPresenceChannel(data.channel) && res.data && res.data.user) {
@@ -111,24 +111,25 @@ class EchoServer {
             this.removeSocketFromPresenceChannel(channel, socket.id);
         });
     }
-    channelAuthentication(data, socket) {
+    channelAuthentication(socket, data) {
         let options = {
             url: this.options.host + this.options.authEndpoint,
             form: { channel_name: data.channel },
             headers: (data.auth && data.auth.headers) ? data.auth.headers : null
         };
-        return this.severRequest(options);
+        return this.severRequest(socket, options);
     }
-    sendSocketId(data, socketId) {
+    sendSocketId(data, socket) {
         let options = {
             url: this.options.host + this.options.socketEndpoint,
-            form: { socket_id: socketId },
+            form: { socket_id: socket.id },
             headers: (data.auth && data.auth.headers) ? data.auth.headers : null
         };
-        return this.severRequest(options);
+        return this.severRequest(socket, options);
     }
-    severRequest(options) {
+    severRequest(socket, options) {
         return new Promise((resolve, reject) => {
+            options.headers = this.prepareHeaders(socket, options);
             this._request.post(options, (error, response, body, next) => {
                 if ((!error && response.statusCode == 200)) {
                     resolve(response.body);
@@ -139,6 +140,10 @@ class EchoServer {
                 }
             });
         });
+    }
+    prepareHeaders(socket, options) {
+        options.headers['Cookie'] = socket.request.headers.cookie;
+        return options.headers;
     }
     log(message, status = 'success') {
         if (status == 'success') {

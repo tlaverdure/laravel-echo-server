@@ -146,7 +146,7 @@ export class EchoServer {
    * @param  {object} data
    */
   joinPrivateChannel(socket, data) {
-    this.channelAuthentication(data, socket).then(res => {
+    this.channelAuthentication(socket, data).then(res => {
       res = JSON.parse(res);
 
       let privateSocket = socket.join(data.channel);
@@ -248,43 +248,46 @@ export class EchoServer {
 
   /**
    * Send authentication request to application server.
-   * @param  {object} data
    * @param  {object} socket
+   * @param  {object} data
    * @return {mixed}
    */
-  protected channelAuthentication(data: any, socket: any) {
+  protected channelAuthentication(socket: any, data: any) {
     let options = {
       url: this.options.host + this.options.authEndpoint,
       form: { channel_name: data.channel },
       headers: (data.auth && data.auth.headers) ? data.auth.headers : null
     };
 
-    return this.severRequest(options);
+    return this.severRequest(socket, options);
   }
 
   /**
    * Send socket id to application server.
    * @param  {object} data
-   * @param  {integer} socketId
+   * @param  {object} socketId
    * @return {mixed}
    */
-  protected sendSocketId(data: any, socketId: number) {
+  protected sendSocketId(data: any, socket: any) {
     let options = {
       url: this.options.host + this.options.socketEndpoint,
-      form: { socket_id: socketId },
+      form: { socket_id: socket.id },
       headers: (data.auth && data.auth.headers) ? data.auth.headers : null
     };
 
-    return this.severRequest(options);
+    return this.severRequest(socket, options);
   }
 
   /**
    * Send a request to the server.
+   * @param  {object} socket
    * @param  {object} options
    * @return {Promise}
    */
-  protected severRequest(options: any) {
+  protected severRequest(socket: any, options: any) {
     return new Promise<any>((resolve, reject) => {
+      options.headers = this.prepareHeaders(socket, options);
+
       this._request.post(options, (error, response, body, next) => {
 
         if ((!error && response.statusCode == 200)) {
@@ -295,6 +298,17 @@ export class EchoServer {
         }
       });
     });
+  }
+
+  /**
+   * Prepare headers for request to app server
+   * @param  {any} options
+   * @return {object}
+   */
+  protected prepareHeaders(socket, options: any) {
+    options.headers['Cookie'] = socket.request.headers.cookie;
+
+    return options.headers;
   }
 
   /**
