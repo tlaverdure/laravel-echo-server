@@ -8,7 +8,8 @@ class EchoServer {
         this._options = {
             port: 6001,
             host: 'http://localhost',
-            authEndpoint: '/broadcasting/auth'
+            authEndpoint: '/broadcasting/auth',
+            socketEndpoint: '/broadcasting/socket'
         };
         this._privateChannels = ['private-*', 'presence-*'];
         this._redis = new Redis();
@@ -56,14 +57,16 @@ class EchoServer {
         }
     }
     joinPrivateChannel(socket, data) {
-        this.channelAuthentication(data).then(res => {
+        this.channelAuthentication(data, socket).then(res => {
             res = JSON.parse(res);
             let privateSocket = socket.join(data.channel);
             if (res.data && res.data.user) {
                 this.addUserToPressenceChannel(data.channel, res.data.user);
                 this.presenceChannelEvents(data.channel, privateSocket);
             }
-        }, error => { });
+        }, error => { }).then(() => {
+            this.sendSocketId(data, socket.id);
+        });
     }
     isPrivateChannel(channel) {
         let isPrivateChannel;
@@ -108,21 +111,25 @@ class EchoServer {
             this.removeSocketFromPresenceChannel(channel, socket.id);
         });
     }
-    channelAuthentication(data) {
+    channelAuthentication(data, socket) {
         let options = {
             url: this.options.host + this.options.authEndpoint,
             form: { channel_name: data.channel },
             headers: (data.auth && data.auth.headers) ? data.auth.headers : null
         };
-        return this.channelAuthenticationRequest(options);
+        return this.severRequest(options);
     }
-    channelAuthenticationRequest(options) {
+    sendSocketId(data, socketId) {
+        let options = {
+            url: this.options.host + this.options.socketEndpoint,
+            form: { socket_id: socketId },
+            headers: (data.auth && data.auth.headers) ? data.auth.headers : null
+        };
+        return this.severRequest(options);
+    }
+    severRequest(options) {
         return new Promise((resolve, reject) => {
             this._request.post(options, (error, response, body, next) => {
-                if (error) {
-                    this.log(error, 'error');
-                    reject(error);
-                }
                 if ((!error && response.statusCode == 200)) {
                     resolve(response.body);
                 }

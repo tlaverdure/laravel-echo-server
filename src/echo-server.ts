@@ -14,7 +14,8 @@ export class EchoServer {
   private _options: any = {
     port: 6001,
     host: 'http://localhost',
-    authEndpoint: '/broadcasting/auth'
+    authEndpoint: '/broadcasting/auth',
+    socketEndpoint: '/broadcasting/socket'
   };
 
   /**
@@ -145,7 +146,7 @@ export class EchoServer {
    * @param  {object} data
    */
   joinPrivateChannel(socket, data) {
-    this.channelAuthentication(data).then(res => {
+    this.channelAuthentication(data, socket).then(res => {
       res = JSON.parse(res);
 
       let privateSocket = socket.join(data.channel);
@@ -154,7 +155,9 @@ export class EchoServer {
         this.addUserToPressenceChannel(data.channel, res.data.user);
         this.presenceChannelEvents(data.channel, privateSocket);
       }
-    }, error => { })
+    }, error => { }).then(() => {
+      this.sendSocketId(data, socket.id);
+    });
   }
 
   /**
@@ -245,31 +248,44 @@ export class EchoServer {
 
   /**
    * Send authentication request to application server.
-   * @param  {string} channel
+   * @param  {object} data
+   * @param  {object} socket
    * @return {mixed}
    */
-  protected channelAuthentication(data) {
+  protected channelAuthentication(data: any, socket: any) {
     let options = {
       url: this.options.host + this.options.authEndpoint,
       form: { channel_name: data.channel },
       headers: (data.auth && data.auth.headers) ? data.auth.headers : null
     };
 
-    return this.channelAuthenticationRequest(options);
+    return this.severRequest(options);
   }
 
   /**
-   * Send the request to the server.
+   * Send socket id to application server.
+   * @param  {object} data
+   * @param  {integer} socketId
+   * @return {mixed}
+   */
+  protected sendSocketId(data: any, socketId: number) {
+    let options = {
+      url: this.options.host + this.options.socketEndpoint,
+      form: { socket_id: socketId },
+      headers: (data.auth && data.auth.headers) ? data.auth.headers : null
+    };
+
+    return this.severRequest(options);
+  }
+
+  /**
+   * Send a request to the server.
    * @param  {object} options
    * @return {Promise}
    */
-  protected channelAuthenticationRequest(options: any) {
+  protected severRequest(options: any) {
     return new Promise<any>((resolve, reject) => {
       this._request.post(options, (error, response, body, next) => {
-        if (error) {
-          this.log(error, 'error');
-          reject(error);
-        }
 
         if ((!error && response.statusCode == 200)) {
           resolve(response.body);
