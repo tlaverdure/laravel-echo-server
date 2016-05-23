@@ -60,7 +60,7 @@ class EchoServer {
         this.channelAuthentication(data, socket).then(res => {
             res = JSON.parse(res);
             let privateSocket = socket.join(data.channel);
-            if (res.data && res.data.user) {
+            if (this.isPresenceChannel(data.channel) && res.data && res.data.user) {
                 this.addUserToPressenceChannel(data.channel, res.data.user);
                 this.presenceChannelEvents(data.channel, privateSocket);
             }
