@@ -37,3 +37,7 @@ var options = {
 
 echo.run(options);
 ```
+
+| Title | Default | Description |
+| :------------- | :------------- | :------------- |
+| host       | http://localhost | {} |
