@@ -7,6 +7,9 @@
     "url": "https://github.com/tlaverdure/Laravel-Echo-Server.git"
   },
   "main": "dist/index.js",
+  "bin": {
+    "echo-server": "dist/index.js"
+  },
   "keywords": [
     "laravel",
     "socket.io"
