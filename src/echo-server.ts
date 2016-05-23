@@ -12,8 +12,8 @@ export class EchoServer {
    * @type {object}
    */
   private _options: any = {
-    port: 6001,
     host: 'http://localhost',
+    port: 6001,
     authEndpoint: '/broadcasting/auth',
     socketEndpoint: '/broadcasting/socket'
   };

@@ -30,7 +30,9 @@ var echo = require('laravel-echo-server');
 
 var options = {
   host: 'http://example.dev',
+  port: 6001
   authPath: '/broadcasting/auth'
+  socketPath: '/broadcasting/socket'
 };
 
 echo.run(options);
