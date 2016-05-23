@@ -1,6 +1,6 @@
 {
   "name": "laravel-echo-server",
-  "version": "0.0.2",
+  "version": "0.5.0",
   "description": "Laravel Echo Node JS Server for Socket.io",
   "repository": {
     "type": "git",
@@ -16,12 +16,12 @@
   "jshintConfig": {
     "esversion": 6
   },
-  "scripts" : {
+  "scripts": {
     "build": "tsc -w"
   },
   "dependencies": {
     "ioredis": "^1.15.1",
-    "lodash.merge": "^4.4.0",
+    "lodash": "^4.12.0",
     "request": "^2.72.0",
     "socket.io": "^1.4.6"
   },

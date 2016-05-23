@@ -1,14 +1,15 @@
 declare let require: any
 
-let merge = require('lodash.merge');
+let _ = require('lodash');
 let io = require('socket.io')
 let Redis = require('ioredis')
 let request = require('request')
 
 export class EchoServer {
+
   /**
-   * Default server options
-   * @type {any}
+   * Default server options.
+   * @type {object}
    */
   private _options: any = {
     port: 6001,
@@ -17,7 +18,7 @@ export class EchoServer {
   };
 
   /**
-   * Channels and patters for private channels
+   * Channels and patters for private channels.
    * @type {array}
    */
   protected _privateChannels: string[] = ['private-*', 'presence-*'];
@@ -27,6 +28,18 @@ export class EchoServer {
    * @type {object}
    */
   private _redis: any;
+
+  /**
+   * Redis pub client
+   * @type {object}
+   */
+  private _redisPub: any;
+
+  /**
+   * Redis sub client
+   * @type {object}
+   */
+  private _redisSub: any;
 
   /**
    * Socket.io client
@@ -42,7 +55,7 @@ export class EchoServer {
 
   /**
    * Configurable server options
-   * @type {any}
+   * @type {object}
    */
   public options: any;
 
@@ -51,16 +64,18 @@ export class EchoServer {
    */
   constructor() {
     this._redis = new Redis();
+    this._redisPub = new Redis();
+    this._redisSub = new Redis();
     this._io = io;
     this._request = request;
   }
 
   /**
-   * Start the Echo Server
+   * Start the Echo Server.
    * @param  {Object} config
    */
   run(options: any) {
-    this.options = merge(this._options, options);
+    this.options = _.merge(this._options, options);
     this.startSocketIoServer();
     this.redisPubSub();
 
@@ -68,34 +83,51 @@ export class EchoServer {
   }
 
   /**
-   * Start the Socket.io server
+   * Start the Socket.io server.
    */
   startSocketIoServer() {
     this._io = io(this.options.port);
     this._io.on('connection', socket => {
-      socket.on('join-channel', data => {
-        this.joinChannel(socket, data);
-      });
+      this.onSubscribe(socket);
+      this.onDisconnect(socket);
     });
   }
 
   /**
-   * Setup redis pub sub
+   * Setup redis pub/sub.
    */
   redisPubSub() {
-    this._redis.psubscribe('*', (err, count) => { });
+    this._redisSub.psubscribe('*', (err, count) => { });
 
-    this._redis.on('pmessage', (subscribed, channel, message) => {
+    this._redisPub.on('pmessage', (subscribed, channel, message) => {
       message = JSON.parse(message);
-      this.log(message);
+      //this.log(message);
       this._io.to(channel).emit(message.event, message.data);
     });
   }
 
   /**
-   * Join a channel
+   * On subscribe to a channel
+   * @param  {object}  socket
+   */
+  onSubscribe(socket: any) {
+    socket.on('subscribe', data => {
+      this.joinChannel(socket, data);
+    });
+  }
+
+  /**
+   * On disconnect from a channe,l
+   * @param  {object}  socket
+   */
+  onDisconnect(socket: any) {
+    socket.on('disconnect', () => { });
+  }
+
+  /**
+   * Join a channel.
    * @param  {object} socket
-   * @param  {data}   data
+   * @param  {data}  data
    */
   joinChannel(socket, data) {
     if (data.channel) {
@@ -108,25 +140,29 @@ export class EchoServer {
   }
 
   /**
-   * Join a private channel
+   * Join private channel, emit data to presence channels.
    * @param  {object} socket
    * @param  {object} data
    */
   joinPrivateChannel(socket, data) {
     this.channelAuthentication(data).then(res => {
-      socket.join(data.channel);
-      // TODO: Send data back for presence channels
-    }, error => {
+      res = JSON.parse(res);
 
-    })
+      let privateSocket = socket.join(data.channel);
+
+      if (res.data && res.data.user) {
+        this.addUserToPressenceChannel(data.channel, res.data.user);
+        this.presenceChannelEvents(data.channel, privateSocket);
+      }
+    }, error => { })
   }
 
   /**
-   * Check if the incoming socket connection is a private channel
+   * Check if the incoming socket connection is a private channel.
    * @param  {string} channel
    * @return {boolean}
    */
-  isPrivateChannel(channel) {
+  isPrivateChannel(channel: string) {
     let isPrivateChannel: boolean
 
     this._privateChannels.forEach(privateChannel => {
@@ -138,30 +174,107 @@ export class EchoServer {
   }
 
   /**
-   * Send authentication request to application server
+   * Check if a channel is a private channel
+   * @param  {string} channel
+   * @return {boolean}
+   */
+  isPresenceChannel(channel: string) {
+    return channel.lastIndexOf('presence-', 0) === 0;
+  }
+
+  /**
+   * Get the users of a presence channel
+   * @param  {string}  channel
+   * @return {Promise}
+   */
+  getPresenceChannelUsers(channel: string): Promise<any> {
+    return this._redis.get(channel + ':users');
+  }
+
+  /**
+   * Set the presence channel users
+   * @param  {string} channel
+   * @param  {object}  user
+   */
+  addUserToPressenceChannel(channel: string, user: any) {
+    this.getPresenceChannelUsers(channel).then(users => {
+      users = (users) ? JSON.parse(users) : [];
+      users.push(user)
+      users = JSON.stringify(_.uniqBy(users, Object.keys(users)[0]));
+      this._redis.set(channel + ':users', users);
+      this.emitPresenceChannelUsers(channel, users);
+      this.log(users);
+    });
+  }
+
+  /**
+   * Remove a user from a presenece channel
+   * @param  {string} channel
+   * @param  {object}  user
+   */
+  removeSocketFromPresenceChannel(channel: string, socket_Id: string) {
+    this.getPresenceChannelUsers(channel).then(users => {
+      users = (users) ? JSON.parse(users) : [];
+      users = JSON.stringify(_.remove(users, user => {
+        user.socket_id == socket_Id
+      }));
+      this._redis.set(channel + ':users', users);
+      this.emitPresenceChannelUsers(channel, users);
+    });
+  }
+
+  /**
+   * Emit presence channel users to the channel
+   * @param  {string} channel
+   * @param  {array} users
+   */
+  emitPresenceChannelUsers(channel: string, users: string[]) {
+    this._io.to(channel).emit('users:updated', users);
+  }
+
+  /**
+   * Listen to events on private channel
+   * @param  {string}  channel
+   * @param  {object}  socket
+   */
+  presenceChannelEvents(channel: string, socket: any) {
+    socket.on('disconnect', () => {
+      this.removeSocketFromPresenceChannel(channel, socket.id);
+    });
+  }
+
+  /**
+   * Send authentication request to application server.
    * @param  {string} channel
    * @return {mixed}
    */
-  private channelAuthentication(data) {
+  protected channelAuthentication(data) {
     let options = {
       url: this.options.host + this.options.authEndpoint,
       form: { channel_name: data.channel },
       headers: (data.auth && data.auth.headers) ? data.auth.headers : null
     };
 
+    return this.channelAuthenticationRequest(options);
+  }
+
+  /**
+   * Send the request to the server.
+   * @param  {object} options
+   * @return {Promise}
+   */
+  protected channelAuthenticationRequest(options: any) {
     return new Promise<any>((resolve, reject) => {
       this._request.post(options, (error, response, body, next) => {
         if (error) {
           this.log(error, 'error');
-
           reject(error);
         }
 
         if ((!error && response.statusCode == 200)) {
-          resolve(true);
+          resolve(response.body);
         } else {
           this.log('Error: ' + response.statusCode, 'error');
-
           reject(false);
         }
       });
@@ -169,11 +282,11 @@ export class EchoServer {
   }
 
   /**
-   * Console log a message
+   * Console log a message with formating.
    * @param  {string} message
    * @param  {string} status
    */
-  log(message: string, status: string = 'success') {
+  protected log(message: string, status: string = 'success') {
     if (status == 'success') {
       console.log('\x1b[32m%s\x1b[0m:', 'EchoServer', message);
     } else {
