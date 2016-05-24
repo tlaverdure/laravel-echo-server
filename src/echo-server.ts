@@ -307,6 +307,7 @@ export class EchoServer {
    */
   protected prepareHeaders(socket, options: any) {
     options.headers['Cookie'] = socket.request.headers.cookie;
+    options.headers['X-Socket-Id'] = socket.id;
 
     return options.headers;
   }
