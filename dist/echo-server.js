@@ -22,7 +22,7 @@ class EchoServer {
         this.options = _.merge(this._options, options);
         this.startSocketIoServer();
         this.redisPubSub();
-        this.log('Server running at ' + this.options.host + ':' + this.options.port);
+        this.log("Server running at " + this.options.host + ":" + this.options.port);
     }
     startSocketIoServer() {
         this._io = io(this.options.port);
@@ -131,11 +131,11 @@ class EchoServer {
         return new Promise((resolve, reject) => {
             options.headers = this.prepareHeaders(socket, options);
             this._request.post(options, (error, response, body, next) => {
-                if ((!error && response.statusCode == 200)) {
+                if (!error && response.statusCode == 200) {
                     resolve(response.body);
                 }
                 else {
-                    this.log('Error: ' + response.statusCode, 'error');
+                    this.log("Error: " + response.statusCode, 'error');
                     reject(false);
                 }
             });
@@ -148,10 +148,10 @@ class EchoServer {
     }
     log(message, status = 'success') {
         if (status == 'success') {
-            console.log('\x1b[32m%s\x1b[0m:', 'EchoServer', message);
+            console.log("\x1b[32m%s\x1b[0m:", 'EchoServer', message);
         }
         else {
-            console.log('\x1b[31m%s\x1b[0m:', '(Error)', message);
+            console.log("\x1b[31m%s\x1b[0m:", '(Error)', message);
         }
     }
 }
