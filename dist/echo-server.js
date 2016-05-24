@@ -60,8 +60,8 @@ class EchoServer {
         this.channelAuthentication(socket, data).then(res => {
             res = JSON.parse(res);
             let privateSocket = socket.join(data.channel);
-            if (this.isPresenceChannel(data.channel) && res.data && res.data.user) {
-                this.addUserToPressenceChannel(data.channel, res.data.user);
+            if (this.isPresenceChannel(data.channel) && res.data && res.data.member) {
+                this.addMemberToPressenceChannel(data.channel, res.data.member);
                 this.presenceChannelEvents(data.channel, privateSocket);
             }
         }, error => { }).then(() => {
@@ -80,31 +80,31 @@ class EchoServer {
     isPresenceChannel(channel) {
         return channel.lastIndexOf('presence-', 0) === 0;
     }
-    getPresenceChannelUsers(channel) {
-        return this._redis.get(channel + ':users');
+    getPresenceChannelMembers(channel) {
+        return this._redis.get(channel + ':members');
     }
-    addUserToPressenceChannel(channel, user) {
-        this.getPresenceChannelUsers(channel).then(users => {
-            users = (users) ? JSON.parse(users) : [];
-            users.push(user);
-            users = JSON.stringify(_.uniqBy(users, Object.keys(users)[0]));
-            this._redis.set(channel + ':users', users);
-            this.emitPresenceChannelUsers(channel, users);
-            this.log(users);
+    addMemberToPressenceChannel(channel, member) {
+        this.getPresenceChannelMembers(channel).then(memebers => {
+            memebers = (memebers) ? JSON.parse(memebers) : [];
+            memebers.push(member);
+            memebers = JSON.stringify(_.uniqBy(memebers, Object.keys(memebers)[0]));
+            this._redis.set(channel + ':memebers', memebers);
+            this.emitPresenceChannelMembers(channel, memebers);
+            this.log(memebers);
         });
     }
     removeSocketFromPresenceChannel(channel, socket_Id) {
-        this.getPresenceChannelUsers(channel).then(users => {
-            users = (users) ? JSON.parse(users) : [];
-            users = JSON.stringify(_.remove(users, user => {
-                user.socket_id == socket_Id;
+        this.getPresenceChannelMembers(channel).then(memebers => {
+            memebers = (memebers) ? JSON.parse(memebers) : [];
+            memebers = JSON.stringify(_.remove(memebers, member => {
+                member.socket_id == socket_Id;
             }));
-            this._redis.set(channel + ':users', users);
-            this.emitPresenceChannelUsers(channel, users);
+            this._redis.set(channel + ':members', memebers);
+            this.emitPresenceChannelMembers(channel, memebers);
         });
     }
-    emitPresenceChannelUsers(channel, users) {
-        this._io.to(channel).emit('users:updated', users);
+    emitPresenceChannelMembers(channel, memebers) {
+        this._io.to(channel).emit('memebers:updated', memebers);
     }
     presenceChannelEvents(channel, socket) {
         socket.on('disconnect', () => {

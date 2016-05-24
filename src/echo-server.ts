@@ -151,8 +151,8 @@ export class EchoServer {
 
       let privateSocket = socket.join(data.channel);
 
-      if (this.isPresenceChannel(data.channel) && res.data && res.data.user) {
-        this.addUserToPressenceChannel(data.channel, res.data.user);
+      if (this.isPresenceChannel(data.channel) && res.data && res.data.member) {
+        this.addMemberToPressenceChannel(data.channel, res.data.member);
         this.presenceChannelEvents(data.channel, privateSocket);
       }
     }, error => { }).then(() => {
@@ -186,53 +186,53 @@ export class EchoServer {
   }
 
   /**
-   * Get the users of a presence channel
+   * Get the memebers of a presence channel
    * @param  {string}  channel
    * @return {Promise}
    */
-  getPresenceChannelUsers(channel: string): Promise<any> {
-    return this._redis.get(channel + ':users');
+  getPresenceChannelMembers(channel: string): Promise<any> {
+    return this._redis.get(channel + ':members');
   }
 
   /**
-   * Set the presence channel users
+   * Set the presence channel members
    * @param  {string} channel
-   * @param  {object}  user
+   * @param  {object}  member
    */
-  addUserToPressenceChannel(channel: string, user: any) {
-    this.getPresenceChannelUsers(channel).then(users => {
-      users = (users) ? JSON.parse(users) : [];
-      users.push(user)
-      users = JSON.stringify(_.uniqBy(users, Object.keys(users)[0]));
-      this._redis.set(channel + ':users', users);
-      this.emitPresenceChannelUsers(channel, users);
-      this.log(users);
+  addMemberToPressenceChannel(channel: string, member: any) {
+    this.getPresenceChannelMembers(channel).then(memebers => {
+      memebers = (memebers) ? JSON.parse(memebers) : [];
+      memebers.push(member)
+      memebers = JSON.stringify(_.uniqBy(memebers, Object.keys(memebers)[0]));
+      this._redis.set(channel + ':memebers', memebers);
+      this.emitPresenceChannelMembers(channel, memebers);
+      this.log(memebers);
     });
   }
 
   /**
-   * Remove a user from a presenece channel
+   * Remove a member from a presenece channel
    * @param  {string} channel
-   * @param  {object}  user
+   * @param  {string_id}  socket_Id
    */
   removeSocketFromPresenceChannel(channel: string, socket_Id: string) {
-    this.getPresenceChannelUsers(channel).then(users => {
-      users = (users) ? JSON.parse(users) : [];
-      users = JSON.stringify(_.remove(users, user => {
-        user.socket_id == socket_Id
+    this.getPresenceChannelMembers(channel).then(memebers => {
+      memebers = (memebers) ? JSON.parse(memebers) : [];
+      memebers = JSON.stringify(_.remove(memebers, member => {
+        member.socket_id == socket_Id
       }));
-      this._redis.set(channel + ':users', users);
-      this.emitPresenceChannelUsers(channel, users);
+      this._redis.set(channel + ':members', memebers);
+      this.emitPresenceChannelMembers(channel, memebers);
     });
   }
 
   /**
-   * Emit presence channel users to the channel
+   * Emit presence channel memebers to the channel
    * @param  {string} channel
-   * @param  {array} users
+   * @param  {array} memebers
    */
-  emitPresenceChannelUsers(channel: string, users: string[]) {
-    this._io.to(channel).emit('users:updated', users);
+  emitPresenceChannelMembers(channel: string, memebers: string[]) {
+    this._io.to(channel).emit('memebers:updated', memebers);
   }
 
   /**
@@ -289,11 +289,11 @@ export class EchoServer {
       options.headers = this.prepareHeaders(socket, options);
 
       this._request.post(options, (error, response, body, next) => {
-
         if ((!error && response.statusCode == 200)) {
           resolve(response.body);
         } else {
           this.log('Error: ' + response.statusCode, 'error');
+
           reject(false);
         }
       });
@@ -302,7 +302,7 @@ export class EchoServer {
 
   /**
    * Prepare headers for request to app server
-   * @param  {any} options
+   * @param  {object} options
    * @return {object}
    */
   protected prepareHeaders(socket, options: any) {
