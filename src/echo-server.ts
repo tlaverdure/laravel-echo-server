@@ -31,16 +31,10 @@ export class EchoServer {
     private _redis: any;
 
     /**
-     * Redis pub client
+     * Redis pub/sub client
      * @type {object}
      */
-    private _redisPub: any;
-
-    /**
-     * Redis sub client
-     * @type {object}
-     */
-    private _redisSub: any;
+    private _redisPubSub: any;
 
     /**
      * Socket.io client
@@ -65,9 +59,11 @@ export class EchoServer {
      */
     constructor() {
         this._redis = new Redis();
-        this._redisPub = new Redis();
-        this._redisSub = new Redis();
+
+        this._redisPubSub = new Redis();
+
         this._io = io;
+
         this._request = request;
     }
 
@@ -77,10 +73,12 @@ export class EchoServer {
      */
     run(options: any) {
         this.options = _.merge(this._options, options);
+
         this.startSocketIoServer();
+
         this.redisPubSub();
 
-        this.log("Server running at " + this.options.host + ":" + this.options.port);
+        this.log("Servering at " + this.options.host + ":" + this.options.port);
     }
 
     /**
@@ -88,6 +86,7 @@ export class EchoServer {
      */
     startSocketIoServer() {
         this._io = io(this.options.port);
+
         this._io.on('connection', socket => {
             this.onSubscribe(socket);
             this.onDisconnect(socket);
@@ -98,13 +97,28 @@ export class EchoServer {
      * Setup redis pub/sub.
      */
     redisPubSub() {
-        this._redisSub.psubscribe('*', (err, count) => { });
+        this._redisPubSub.psubscribe('*', (err, count) => { });
 
-        this._redisPub.on('pmessage', (subscribed, channel, message) => {
+        this._redisPubSub.on('pmessage', (subscribed, channel, message) => {
             message = JSON.parse(message);
-            //this.log(message);
-            this._io.to(channel).emit(message.event, message.data);
+
+            this.handleSub(channel, message);
         });
+    }
+
+    /**
+     * Handle subscribing to events and emitting to channels
+     * @param  {string} channel
+     * @param  {any}    message
+     */
+    handleSub(channel: string, message: any) {
+        if (message.socket) {
+            let socket = this._io.sockets.connected["/#" + message.socket];
+
+            socket.broadcast.to(channel).emit(message.event, message.data);
+        } else {
+            this._io.to(channel).emit(message.event, message.data);
+        }
     }
 
     /**
@@ -112,9 +126,7 @@ export class EchoServer {
      * @param  {object}  socket
      */
     onSubscribe(socket: any) {
-        socket.on('subscribe', data => {
-            this.joinChannel(socket, data);
-        });
+        socket.on('subscribe', data => this.joinChannel(socket, data));
     }
 
     /**
@@ -147,17 +159,17 @@ export class EchoServer {
      */
     joinPrivateChannel(socket: any, data: any) {
         this.channelAuthentication(socket, data).then(res => {
-            res = JSON.parse(res);
 
             let privateSocket = socket.join(data.channel);
 
             if (this.isPresenceChannel(data.channel) && res.data && res.data.member) {
-                this.addMemberToPressenceChannel(data.channel, res.data.member);
-                this.presenceChannelEvents(data.channel, privateSocket);
+                let member = res.data.member;
+
+                member.socketId = socket.id;
+
+                this.presenceChannelEvents(data.channel, privateSocket, member);
             }
-        }, error => { }).then(() => {
-            this.sendSocketId(data, socket.id);
-        });
+        }, error => { }).then(() => this.sendSocketId(data, socket.id));
     }
 
     /**
@@ -186,12 +198,12 @@ export class EchoServer {
     }
 
     /**
-     * Get the memebers of a presence channel
+     * Get the members of a presence channel
      * @param  {string}  channel
      * @return {Promise}
      */
     getPresenceChannelMembers(channel: string): Promise<any> {
-        return this._redis.get(channel + ':members');
+        return this.retrieve(channel + ':members');
     }
 
     /**
@@ -199,14 +211,17 @@ export class EchoServer {
      * @param  {string} channel
      * @param  {object}  member
      */
-    addMemberToPressenceChannel(channel: string, member: any) {
-        this.getPresenceChannelMembers(channel).then(memebers => {
-            memebers = (memebers) ? JSON.parse(memebers) : [];
-            memebers.push(member)
-            memebers = JSON.stringify(_.uniqBy(memebers, Object.keys(memebers)[0]));
-            this._redis.set(channel + ':memebers', memebers);
-            this.emitPresenceChannelMembers(channel, memebers);
-            this.log(memebers);
+    addToPressence(channel: string, member: any) {
+        this.getPresenceChannelMembers(channel).then(members => {
+            members = members || [];
+
+            members.push(member);
+
+            members = _.uniqBy(members.reverse(), Object.keys(member)[0]);
+
+            this.store(channel + ':members', members);
+
+            this.emitPresenceEvents(channel, members, member, 'add');
         });
     }
 
@@ -215,24 +230,38 @@ export class EchoServer {
      * @param  {string} channel
      * @param  {string_id}  socket_Id
      */
-    removeSocketFromPresenceChannel(channel: string, socket_Id: string) {
-        this.getPresenceChannelMembers(channel).then(memebers => {
-            memebers = (memebers) ? JSON.parse(memebers) : [];
-            memebers = JSON.stringify(_.remove(memebers, member => {
-                member.socket_id == socket_Id
-            }));
-            this._redis.set(channel + ':members', memebers);
-            this.emitPresenceChannelMembers(channel, memebers);
+    removeFromPresence(channel: string, socket_Id: string) {
+        this.getPresenceChannelMembers(channel).then(members => {
+            members = members || [];
+
+            let member = _.find(members, ['socketId', socket_Id]);
+
+            members = _.reject(members, member);
+
+            this.store(channel + ':members', members);
+
+            this.emitPresenceEvents(channel, members, member, 'remove');
         });
     }
 
     /**
-     * Emit presence channel memebers to the channel
+     * Emit presence channel members to the channel
      * @param  {string} channel
-     * @param  {array} memebers
+     * @param  {array} members
      */
-    emitPresenceChannelMembers(channel: string, memebers: string[]) {
-        this._io.to(channel).emit('memebers:updated', memebers);
+    emitPresenceEvents(
+        channel: string,
+        members: string[],
+        member: string,
+        action: string = null
+    ) {
+        this._io.to(channel).emit('members:updated', members);
+
+        if (action == 'add') {
+            this._io.to(channel).emit('members:added', member);
+        } else if (action == 'remove') {
+            this._io.to(channel).emit('members:removed', member);
+        }
     }
 
     /**
@@ -240,10 +269,34 @@ export class EchoServer {
      * @param  {string}  channel
      * @param  {object}  socket
      */
-    presenceChannelEvents(channel: string, socket: any) {
-        socket.on('disconnect', () => {
-            this.removeSocketFromPresenceChannel(channel, socket.id);
+    presenceChannelEvents(
+        channel: string,
+        socket: any,
+        member: string = null
+    ) {
+        this.addToPressence(channel, member);
+
+        socket.on('disconnect', () => this.removeFromPresence(channel, socket.id));
+    }
+
+    /**
+     * Retrieve data from redis
+     * @param  {string}  key
+     * @return {Promise>}
+     */
+    protected retrieve(key: string): Promise<any> {
+        return new Promise<any>((resolve, reject) => {
+            this._redis.get(key).then(value => resolve(JSON.parse(value)));
         });
+    }
+
+    /**
+     * Store data to redis
+     * @param  {string} key
+     * @param  {any}  value
+     */
+    protected store(key: string, value: any) {
+        this._redis.set(key, JSON.stringify(value));
     }
 
     /**
@@ -290,7 +343,7 @@ export class EchoServer {
 
             this._request.post(options, (error, response, body, next) => {
                 if (!error && response.statusCode == 200) {
-                    resolve(response.body);
+                    resolve(JSON.parse(response.body));
                 } else {
                     this.log("Error: " + response.statusCode, 'error');
 
@@ -307,6 +360,7 @@ export class EchoServer {
      */
     protected prepareHeaders(socket: any, options: any) {
         options.headers['Cookie'] = socket.request.headers.cookie;
+
         options.headers['X-Socket-Id'] = socket.id;
 
         return options.headers;

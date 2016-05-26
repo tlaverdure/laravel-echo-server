@@ -9,6 +9,7 @@
     "pretty": true,
     "removeComments": true,
     "preserveConstEnums": true
+
   },
   "files": [
     "src/index.ts"
@@ -19,6 +20,7 @@
   "compileOnSave": false,
   "buildOnSave": false,
   "atom": {
+    "formatOnSave": true,
     "rewriteTsconfig": false
   }
 }

@@ -13,8 +13,7 @@ class EchoServer {
         };
         this._privateChannels = ['private-*', 'presence-*'];
         this._redis = new Redis();
-        this._redisPub = new Redis();
-        this._redisSub = new Redis();
+        this._redisPubSub = new Redis();
         this._io = io;
         this._request = request;
     }
@@ -22,7 +21,7 @@ class EchoServer {
         this.options = _.merge(this._options, options);
         this.startSocketIoServer();
         this.redisPubSub();
-        this.log("Server running at " + this.options.host + ":" + this.options.port);
+        this.log("Servering at " + this.options.host + ":" + this.options.port);
     }
     startSocketIoServer() {
         this._io = io(this.options.port);
@@ -32,16 +31,23 @@ class EchoServer {
         });
     }
     redisPubSub() {
-        this._redisSub.psubscribe('*', (err, count) => { });
-        this._redisPub.on('pmessage', (subscribed, channel, message) => {
+        this._redisPubSub.psubscribe('*', (err, count) => { });
+        this._redisPubSub.on('pmessage', (subscribed, channel, message) => {
             message = JSON.parse(message);
-            this._io.to(channel).emit(message.event, message.data);
+            this.handleSub(channel, message);
         });
     }
+    handleSub(channel, message) {
+        if (message.socket) {
+            let socket = this._io.sockets.connected["/#" + message.socket];
+            socket.broadcast.to(channel).emit(message.event, message.data);
+        }
+        else {
+            this._io.to(channel).emit(message.event, message.data);
+        }
+    }
     onSubscribe(socket) {
-        socket.on('subscribe', data => {
-            this.joinChannel(socket, data);
-        });
+        socket.on('subscribe', data => this.joinChannel(socket, data));
     }
     onDisconnect(socket) {
         socket.on('disconnect', () => { });
@@ -58,15 +64,13 @@ class EchoServer {
     }
     joinPrivateChannel(socket, data) {
         this.channelAuthentication(socket, data).then(res => {
-            res = JSON.parse(res);
             let privateSocket = socket.join(data.channel);
             if (this.isPresenceChannel(data.channel) && res.data && res.data.member) {
-                this.addMemberToPressenceChannel(data.channel, res.data.member);
-                this.presenceChannelEvents(data.channel, privateSocket);
+                let member = res.data.member;
+                member.socketId = socket.id;
+                this.presenceChannelEvents(data.channel, privateSocket, member);
             }
-        }, error => { }).then(() => {
-            this.sendSocketId(data, socket.id);
-        });
+        }, error => { }).then(() => this.sendSocketId(data, socket.id));
     }
     isPrivateChannel(channel) {
         let isPrivateChannel;
@@ -81,35 +85,46 @@ class EchoServer {
         return channel.lastIndexOf('presence-', 0) === 0;
     }
     getPresenceChannelMembers(channel) {
-        return this._redis.get(channel + ':members');
+        return this.retrieve(channel + ':members');
     }
-    addMemberToPressenceChannel(channel, member) {
-        this.getPresenceChannelMembers(channel).then(memebers => {
-            memebers = (memebers) ? JSON.parse(memebers) : [];
-            memebers.push(member);
-            memebers = JSON.stringify(_.uniqBy(memebers, Object.keys(memebers)[0]));
-            this._redis.set(channel + ':memebers', memebers);
-            this.emitPresenceChannelMembers(channel, memebers);
-            this.log(memebers);
+    addToPressence(channel, member) {
+        this.getPresenceChannelMembers(channel).then(members => {
+            members = members || [];
+            members.push(member);
+            members = _.uniqBy(members.reverse(), Object.keys(member)[0]);
+            this.store(channel + ':members', members);
+            this.emitPresenceEvents(channel, members, member, 'add');
         });
     }
-    removeSocketFromPresenceChannel(channel, socket_Id) {
-        this.getPresenceChannelMembers(channel).then(memebers => {
-            memebers = (memebers) ? JSON.parse(memebers) : [];
-            memebers = JSON.stringify(_.remove(memebers, member => {
-                member.socket_id == socket_Id;
-            }));
-            this._redis.set(channel + ':members', memebers);
-            this.emitPresenceChannelMembers(channel, memebers);
+    removeFromPresence(channel, socket_Id) {
+        this.getPresenceChannelMembers(channel).then(members => {
+            members = members || [];
+            let member = _.find(members, ['socketId', socket_Id]);
+            members = _.reject(members, member);
+            this.store(channel + ':members', members);
+            this.emitPresenceEvents(channel, members, member, 'remove');
         });
     }
-    emitPresenceChannelMembers(channel, memebers) {
-        this._io.to(channel).emit('memebers:updated', memebers);
+    emitPresenceEvents(channel, members, member, action = null) {
+        this._io.to(channel).emit('members:updated', members);
+        if (action == 'add') {
+            this._io.to(channel).emit('members:added', member);
+        }
+        else if (action == 'remove') {
+            this._io.to(channel).emit('members:removed', member);
+        }
     }
-    presenceChannelEvents(channel, socket) {
-        socket.on('disconnect', () => {
-            this.removeSocketFromPresenceChannel(channel, socket.id);
+    presenceChannelEvents(channel, socket, member = null) {
+        this.addToPressence(channel, member);
+        socket.on('disconnect', () => this.removeFromPresence(channel, socket.id));
+    }
+    retrieve(key) {
+        return new Promise((resolve, reject) => {
+            this._redis.get(key).then(value => resolve(JSON.parse(value)));
         });
+    }
+    store(key, value) {
+        this._redis.set(key, JSON.stringify(value));
     }
     channelAuthentication(socket, data) {
         let options = {
@@ -132,7 +147,7 @@ class EchoServer {
             options.headers = this.prepareHeaders(socket, options);
             this._request.post(options, (error, response, body, next) => {
                 if (!error && response.statusCode == 200) {
-                    resolve(response.body);
+                    resolve(JSON.parse(response.body));
                 }
                 else {
                     this.log("Error: " + response.statusCode, 'error');
