@@ -8,6 +8,7 @@ class EchoServer {
         this._options = {
             host: 'http://localhost',
             port: 6001,
+            authHost: 'http://localhost',
             authEndpoint: '/broadcasting/auth',
             socketEndpoint: '/broadcasting/socket'
         };
@@ -128,7 +129,7 @@ class EchoServer {
     }
     channelAuthentication(socket, data) {
         let options = {
-            url: this.options.host + this.options.authEndpoint,
+            url: this.options.authHost + this.options.authEndpoint,
             form: { channel_name: data.channel },
             headers: (data.auth && data.auth.headers) ? data.auth.headers : null
         };
@@ -136,7 +137,7 @@ class EchoServer {
     }
     sendSocketId(data, socket) {
         let options = {
-            url: this.options.host + this.options.socketEndpoint,
+            url: this.options.authHost + this.options.socketEndpoint,
             form: { socket_id: socket.id },
             headers: (data.auth && data.auth.headers) ? data.auth.headers : null
         };
