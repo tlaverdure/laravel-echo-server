@@ -14,7 +14,7 @@ export class EchoServer {
     private _options: any = {
         host: 'http://localhost',
         port: 6001,
-        authHost: 'http://localhost',
+        authHost: null,
         authEndpoint: '/broadcasting/auth',
         socketEndpoint: '/broadcasting/socket'
     };
@@ -301,6 +301,18 @@ export class EchoServer {
     }
 
     /**
+     * Get the auth endpoint
+     * @return {string}
+     */
+    protected getAuthHost(): string {
+        if (this.options.authHost) {
+            return this.options.authHost + this.options.authEndpoint
+        }
+
+        return this.options.host + this.options.authEndpoint
+    }
+
+    /**
      * Send authentication request to application server.
      * @param  {object} socket
      * @param  {object} data
@@ -308,7 +320,7 @@ export class EchoServer {
      */
     protected channelAuthentication(socket: any, data: any): Promise<any> {
         let options = {
-            url: this.options.authHost + this.options.authEndpoint,
+            url: this.getAuthHost() + this.options.authEndpoint,
             form: { channel_name: data.channel },
             headers: (data.auth && data.auth.headers) ? data.auth.headers : null
         };
@@ -324,7 +336,7 @@ export class EchoServer {
      */
     protected sendSocketId(data: any, socket: any): Promise<any> {
         let options = {
-            url: this.options.authHost + this.options.socketEndpoint,
+            url: this.getAuthHost() + this.options.socketEndpoint,
             form: { socket_id: socket.id },
             headers: (data.auth && data.auth.headers) ? data.auth.headers : null
         };
