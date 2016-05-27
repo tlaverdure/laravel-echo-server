@@ -1,5 +1,3 @@
-declare let require: any
-
 let _ = require('lodash');
 let io = require('socket.io')
 let Redis = require('ioredis')

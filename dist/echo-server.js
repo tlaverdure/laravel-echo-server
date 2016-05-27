@@ -8,7 +8,7 @@ class EchoServer {
         this._options = {
             host: 'http://localhost',
             port: 6001,
-            authHost: 'http://localhost',
+            authHost: null,
             authEndpoint: '/broadcasting/auth',
             socketEndpoint: '/broadcasting/socket'
         };
@@ -127,9 +127,15 @@ class EchoServer {
     store(key, value) {
         this._redis.set(key, JSON.stringify(value));
     }
+    getAuthHost() {
+        if (this.options.authHost) {
+            return this.options.authHost + this.options.authEndpoint;
+        }
+        return this.options.host + this.options.authEndpoint;
+    }
     channelAuthentication(socket, data) {
         let options = {
-            url: this.options.authHost + this.options.authEndpoint,
+            url: this.getAuthHost() + this.options.authEndpoint,
             form: { channel_name: data.channel },
             headers: (data.auth && data.auth.headers) ? data.auth.headers : null
         };
@@ -137,7 +143,7 @@ class EchoServer {
     }
     sendSocketId(data, socket) {
         let options = {
-            url: this.options.authHost + this.options.socketEndpoint,
+            url: this.getAuthHost() + this.options.socketEndpoint,
             form: { socket_id: socket.id },
             headers: (data.auth && data.auth.headers) ? data.auth.headers : null
         };
@@ -159,7 +165,6 @@ class EchoServer {
     }
     prepareHeaders(socket, options) {
         options.headers['Cookie'] = socket.request.headers.cookie;
-        options.headers['X-Socket-Id'] = socket.id;
         return options.headers;
     }
     log(message, status = 'success') {

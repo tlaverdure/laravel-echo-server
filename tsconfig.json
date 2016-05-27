@@ -12,6 +12,7 @@
 
   },
   "files": [
+    "typings/main.d.ts",
     "src/index.ts"
   ],
   "exclude": [
