@@ -9,7 +9,6 @@
     "pretty": true,
     "removeComments": true,
     "preserveConstEnums": true
-
   },
   "files": [
     "typings/main.d.ts",

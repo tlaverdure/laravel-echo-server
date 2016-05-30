@@ -161,8 +161,8 @@ export class EchoServer {
 
             let privateSocket = socket.join(data.channel);
 
-            if (this.isPresenceChannel(data.channel) && res.data && res.data.member) {
-                let member = res.data.member;
+            if (this.isPresenceChannel(data.channel) && res.channel_data) {
+                let member = res.channel_data;
 
                 member.socketId = socket.id;
 
@@ -257,9 +257,9 @@ export class EchoServer {
         this._io.to(channel).emit('members:updated', members);
 
         if (action == 'add') {
-            this._io.to(channel).emit('members:added', member);
+            this._io.to(channel).emit('member:added', member);
         } else if (action == 'remove') {
-            this._io.to(channel).emit('members:removed', member);
+            this._io.to(channel).emit('member:removed', member);
         }
     }
 
@@ -281,7 +281,7 @@ export class EchoServer {
     /**
      * Retrieve data from redis
      * @param  {string}  key
-     * @return {Promise>}
+     * @return {Promise}
      */
     protected retrieve(key: string): Promise<any> {
         return new Promise<any>((resolve, reject) => {
@@ -303,11 +303,8 @@ export class EchoServer {
      * @return {string}
      */
     protected getAuthHost(): string {
-        if (this.options.authHost) {
-            return this.options.authHost + this.options.authEndpoint
-        }
-
-        return this.options.host + this.options.authEndpoint
+        return (this.options.authHost) ?
+            this.options.authHost : this.options.host;
     }
 
     /**
@@ -320,7 +317,7 @@ export class EchoServer {
         let options = {
             url: this.getAuthHost() + this.options.authEndpoint,
             form: { channel_name: data.channel },
-            headers: (data.auth && data.auth.headers) ? data.auth.headers : null
+            headers: (data.auth && data.auth.headers) ? data.auth.headers : {}
         };
 
         return this.severRequest(socket, options);
@@ -336,7 +333,7 @@ export class EchoServer {
         let options = {
             url: this.getAuthHost() + this.options.socketEndpoint,
             form: { socket_id: socket.id },
-            headers: (data.auth && data.auth.headers) ? data.auth.headers : null
+            headers: (data.auth && data.auth.headers) ? data.auth.headers : {}
         };
 
         return this.severRequest(socket, options);
@@ -377,14 +374,14 @@ export class EchoServer {
 
     /**
      * Console log a message with formating.
-     * @param  {string} message
+     * @param  {string|object} message
      * @param  {string} status
      */
-    protected log(message: string, status: string = 'success') {
+    protected log(message: any, status: string = 'success') {
         if (status == 'success') {
-            console.log("\x1b[32m%s\x1b[0m:", 'EchoServer', message);
+            console.log("\x1b[32m%s\x1b[0m:", 'EchoServer', JSON.stringify(message));
         } else {
-            console.log("\x1b[31m%s\x1b[0m:", '(Error)', message);
+            console.log("\x1b[31m%s\x1b[0m:", '(Error)', JSON.stringify(message));
         }
     }
 }

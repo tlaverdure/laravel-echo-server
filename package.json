@@ -7,9 +7,6 @@
     "url": "https://github.com/tlaverdure/Laravel-Echo-Server.git"
   },
   "main": "dist/index.js",
-  "bin": {
-    "echo-server": "dist/index.js"
-  },
   "keywords": [
     "laravel",
     "socket.io"
@@ -20,7 +17,9 @@
     "esversion": 6
   },
   "scripts": {
-    "build": "tsc -w"
+    "compile": "tsc",
+    "compile watch": "tsc -w",
+    "prepublish": "npm run compile"
   },
   "dependencies": {
     "ioredis": "^1.15.1",
