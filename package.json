@@ -28,6 +28,7 @@
     "socket.io": "^1.4.6"
   },
   "devDependencies": {
-    "typescript": "^1.8.10"
+    "typescript": "^1.8.10",
+    "typings": "^1.0.4"
   }
 }
