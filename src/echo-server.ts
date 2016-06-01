@@ -353,7 +353,7 @@ export class EchoServer {
                 if (!error && response.statusCode == 200) {
                     resolve(JSON.parse(response.body));
                 } else {
-                    this.log("Error: " + response.statusCode, 'error');
+                    this.log(response.statusCode, 'error');
 
                     reject(false);
                 }

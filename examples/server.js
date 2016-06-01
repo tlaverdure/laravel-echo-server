@@ -1,5 +1,7 @@
 var echo = require('../dist/index.js');
 
-var options = {};
+var options = {
+  host: 'http://example.dev',
+};
 
-echo.run();
+echo.run(options);
