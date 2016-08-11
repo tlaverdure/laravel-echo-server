@@ -177,8 +177,7 @@ export class EchoServer {
             let privateSocket = socket.join(data.channel);
 
             if (this.isPresenceChannel(data.channel) && res.channel_data) {
-                let member = JSON.parse(res.channel_data);
-                member.socketId = socket.id;
+                let member = res.channel_data;
                 this.presenceChannelEvents(data.channel, privateSocket, member);
             }
         }, error => { }).then(() => this.sendSocketId(data, socket.id));
