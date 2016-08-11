@@ -177,7 +177,7 @@ export class EchoServer {
             let privateSocket = socket.join(data.channel);
 
             if (this.isPresenceChannel(data.channel) && res.channel_data) {
-                let member = res.channel_data;
+                let member = JSON.parse(res.channel_data);
                 member.socketId = socket.id;
                 this.presenceChannelEvents(data.channel, privateSocket, member);
             }
@@ -266,12 +266,12 @@ export class EchoServer {
         member: string,
         action: string = null
     ): void {
-        this._io.to(channel).emit('members:updated', members);
+        this._io.to(channel).emit('presence:subscribed', members);
 
         if (action == 'add') {
-            this._io.to(channel).emit('member:added', member);
+            this._io.to(channel).emit('presence:joining', member);
         } else if (action == 'remove') {
-            this._io.to(channel).emit('member:removed', member);
+            this._io.to(channel).emit('presence:leaving', member);
         }
     }
 
@@ -395,7 +395,7 @@ export class EchoServer {
 
     /**
      * Console log a message with formating.
-     * 
+     *
      * @param  {string|object} message
      * @param  {string} status
      * @return {void}
