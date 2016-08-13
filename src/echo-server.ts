@@ -180,7 +180,7 @@ export class EchoServer {
                 let member = res.channel_data;
                 this.presenceChannelEvents(data.channel, privateSocket, member);
             }
-        }, error => { }).then(() => this.sendSocketId(data, socket.id));
+        }, error => { });
     }
 
     /**
@@ -345,23 +345,6 @@ export class EchoServer {
         let options = {
             url: this.getAuthHost() + this.options.authEndpoint,
             form: { channel_name: data.channel },
-            headers: (data.auth && data.auth.headers) ? data.auth.headers : {}
-        };
-
-        return this.severRequest(socket, options);
-    }
-
-    /**
-     * Send socket id to application server.
-     *
-     * @param  {object} data
-     * @param  {object} socketId
-     * @return {Promise<any>}
-     */
-    protected sendSocketId(data: any, socket: any): Promise<any> {
-        let options = {
-            url: this.getAuthHost() + this.options.socketEndpoint,
-            form: { socket_id: socket.id },
             headers: (data.auth && data.auth.headers) ? data.auth.headers : {}
         };
 
