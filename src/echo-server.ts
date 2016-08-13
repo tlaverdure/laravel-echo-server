@@ -221,54 +221,65 @@ export class EchoServer {
     }
 
     /**
-     * Set the presence channel members
+     * Set the presence channel members.
+     *
+     * @param  {any} socket
      * @param  {string} channel
      * @param  {object}  member
      */
-    addToPressence(channel: string, member: any) {
+    addToPressence(socket: any, channel: string, member: any) {
+        let newMember = member;
+        newMember.socketId = socket.id;
+
         this.getPresenceChannelMembers(channel).then(members => {
             members = members || [];
-            members.push(member);
+            members.push(newMember);
             members = _.uniqBy(members.reverse(), Object.keys(member)[0]);
+
             this.store(channel + ':members', members);
-            this.emitPresenceEvents(channel, members, member, 'add');
+            this.emitPresenceEvents(socket, channel, members, member, 'add');
         });
     }
 
     /**
      * Remove a member from a presenece channel.
      *
+     * @param  {any} socket
      * @param  {string} channel
-     * @param  {string_id}  socket_Id
      * @return {void}
      */
-    removeFromPresence(channel: string, socket_Id: string): void {
+    removeFromPresence(socket: any, channel: string): void {
         this.getPresenceChannelMembers(channel).then(members => {
             members = members || [];
-            let member = _.find(members, ['socketId', socket_Id]);
+            let member = _.find(members, ['socketId', socket.id]);
             members = _.reject(members, member);
+
             this.store(channel + ':members', members);
-            this.emitPresenceEvents(channel, members, member, 'remove');
+            this.emitPresenceEvents(socket, channel, members, member, 'remove');
         });
     }
 
     /**
      * Emit presence channel members to the channel.
      *
+     * @param  {any} socket
      * @param  {string} channel
      * @param  {array} members
      * @return {void}
      */
     emitPresenceEvents(
+        socket: any,
         channel: string,
         members: string[],
         member: string,
         action: string = null
     ): void {
+        let currentSocket = this._io.sockets.connected[socket.id];
+
         this._io.to(channel).emit('presence:subscribed', members);
 
         if (action == 'add') {
-            this._io.to(channel).emit('presence:joining', member);
+            currentSocket.broadcast.to(channel).emit('presence:joining', member);
         } else if (action == 'remove') {
             this._io.to(channel).emit('presence:leaving', member);
         }
@@ -286,8 +297,8 @@ export class EchoServer {
         socket: any,
         member: string = null
     ): void {
-        this.addToPressence(channel, member);
-        socket.on('disconnect', () => this.removeFromPresence(channel, socket.id));
+        this.addToPressence(socket, channel, member);
+        socket.on('disconnect', () => this.removeFromPresence(socket, channel));
     }
 
     /**
