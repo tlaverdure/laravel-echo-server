@@ -1,6 +1,13 @@
 # Laravel Echo Server
 
-Socket.io NodeJs server for Laravel Echo
+NodeJs server for Laravel Echo broadcasting with Socket.io.
+
+## System Requirements
+
+The following are required to function properly.
+
+* Laravel 5.3
+* Node 5.0+
 
 ## Getting Started
 
@@ -35,9 +42,9 @@ Edit the default configuration of the server.
 var echo = require('laravel-echo-server');
 
 var options = {
-  authHost: 'http://example.dev',
+  authHost: 'http://app.dev',
   authPath: '/broadcasting/auth',
-  host: 'http://localhost',
+  host: 'http://app.dev',
   port: 6001,
   socketPath: '/broadcasting/socket'
 };
@@ -52,3 +59,8 @@ echo.run(options);
 | `host` | `http://localhost` | The host of the socket.io server |
 | `port` | `6001` | The port that the socket.io server should run on |
 | `socketPath` | `/broadcasting/socket` | The route that stores socket identifiers |
+
+
+## Client Side configuration
+
+Details coming soon...
