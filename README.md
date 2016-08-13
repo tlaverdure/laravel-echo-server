@@ -8,6 +8,10 @@ The following are required to function properly.
 
 * Laravel 5.3
 * Node 5.0+
+* Redis 3+
+
+Additional information on broadcasting with Laravel can be found on the official docs:
+https://laravel.com/docs/master/broadcasting
 
 ## Getting Started
 
