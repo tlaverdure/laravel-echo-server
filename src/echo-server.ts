@@ -95,6 +95,7 @@ export class EchoServer {
         this._io = io(this.options.port);
         this._io.on('connection', socket => {
             this.onSubscribe(socket);
+            this.onUnsubscribe(socket);
             this.onDisconnect(socket);
         });
     }
@@ -136,6 +137,16 @@ export class EchoServer {
      */
     onSubscribe(socket: any): void {
         socket.on('subscribe', data => this.joinChannel(socket, data));
+    }
+
+    /**
+     * On unsubscribe from a channel.
+     *
+     * @param  {object}  socket
+     * @return {void}
+     */
+    onUnsubscribe(socket: any): void {
+        socket.on('unsubscribe', data => this.leaveChannel(socket, data));
     }
 
     /**
@@ -181,6 +192,18 @@ export class EchoServer {
                 this.presenceChannelEvents(data.channel, privateSocket, member);
             }
         }, error => { });
+    }
+
+    /**
+     * Leave a channel.
+     *
+     * @param  {object} socket
+     * @param  {object}  data
+     * @return {void}
+     */
+    leaveChannel(socket: any, data: any): void {
+
+        if(data.channel) socket.leave(data.channel);
     }
 
     /**
