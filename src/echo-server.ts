@@ -276,9 +276,8 @@ export class EchoServer {
     ): void {
         let currentSocket = this._io.sockets.connected[socket.id];
 
-        this._io.to(channel).emit('presence:subscribed', members);
-
         if (action == 'add') {
+            this._io.sockets.socket(socket.id).emit('presence:subscribed', members);
             currentSocket.broadcast.to(channel).emit('presence:joining', member);
         } else if (action == 'remove') {
             this._io.to(channel).emit('presence:leaving', member);
