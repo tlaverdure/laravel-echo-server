@@ -142,7 +142,7 @@ export class EchoServer {
     /**
      * On unsubscribe from a channel.
      *
-     * @param  {object}  socket
+     * @param  {object} socket
      * @return {void}
      */
     onUnsubscribe(socket: any): void {
@@ -198,12 +198,17 @@ export class EchoServer {
      * Leave a channel.
      *
      * @param  {object} socket
-     * @param  {object}  data
+     * @param  {object} data
      * @return {void}
      */
     leaveChannel(socket: any, data: any): void {
+        if (data.channel) {
+            if (this.isPresenceChannel(data.channel)) {
+                this.removeFromPresence(socket, data.channel)
+            }
 
-        if(data.channel) socket.leave(data.channel);
+            socket.leave(data.channel);
+        }
     }
 
     /**
