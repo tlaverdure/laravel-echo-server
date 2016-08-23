@@ -17,8 +17,7 @@ export class EchoServer {
         host: 'http://localhost',
         port: 6001,
         authHost: null,
-        authEndpoint: '/broadcasting/auth',
-        socketEndpoint: '/broadcasting/socket'
+        authEndpoint: '/broadcasting/auth'
     };
 
     /**
