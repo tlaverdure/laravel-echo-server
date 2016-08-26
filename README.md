@@ -62,6 +62,7 @@ echo.run(options);
 | `authPath` | `/broadcasting/auth` | The route that authenticates private channels  |
 | `host` | `http://localhost` | The host of the socket.io server |
 | `port` | `6001` | The port that the socket.io server should run on |
+| `https` | `boolean` | Boolean that allows to use SSL |
 
 
 ## Client Side Configuration
