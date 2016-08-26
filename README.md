@@ -63,7 +63,8 @@ echo.run(options);
 | `host` | `http://localhost` | The host of the socket.io server |
 | `port` | `6001` | The port that the socket.io server should run on |
 | `https` | `boolean` | Boolean that allows to use SSL |
-
+| `ssl_key_path` | `string` | The path to your client ssl key |
+| `ssl_cert_path` | `string` | The path to your client ssl certificate |
 
 ## Client Side Configuration
 
