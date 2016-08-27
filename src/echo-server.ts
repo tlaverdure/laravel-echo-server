@@ -83,7 +83,7 @@ export class EchoServer {
         this.options = _.merge(this._options, options);
         this.startSocketIoServer();
         this.redisPubSub();
-        this.log("Servering at " + this.options.host + ":" + this.options.port);
+        this.log("Server running at " + this.options.host + ":" + this.options.port);
     }
 
     /**
