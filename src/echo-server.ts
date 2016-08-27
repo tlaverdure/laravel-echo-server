@@ -2,6 +2,7 @@ let _ = require('lodash');
 let io = require('socket.io')
 let Redis = require('ioredis')
 let request = require('request')
+let https = require('https');
 
 /**
  * Echo server class.
@@ -80,9 +81,40 @@ export class EchoServer {
      */
     run(options: any): void {
         this.options = _.merge(this._options, options);
+        this.loadSecureMode();
+        this.initializeSocketIo();
         this.startSocketIoServer();
         this.redisPubSub();
         this.log("Server running at " + this.options.host + ":" + this.options.port);
+    }
+
+    /**
+     * Load SSL 'key' & 'cert' files if https is enabled
+     *
+     * @return {void}
+     */
+    loadSecureMode() {
+        if (!this.options.https)  return;
+
+        _.assignIn(this.options, {
+            key:  fs.readFileSync(this.options.ssl_key_path),
+            cert: fs.readFileSync(this.options.ssl_cert_path)
+        });
+    }
+
+    /**
+     * Initialize socket.io variable
+     */
+    initializeSocketIo() {
+
+        if (!this.options.https) {
+            this._io = io(this.options.port);
+            return;
+        }
+
+        let _https = https.createServer(this.options).listen(this.options.port);
+
+        this._io = io(_https);
     }
 
     /**
@@ -91,7 +123,6 @@ export class EchoServer {
      * @return {void}
      */
     startSocketIoServer(): void {
-        this._io = io(this.options.port);
         this._io.on('connection', socket => {
             this.onSubscribe(socket);
             this.onUnsubscribe(socket);
