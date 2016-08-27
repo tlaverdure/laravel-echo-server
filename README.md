@@ -62,9 +62,8 @@ echo.run(options);
 | `authPath` | `/broadcasting/auth` | The route that authenticates private channels  |
 | `host` | `http://localhost` | The host of the socket.io server |
 | `port` | `6001` | The port that the socket.io server should run on |
-| `socketPath` | `/broadcasting/socket` | The route that stores socket identifiers |
 
 
-## Client Side configuration
+## Client Side Configuration
 
-Details coming soon...
+See the offical Laravel documentation. https://laravel.com/docs/5.3/broadcasting#introduction
