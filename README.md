@@ -50,7 +50,8 @@ var options = {
   authPath: '/broadcasting/auth',
   host: 'http://app.dev',
   port: 6001,
-  socketPath: '/broadcasting/socket'
+  sslCertPath: '/path/to/app.dev.cert',
+  sslKeyPath: '/path/to/app.dev.key'
 };
 
 echo.run(options);
@@ -62,8 +63,8 @@ echo.run(options);
 | `authPath` | `/broadcasting/auth` | The route that authenticates private channels  |
 | `host` | `http://localhost` | The host of the socket.io server |
 | `port` | `6001` | The port that the socket.io server should run on |
-| `ssl_key_path` | `string` | The path to your server's ssl key |
-| `ssl_cert_path` | `string` | The path to your server's ssl certificate |
+| `sslCertPath` | `string` | The path to your server's ssl certificate |
+| `sslKeyPath` | `string` | The path to your server's ssl key |
 
 ### Running with SSL
 

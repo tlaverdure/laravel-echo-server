@@ -20,8 +20,8 @@ export class EchoServer {
         port: 6001,
         authHost: null,
         authEndpoint: '/broadcasting/auth',
-        ssl_key_path: '',
-        ssl_cert_path: ''
+        sslCertPath: '',
+        sslKeyPath: ''
     };
 
     /**
@@ -116,13 +116,13 @@ export class EchoServer {
      */
     loadSSL(): Promise<any> {
         return new Promise((resolve, reject) => {
-            if (!this.options.ssl_key_path || !this.options.ssl_cert_path) {
+            if (!this.options.sslCertPath || !this.options.sslKeyPath) {
                 reject('SSL paths are missing in server config.');
             }
 
             Object.assign(this.options, {
-                key: fs.readFileSync(this.options.ssl_key_path),
-                cert: fs.readFileSync(this.options.ssl_cert_path)
+                cert: fs.readFileSync(this.options.sslCertPath),
+                key: fs.readFileSync(this.options.sslKeyPath)
             });
 
             resolve(this.options);
