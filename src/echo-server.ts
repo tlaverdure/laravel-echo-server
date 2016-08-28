@@ -358,8 +358,13 @@ export class EchoServer {
         channel: string,
         members: string[],
         member: string,
-        action: string = null
+        action: string
     ): void {
+
+        if (action === undefined) {
+            action = null;
+        }
+
         let currentSocket = this._io.sockets.connected[socket.id];
 
         if (action == 'add') {
@@ -380,8 +385,13 @@ export class EchoServer {
     presenceChannelEvents(
         channel: string,
         socket: any,
-        member: string = null
+        member: string
     ): void {
+
+        if (member === undefined) {
+            member = null;
+        }
+
         this.addToPressence(socket, channel, member);
         socket.on('disconnect', () => this.removeFromPresence(socket, channel));
     }
@@ -479,7 +489,12 @@ export class EchoServer {
      * @param  {string} status
      * @return {void}
      */
-    protected log(message: any, status: string = 'success'): void {
+    protected log(message: any, status: string): void {
+
+        if (status === undefined) {
+            status = 'success';
+        }
+
         if (status == 'success') {
             console.log("\x1b[32m%s\x1b[0m:", 'EchoServer', JSON.stringify(message));
         } else {
