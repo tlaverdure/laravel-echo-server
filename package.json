@@ -1,6 +1,6 @@
 {
   "name": "laravel-echo-server",
-  "version": "0.9.5",
+  "version": "0.9.6",
   "description": "Laravel Echo Node JS Server for Socket.io",
   "repository": {
     "type": "git",
@@ -8,8 +8,7 @@
   },
   "main": "dist/index.js",
   "keywords": [
-    "laravel",
-    "socket.io"
+    "laravel", "socket.io"
   ],
   "author": "Thiery Laverdure",
   "license": "MIT",

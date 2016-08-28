@@ -1,8 +1,9 @@
-let _ = require('lodash');
-let io = require('socket.io')
-let Redis = require('ioredis')
-let request = require('request')
-let https = require('https');
+var fs = require('fs');
+var _ = require('lodash');
+var https = require('https');
+var io = require('socket.io');
+var Redis = require('ioredis');
+var request = require('request');
 
 /**
  * Echo server class.
@@ -18,7 +19,9 @@ export class EchoServer {
         host: 'http://localhost',
         port: 6001,
         authHost: null,
-        authEndpoint: '/broadcasting/auth'
+        authEndpoint: '/broadcasting/auth',
+        ssl_key_path: '',
+        ssl_cert_path: ''
     };
 
     /**
@@ -81,40 +84,12 @@ export class EchoServer {
      */
     run(options: any): void {
         this.options = _.merge(this._options, options);
-        this.loadSecureMode();
-        this.initializeSocketIo();
-        this.startSocketIoServer();
-        this.redisPubSub();
-        this.log("Server running at " + this.options.host + ":" + this.options.port);
-    }
 
-    /**
-     * Load SSL 'key' & 'cert' files if https is enabled
-     *
-     * @return {void}
-     */
-    loadSecureMode() {
-        if (!this.options.https)  return;
-
-        _.assignIn(this.options, {
-            key:  fs.readFileSync(this.options.ssl_key_path),
-            cert: fs.readFileSync(this.options.ssl_cert_path)
+        this.startSocketIoServer().then(() => {
+            this.onConnect();
+            this.redisPubSub();
+            this.log("Server running at " + this.options.host + ":" + this.options.port);
         });
-    }
-
-    /**
-     * Initialize socket.io variable
-     */
-    initializeSocketIo() {
-
-        if (!this.options.https) {
-            this._io = io(this.options.port);
-            return;
-        }
-
-        let _https = https.createServer(this.options).listen(this.options.port);
-
-        this._io = io(_https);
     }
 
     /**
@@ -122,12 +97,50 @@ export class EchoServer {
      *
      * @return {void}
      */
-    startSocketIoServer(): void {
-        this._io.on('connection', socket => {
-            this.onSubscribe(socket);
-            this.onUnsubscribe(socket);
-            this.onDisconnect(socket);
+    startSocketIoServer(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            if ((/(https)\:\/\//).test(this.options.host)) {
+                this.loadSSL().then(() => {
+                    resolve(this.secureSocketIoServer());
+                }, error => this.log(error, 'error'));
+            } else {
+                resolve(this._io = io(this.options.port));
+            }
         });
+    }
+
+    /**
+     * Load SSL 'key' & 'cert' files if https is enabled.
+     *
+     * @return {void}
+     */
+    loadSSL(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            if (!this.options.ssl_key_path || !this.options.ssl_cert_path) {
+                reject('SSL paths are missing in server config.');
+            }
+
+            Object.assign(this.options, {
+                key: fs.readFileSync(this.options.ssl_key_path),
+                cert: fs.readFileSync(this.options.ssl_cert_path)
+            });
+
+            resolve(this.options);
+        });
+    }
+
+    /**
+     * Create a secure socket.io server.
+     *
+     * @return {any}
+     */
+    secureSocketIoServer(): any {
+        let server = https.createServer(this.options, (req, res) => {
+            res.writeHead(200);
+            res.end('')
+        }).listen(this.options.port);
+
+        return this._io = io(server);
     }
 
     /**
@@ -157,6 +170,19 @@ export class EchoServer {
         } else {
             this._io.to(channel).emit(message.event, message.data);
         }
+    }
+
+    /**
+     * On server connection.
+     *
+     * @return {void}
+     */
+    onConnect(): void {
+        this._io.on('connection', socket => {
+            this.onSubscribe(socket);
+            this.onUnsubscribe(socket);
+            this.onDisconnect(socket);
+        });
     }
 
     /**
@@ -221,7 +247,7 @@ export class EchoServer {
                 let member = res.channel_data;
                 this.presenceChannelEvents(data.channel, privateSocket, member);
             }
-        }, error => { });
+        }, error => this.log(error, 'error'));
     }
 
     /**
@@ -292,10 +318,12 @@ export class EchoServer {
         this.getPresenceChannelMembers(channel).then(members => {
             members = members || [];
             members.push(newMember);
-            members = _.uniqBy(members.reverse(), Object.keys(member)[0]);
+            members = _.uniqBy(members.reverse(), Object.keys(newMember)[0]);
 
             this.store(channel + ':members', members);
             this.emitPresenceEvents(socket, channel, members, member, 'add');
+        }, () => {
+            this.log('Error retrieving pressence channel members.', 'error');
         });
     }
 
@@ -335,7 +363,7 @@ export class EchoServer {
         let currentSocket = this._io.sockets.connected[socket.id];
 
         if (action == 'add') {
-            this._io.sockets.socket(socket.id).emit('presence:subscribed', members);
+            this._io.to(socket.id).emit('presence:subscribed', members);
             currentSocket.broadcast.to(channel).emit('presence:joining', member);
         } else if (action == 'remove') {
             this._io.to(channel).emit('presence:leaving', member);
@@ -402,7 +430,8 @@ export class EchoServer {
         let options = {
             url: this.getAuthHost() + this.options.authEndpoint,
             form: { channel_name: data.channel },
-            headers: (data.auth && data.auth.headers) ? data.auth.headers : {}
+            headers: (data.auth && data.auth.headers) ? data.auth.headers : {},
+            rejectUnauthorized: false
         };
 
         return this.severRequest(socket, options);

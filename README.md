@@ -62,9 +62,14 @@ echo.run(options);
 | `authPath` | `/broadcasting/auth` | The route that authenticates private channels  |
 | `host` | `http://localhost` | The host of the socket.io server |
 | `port` | `6001` | The port that the socket.io server should run on |
-| `https` | `boolean` | Boolean that allows to use SSL |
-| `ssl_key_path` | `string` | The path to your client ssl key |
-| `ssl_cert_path` | `string` | The path to your client ssl certificate |
+| `ssl_key_path` | `string` | The path to your server's ssl key |
+| `ssl_cert_path` | `string` | The path to your server's ssl certificate |
+
+### Running with SSL
+
+After adding paths to your ssl certificate and key located on your server, socket.io should be accessible on https.
+
+*Note: Currently only supports either http or https, not both.*
 
 ## Client Side Configuration
 
