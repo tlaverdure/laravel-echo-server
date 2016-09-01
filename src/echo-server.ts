@@ -318,7 +318,7 @@ export class EchoServer {
         this.getPresenceChannelMembers(channel).then(members => {
             members = members || [];
             members.push(newMember);
-            members = _.uniqBy(members.reverse(), Object.keys(newMember)[0]);
+    	    members = _.uniqBy(members.reverse(), 'socketId');
 
             this.store(channel + ':members', members);
             this.emitPresenceEvents(socket, channel, members, member, 'add');
