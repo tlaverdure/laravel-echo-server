@@ -48,7 +48,7 @@ var echo = require('laravel-echo-server');
 var options = {
   authHost: 'http://app.dev',
   authPath: '/broadcasting/auth',
-  host: 'http://app.dev',
+  hostname: 'http://app.dev',
   port: 6001,
   sslCertPath: '/path/to/app.dev.cert',
   sslKeyPath: '/path/to/app.dev.key'
@@ -59,9 +59,10 @@ echo.run(options);
 
 | Title | Default | Description |
 | :------------- | :------------- | :------------- |
+| `appKey` | `string` | Unique app key used in security implementations. |
 | `authHost` | `http://localhost` | The host of the server that authenticates private and presence channels  |
 | `authPath` | `/broadcasting/auth` | The route that authenticates private channels  |
-| `host` | `http://localhost` | The host of the socket.io server |
+| `hostname` | `http://localhost` | The host of the socket.io server |
 | `port` | `6001` | The port that the socket.io server should run on |
 | `sslCertPath` | `string` | The path to your server's ssl certificate |
 | `sslKeyPath` | `string` | The path to your server's ssl key |

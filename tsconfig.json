@@ -15,7 +15,7 @@
     "src/index.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules/"
   ],
   "compileOnSave": false,
   "buildOnSave": false,
