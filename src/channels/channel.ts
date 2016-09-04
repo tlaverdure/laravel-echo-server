@@ -1,6 +1,6 @@
 import { PresenceChannel } from './presence-channel';
 import { PrivateChannel } from './private-channel';
-import { Log } from './log';
+import { Log } from './../log';
 
 export class Channel {
     /**
@@ -30,6 +30,8 @@ export class Channel {
     constructor(private io, private options) {
         this.private = new PrivateChannel(options);
         this.presence = new PresenceChannel(io, options);
+
+        Log.success('Channels are ready.');
     }
 
     /**

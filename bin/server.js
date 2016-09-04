@@ -19,7 +19,7 @@ const OPTION_KEYS = [
     'appKey',
     'authHost',
     'authPath',
-    'hostname',
+    'host',
     'port',
     'sslCertPath',
     'sslKeyPath'
@@ -31,6 +31,7 @@ const OPTION_KEYS = [
 var argv = yargs.usage("$0 command")
     .command("init", "Initialize server with a config file.", init)
     .command("start", "Start up the server.", start)
+    .command("key:generate", "Generate an app key for the server.", key_generate)
     .demand(1, "Please provide a valid command.")
     .help("h")
     .alias("h", "help")
@@ -44,7 +45,7 @@ var argv = yargs.usage("$0 command")
  */
 function init(yargs) {
     setupConfig().then(function(options) {
-        options.appKey = createAppKey();
+        options.appKey = create_app_key();
 
         saveConfig(options).then(function() {
             console.log('Configuration saved. Run ' + colors.magenta.bold('laravel-echo-server start') + ' to run server.')
@@ -63,8 +64,8 @@ function init(yargs) {
  */
 function setupConfig() {
     return inquirer.prompt([{
-        name: 'hostname',
-        message: 'Enter a hostname for server.'
+        name: 'host',
+        message: 'Enter the host for the server.'
     }, {
         name: 'port',
         default: '6001',
@@ -75,7 +76,7 @@ function setupConfig() {
         type: 'confirm'
     }, {
         name: 'authHost',
-        message: 'Enter the hostname of your authentication server.',
+        message: 'Enter the host of your authentication server.',
         when: function(options) {
             return options.verifyAuthServer;
         }
@@ -146,6 +147,20 @@ function start(yargs) {
  *
  * @return {string}
  */
-function createAppKey() {
+function create_app_key() {
     return Math.random().toString(31).substring(7).slice(0, 60);
+}
+
+/**
+ * Generate an app key and save to config.
+ *
+ * @return {void}
+ */
+function key_generate() {
+    var key = create_app_key();
+    var options = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
+
+    options.appKey = key;
+
+    saveConfig(options);
 }

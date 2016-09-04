@@ -5,15 +5,39 @@ colors.setTheme({
     input: 'grey',
     verbose: 'cyan',
     prompt: 'grey',
-    info: 'green',
+    info: 'cyan',
     data: 'grey',
     help: 'cyan',
     warn: 'yellow',
     debug: 'blue',
-    error: 'red'
+    error: 'red',
+    h1: 'grey',
+    h2: 'yellow'
 });
 
 export class Log {
+    /**
+     * Console log heading 1.
+     *
+     * @param  {string|object} message
+     * @param  {string} status
+     * @return {void}
+     */
+    static title(message: any): void {
+        console.log(colors.bold(message));
+    }
+
+    /**
+     * Console log heaing 2.
+     *
+     * @param  {string|object} message
+     * @param  {string} status
+     * @return {void}
+     */
+    static subtitle(message: any): void {
+        console.log(colors.h2.bold(message));
+    }
+
     /**
      * Console log info.
      *
@@ -44,6 +68,6 @@ export class Log {
      * @return {void}
      */
     static error(message: any): void {
-        console.log(colors.error(`Error: ${message}`));
+        console.log(colors.error(message));
     }
 }

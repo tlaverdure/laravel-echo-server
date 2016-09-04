@@ -1,9 +1,17 @@
 var fs = require('fs');
+var http = require('http');
 var https = require('https');
 var io = require('socket.io');
 import { Log } from './log';
 
 export class Server {
+    /**
+     * The http server.
+     *
+     * @type {any}
+     */
+    public http: any;
+
     /**
      * Socket.io client.
      *
@@ -24,10 +32,10 @@ export class Server {
     init(): Promise<any> {
         return new Promise((resolve, reject) => {
             this.serverProtocol().then(() => {
-                Log.success(`Server running at ${this.options.hostname} on port ${this.options.port}`);
+                Log.success(`Running at ${this.options.host} on port ${this.options.port}`);
 
                 resolve(this.io);
-            });
+            }, error => reject(error));
         });
     }
 
@@ -38,12 +46,12 @@ export class Server {
      */
     serverProtocol(): Promise<any> {
         return new Promise((resolve, reject) => {
-            if ((/(https)\:\/\//).test(this.options.hostname)) {
+            if ((/(https)\:\/\//).test(this.options.host)) {
                 this.secure().then(() => {
-                    resolve(this.secureServer());
-                }, error => Log.error(error));
+                    resolve(this.httpServer(true));
+                }, error => reject(error));
             } else {
-                resolve(this.io = io(this.options.port));
+                resolve(this.httpServer(false));
             }
         });
     }
@@ -69,16 +77,24 @@ export class Server {
     }
 
     /**
-     * Create a secure socket.io server.
+     * Create a socket.io server.
      *
      * @return {any}
      */
-    secureServer(): any {
-        let server = https.createServer(this.options, (req, res) => {
-            res.writeHead(200);
-            res.end('')
-        }).listen(this.options.port);
+    httpServer(secure: boolean) {
+        if (secure) {
+            this.http = https.createServer(this.options, this.httpHandler);
+        } else {
+            this.http = http.createServer(this.httpHandler);
+        }
 
-        return this.io = io(server);
+        this.http.listen(this.options.port, this.options.host);
+
+        return this.io = io(this.http);
+    }
+
+    httpHandler(req, res) {
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('X-Porwered-By', 'Laravel Echo Server');
     }
 }

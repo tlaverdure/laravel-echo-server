@@ -1,7 +1,7 @@
 var _ = require('lodash');
 import { Channel } from './channel';
-import { Cache } from './cache';
-import { Log } from './log';
+import { Cache } from './../cache';
+import { Log } from './../log';
 
 export class PresenceChannel {
     /**

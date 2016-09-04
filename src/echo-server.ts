@@ -1,7 +1,5 @@
-var _ = require('lodash');
-var Redis = require('ioredis');
-
-import { Channel } from './channel';
+import { HttpSubscriber, RedisSubscriber } from './subscribers';
+import { Channel } from './channels';
 import { Server } from './server';
 import { Log } from './log';
 
@@ -17,7 +15,7 @@ export class EchoServer {
     private _defaultOptions: any = {
         authHost: null,
         authEndpoint: '/broadcasting/auth',
-        hostname: 'http://localhost',
+        host: 'http://localhost',
         port: 6001,
         sslCertPath: '',
         sslKeyPath: ''
@@ -38,19 +36,31 @@ export class EchoServer {
     private server: Server;
 
     /**
-     * Redis pub/sub client.
+     * Channel instance.
      *
-     * @type {object}
+     * @type {Channel}
      */
-    private _redisPubSub: any;
+    private channel: Channel;
 
-    channel: any;
+    /**
+     * Redis subscriber instance.
+     *
+     * @type {RedisSubscriber}
+     */
+    private redisSub: RedisSubscriber;
+
+    /**
+     * Http subscriber instance.
+     *
+     * @type {HttpSubscriber}
+     */
+    private httpSub: HttpSubscriber;
 
     /**
      * Create a new instance.
      */
     constructor() {
-        this._redisPubSub = new Redis();
+        Log.title(`\nL A R A V E L  E C H O  S E R V E R\n`);
     }
 
     /**
@@ -60,46 +70,105 @@ export class EchoServer {
      * @return {void}
      */
     run(options: any): void {
+        Log.info('Starting server...\n');
+
         this.options = Object.assign(this._defaultOptions, options);
         this.server = new Server(this.options);
 
         this.server.init().then(io => {
+            this.init(io).then(() => {
+                Log.info('\nServer ready!\n');
+            }, error => Log.error(error));
+        }, error => Log.error(error));
+    }
+
+    /**
+     * Initialize the class
+     *
+     * @param {any} io
+     */
+    init(io: any): void {
+        new Promise((resolve, reject) => {
             this.channel = new Channel(io, this.options);
-            this.redisPubSub();
+            this.redisSub = new RedisSubscriber();
+            this.httpSub = new HttpSubscriber(this.options, this.server.http);
+
+            this.listen();
             this.onConnect();
+
+            resolve();
         });
     }
 
     /**
-     * Setup redis pub/sub.
+     * Listen for incoming event from subscibers.
      *
      * @return {void}
      */
-    redisPubSub(): void {
-        this._redisPubSub.psubscribe('*', (err, count) => { });
-        this._redisPubSub.on('pmessage', (subscribed, channel, message) => {
-            message = JSON.parse(message);
-            this.handleSub(channel, message);
+    listen(): void {
+        this.redisSub.subscribe((channel, message) => {
+            return this.broadcast(channel, message);
+        });
+
+        this.httpSub.subscribe((channel, message) => {
+            return this.broadcast(channel, message);
         });
     }
 
     /**
-     * Handle subscribing to events and emitting to channels.
+     * Return a channel by its socket id.
+     *
+     * @param  {string} socket_id
+     * @return {any}
+     */
+    find(socket_id: string): any {
+        return this.server.io.sockets
+            .connected["/#" + socket_id];
+    }
+
+    /**
+     * Broadcast events to channels from subscribers.
      *
      * @param  {string} channel
      * @param  {any} message
      * @return {void}
      */
-    handleSub(channel: string, message: any): void {
-        if (message.socket) {
-            let socket = this.server.io
-                .sockets
-                .connected["/#" + message.socket];
-
-            socket.broadcast.to(channel).emit(message.event, message.data);
+    broadcast(channel: string, message: any): boolean {
+        if (message.socket && this.find(message.socket)) {
+            return this.toOthers(this.find(message.socket), channel, message);
         } else {
-            this.server.io.to(channel).emit(message.event, message.data);
+            return this.toAll(channel, message);
         }
+    }
+
+    /**
+     * Broadcast to others on channel.
+     *
+     * @param  {any} socket
+     * @param  {string} channel
+     * @param  {any} message
+     * @return {boolean}
+     */
+    toOthers(socket: any, channel: string, message: any): boolean {
+        socket.broadcast.to(channel)
+            .emit(message.event, message.data);
+
+        return true
+    }
+
+    /**
+     * Broadcast to all members on channel.
+     *
+     * @param  {any} socket
+     * @param  {string} channel
+     * @param  {any} message
+     * @return {boolean}
+     */
+    toAll(channel: string, message: any): boolean {
+        this.server.io.to(channel)
+            .emit(message.event, message.data);
+
+        return true
     }
 
     /**
@@ -122,7 +191,7 @@ export class EchoServer {
      */
     onSubscribe(socket: any): void {
         socket.on('subscribe', data => {
-            this.channel.join(socket, data)
+            this.channel.join(socket, data);
         });
     }
 
@@ -134,7 +203,7 @@ export class EchoServer {
      */
     onUnsubscribe(socket: any): void {
         socket.on('unsubscribe', data => {
-            this.channel.leave(socket, data.channel)
+            this.channel.leave(socket, data.channel);
         });
     }
 }

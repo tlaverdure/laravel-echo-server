@@ -1,6 +1,6 @@
 var request = require('request');
 import { Channel } from './channel';
-import { Log } from './log';
+import { Log } from './../log';
 
 export class PrivateChannel {
     /**
@@ -42,7 +42,7 @@ export class PrivateChannel {
      */
     protected authHost(): string {
         return (this.options.authHost) ?
-            this.options.authHost : this.options.hostname;
+            this.options.authHost : this.options.host;
     }
 
     /**
