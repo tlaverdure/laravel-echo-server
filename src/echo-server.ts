@@ -59,9 +59,7 @@ export class EchoServer {
     /**
      * Create a new instance.
      */
-    constructor() {
-        Log.title(`\nL A R A V E L  E C H O  S E R V E R\n`);
-    }
+    constructor() { }
 
     /**
      * Start the Echo Server.
@@ -70,6 +68,7 @@ export class EchoServer {
      * @return {void}
      */
     run(options: any): void {
+        Log.title(`\nL A R A V E L  E C H O  S E R V E R\n`);
         Log.info('Starting server...\n');
 
         this.options = Object.assign(this._defaultOptions, options);
@@ -87,8 +86,8 @@ export class EchoServer {
      *
      * @param {any} io
      */
-    init(io: any): void {
-        new Promise((resolve, reject) => {
+    init(io: any): Promise<any> {
+        return new Promise((resolve, reject) => {
             this.channel = new Channel(io, this.options);
             this.redisSub = new RedisSubscriber();
             this.httpSub = new HttpSubscriber(this.options, this.server.http);

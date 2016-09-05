@@ -21,6 +21,7 @@ const OPTION_KEYS = [
     'authPath',
     'host',
     'port',
+    'referrers',
     'sslCertPath',
     'sslKeyPath'
 ];
@@ -30,8 +31,10 @@ const OPTION_KEYS = [
  */
 var argv = yargs.usage("$0 command")
     .command("init", "Initialize server with a config file.", init)
-    .command("start", "Start up the server.", start)
     .command("key:generate", "Generate an app key for the server.", key_generate)
+    .command("referrer:add", "Register a referrer that can make api requests.", referrer_add)
+    .command("referrer:remove", "Remove a referrer that has been registered.", referrer_remove)
+    .command("start", "Start up the server.", start)
     .demand(1, "Please provide a valid command.")
     .help("h")
     .alias("h", "help")
@@ -161,6 +164,84 @@ function key_generate() {
     var options = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
 
     options.appKey = key;
+
+    saveConfig(options);
+}
+
+/**
+ * Create an api key for a referrer.
+ *
+ * @return {string}
+ */
+function create_api_key(app_key) {
+    var hash = Math.random().toString(31).substring(7).slice(0, 60);
+
+    api_key = hash.concat(app_key);
+    api_key = api_key.split('').sort(function() {
+        return 0.5 - Math.random()
+    }).join('').slice(0, 60);
+
+    return api_key;
+}
+
+/**
+ * Add a registered referrer.
+ *
+ * @param  {Object} yargs
+ * @return {void}
+ */
+function referrer_add(yargs) {
+    var options = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
+    var host = yargs.argv._[1] || null;
+    options.referrers = options.referrers || [];
+
+    if (host && options.appKey) {
+        var index = null;
+        var referrer = options.referrers.find(function(referrer, i) {
+            index = i;
+            return referrer.host == host;
+        });
+
+        if (referrer) {
+            referrer.apiKey = create_api_key(options.appKey);
+            options.referrers[index] = referrer;
+        } else {
+            var referrer = {
+                host: host,
+                apiKey: create_api_key(options.appKey)
+            };
+
+            options.referrers.push(referrer);
+        }
+
+        console.log(colors.green('API Key: ' + referrer.apiKey))
+
+        saveConfig(options);
+    }
+}
+
+/**
+ * Remove a registered referrer.
+ *
+ * @param  {Object} yargs
+ * @return {void}
+ */
+function referrer_remove(yargs) {
+    var options = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
+    var host = yargs.argv._[1] || null;
+    options.referrers = options.referrers || [];
+
+    var index = null;
+    var referrer = options.referrers.find(function(referrer, i) {
+        index = i;
+        return referrer.host == host;
+    });
+
+    if (index >= 0) {
+        options.referrers.splice(index, 1);
+    }
+
+    console.log(colors.green('Referrer removed'))
 
     saveConfig(options);
 }

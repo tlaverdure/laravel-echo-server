@@ -35,24 +35,34 @@ $   laravel-echo-server init
 
 The cli tool will help you setup a **laravel-echo-sever.json** file in the root directory of your project. This file will be loaded by the server during start up. You may edit this file later on to edit your configuration.
 
+#### App Key
+
+After initial configuration an app key will be stored in the laravel-echo-server.json file. An app key is required to perform some actions on the server. To generate a new app key, use the cli command:
+
+``` shell
+
+$ laravel-echo-server key:generate
+
+```
+
+#### Referrers
+
+The server exposes a light http api to perform some functionality. For security purposes, access to these endpoints from http referrers other than the server's host must be registered. This can be done using the cli command:
+
+``` shell
+
+$ laravel-echo-server referrer:add example.com
+
+```
+
+After running this command, an api key for the referrer will be displayed and stored in the laravel-echo-server.json file.
+
+In this example, requests from example.com will be allowed as long as the referrer's api_key is provided with http requests.
+
 ### Configurable Options
 
-Edit the default configuration of the server.
+Edit the default configuration of the server by adding options to your laravel-echo-server.json file.
 
-``` javascript
-var echo = require('laravel-echo-server');
-
-var options = {
-  authHost: 'http://app.dev',
-  authPath: '/broadcasting/auth',
-  host: 'http://app.dev',
-  port: 6001,
-  sslCertPath: '/path/to/app.dev.cert',
-  sslKeyPath: '/path/to/app.dev.key'
-};
-
-echo.run(options);
-```
 
 | Title          | Default        | Description |
 | :------------- | :------------- | :-----------|
