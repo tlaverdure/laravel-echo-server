@@ -21,7 +21,8 @@ export class EchoServer {
         authHost: null,
         authEndpoint: '/broadcasting/auth',
         sslCertPath: '',
-        sslKeyPath: ''
+        sslKeyPath: '',
+        redisConfig: null
     };
 
     /**
@@ -70,8 +71,8 @@ export class EchoServer {
      * Create a new instance.
      */
     constructor() {
-        this._redis = new Redis();
-        this._redisPubSub = new Redis();
+        this._redis = new Redis(this._options.redisConfig);
+        this._redisPubSub = new Redis(this._options.redisConfig);
         this._io = io;
         this._request = request;
     }
