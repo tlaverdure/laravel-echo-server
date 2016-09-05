@@ -15,6 +15,7 @@ export class EchoServer {
     private _defaultOptions: any = {
         authHost: null,
         authEndpoint: '/broadcasting/auth',
+        devMode: false,
         host: 'http://localhost',
         port: 6001,
         sslCertPath: '',
@@ -68,10 +69,8 @@ export class EchoServer {
      * @return {void}
      */
     run(options: any): void {
-        Log.title(`\nL A R A V E L  E C H O  S E R V E R\n`);
-        Log.info('Starting server...\n');
-
         this.options = Object.assign(this._defaultOptions, options);
+        this.startup();
         this.server = new Server(this.options);
 
         this.server.init().then(io => {
@@ -97,6 +96,22 @@ export class EchoServer {
 
             resolve();
         });
+    }
+
+    /**
+     * Text shown at startup.
+     *
+     * @return {void}
+     */
+    startup(): void {
+        Log.title(`\nL A R A V E L  E C H O  S E R V E R\n`);
+
+        if (this.options.devMode) {
+            Log.info('Starting server in DEV mode...\n');
+            Log.success('Dev mode activated.');
+        } else {
+            Log.info('Starting server...\n')
+        }
     }
 
     /**
