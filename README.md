@@ -73,14 +73,63 @@ echo.run(options);
 
 *Note: This library currently supports only serving from either http or https, not both.*
 
+## Subscribers
+The Laravel Echo Server subscribes to incoming events with two methods.
+
+### Redis
+
+ Your application can use Redis to publish events to channels. The server will subscribe to those channels and broadcast those messages via socket.io.
+
+ ### Http
+
+Using Http, you can publish events to the Laravel Echo Server in the same fashion you would do so with Redis.
+
+**Request Endpoint**
+
+``` http
+
+POST http://app.dev:6001/broadcast
+
+```
+
+**Request Body**
+
+``` json
+
+{
+  "channel": "channel-name",
+  "message": {
+    "event":"event-name",
+    "data": {
+       "key": "value"
+     },
+     "socket": "h3nAdb134tbvqwrg"
+   }
+}
+
+```
+
+**Channel Name** - The name of the channel to broadcast event to. For private of presence channels prepend `private-` or `presence-`.
+
+ **Message** - Object containing information about the event.
+ *   **event** - A string that represents the event key within your app.
+ *   **data** - Data you would like to broadcast to channel.
+ *   **socket (optional)** - The socket id of the user that initiated the event. When present, the server will only broadcast to others.
+
+
+## Presence Channels
+
+When users join a presence channel, their presence channel authentication data is stored using redis.
+
+While presence channels contain a list of users, their will be instances where a user joins a presence channel multiple times. For example, by opening multiple browser tabs. In this situation "joining" and "leaving" events are only emitted to the first and last instance of the user.
+
 ## Client Side Configuration
 
 See the offical Laravel documentation for more information. <https://laravel.com/docs/5.3/broadcasting#introduction>
 
 ### Tips
 
-You can include the socket.io client libray from your running server.
-For example, if your server is running at `app.dev:6001` you should be able to
+You can include the socket.io client libray from your running server. For example, if your server is running at `app.dev:6001` you should be able to
 add a script tag to your html like so:
 
 `<script src="//app.dev:6001/socket.io/socket.io.js"></script>`
