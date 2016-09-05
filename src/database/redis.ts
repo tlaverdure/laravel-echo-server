@@ -1,6 +1,7 @@
+import { DatabaseDriver } from './database-driver';
 var Redis = require('ioredis');
 
-export class Cache {
+export class RedisDatabase implements DatabaseDriver {
     /**
      * Redis client.
      *
@@ -11,19 +12,8 @@ export class Cache {
     /**
      * Create a new cache instance.
      */
-    constructor() {
+    constructor(private options) {
         this._redis = new Redis();
-    }
-
-    /**
-     * Store data to cache.
-     *
-     * @param  {string} key
-     * @param  {any}  value
-     * @return {void}
-     */
-    store(key: string, value: any): void {
-        this._redis.set(key, JSON.stringify(value));
     }
 
     /**
@@ -38,5 +28,14 @@ export class Cache {
         });
     }
 
-    flush() { }
+    /**
+     * Store data to cache.
+     *
+     * @param  {string} key
+     * @param  {any}  value
+     * @return {void}
+     */
+    set(key: string, value: any): void {
+        this._redis.set(key, JSON.stringify(value));
+    }
 }

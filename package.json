@@ -28,6 +28,7 @@
     "lodash": "^4.12.0",
     "request": "^2.72.0",
     "socket.io": "^1.4.6",
+    "sqlite3": "^3.1.4",
     "yargs": "^5.0.0"
   },
   "devDependencies": {
