@@ -13,7 +13,7 @@ export class SQLiteDatabase implements DatabaseDriver {
      * Create a new cache instance.
      */
     constructor(private options) {
-        let path = process.cwd() + '/database/laravel-echo-server.sqlite';
+        let path = process.cwd() + options.databaseConfig.sqlite.databasePath;
         this._sqlite = new sqlite3.cached.Database(path);
         this._sqlite.serialize(() => {
             this._sqlite.run('CREATE TABLE IF NOT EXISTS key_value (key VARCHAR(255), value TEXT)');

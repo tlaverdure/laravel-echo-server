@@ -4,18 +4,10 @@ let echo = require('./../../dist');
 let inquirer = require('inquirer');
 
 const CONFIG_FILE = process.cwd() + '/laravel-echo-server.json';
-const OPTION_KEYS = [
-    'appKey',
-    'authHost',
-    'authPath',
-    'devMode',
-    'host',
-    'port',
-    'referrers',
-    'sslCertPath',
-    'sslKeyPath'
-];
 
+/**
+ * Laravel Echo Server CLI
+ */
 export class Cli {
     /**
      * Initialize server with a configuration file.
@@ -24,17 +16,18 @@ export class Cli {
      * @return {void}
      */
     init(yargs) {
-        this.setupConfig().then(function(options) {
+        this.setupConfig().then((options) => {
+            options = Object.assign(options, echo.defaultOptions);
             options.appKey = this.createAppKey();
 
-            this.saveConfig(options).then(function() {
+            this.saveConfig(options).then(() => {
                 console.log('Configuration file saved. Run ' + colors.magenta.bold('laravel-echo-server start') + ' to run server.');
 
                 process.exit();
-            }, function(error) {
+            }, (error) => {
                 console.error(error);
             });
-        });
+        }, error => console.error(error));
     }
 
     /**
@@ -50,6 +43,11 @@ export class Cli {
                 name: 'port',
                 default: '6001',
                 message: 'Which port would you like to serve from?'
+            }, {
+                name: 'database',
+                message: 'Which database would you like to use to store presence channel members?',
+                type: 'list',
+                choices: ['redis', 'sqlite']
             }, {
                 name: 'verifyAuthServer',
                 message: 'Will you be authenticating users from a different host?',
@@ -87,7 +85,7 @@ export class Cli {
                 when: function(options) {
                     return options.protocol == 'https';
                 }
-            }])
+            }]);
     }
 
     /**
@@ -97,19 +95,23 @@ export class Cli {
      * @return {Promise<any>}
      */
     saveConfig(options): Promise<any> {
-        return new Promise(function(resolve, reject) {
-            Object.keys(options).filter(function(k) {
-                return OPTION_KEYS.indexOf(k) < 0;
-            }).forEach(function(option) {
-                delete options[option];
-            });
+        let opts = {};
 
-            fs.writeFile(
-                CONFIG_FILE,
-                JSON.stringify(options, null, '\t'),
-                function(error) {
-                    (error) ? reject(error) : resolve();
-                });
+        Object.keys(options).filter(function(k) {
+            return Object.keys(echo.defaultOptions).indexOf(k) >= 0;
+        }).sort().forEach((option, i, arr) => {
+            opts[option] = options[option];
+        });
+
+        return new Promise((resolve, reject) => {
+            if (opts) {
+                fs.writeFile(
+                    CONFIG_FILE,
+                    JSON.stringify(opts, null, '\t'),
+                    (error) => (error) ? reject(error) : resolve());
+            } else {
+                reject('No options provided.')
+            }
         });
     }
 
@@ -157,9 +159,9 @@ export class Cli {
     createApiKey(app_key: string): string {
         var hash = Math.random().toString(31).substring(7).slice(0, 60);
         let api_key = hash.concat(app_key);
-        api_key = api_key.split('').sort(function() {
-            return 0.5 - Math.random()
-        }).join('').slice(0, 60);
+        api_key = api_key.split('')
+            .sort(() => 0.5 - Math.random())
+            .join('').slice(0, 60);
 
         return api_key;
     }
@@ -177,7 +179,7 @@ export class Cli {
 
         if (host && options.appKey) {
             var index = null;
-            var referrer = options.referrers.find(function(referrer, i) {
+            var referrer = options.referrers.find((referrer, i) => {
                 index = i;
                 return referrer.host == host;
             });
@@ -213,7 +215,7 @@ export class Cli {
         options.referrers = options.referrers || [];
 
         var index = null;
-        var referrer = options.referrers.find(function(referrer, i) {
+        var referrer = options.referrers.find((referrer, i) => {
             index = i;
             return referrer.host == host;
         });

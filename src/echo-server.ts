@@ -12,12 +12,21 @@ export class EchoServer {
      *
      * @type {object}
      */
-    private _defaultOptions: any = {
+    public defaultOptions: any = {
+        appKey: '',
         authHost: null,
         authEndpoint: '/broadcasting/auth',
+        database: 'redis',
+        databaseConfig: {
+            redis: {},
+            sqlite: {
+                databasePath: '/database/laravel-echo-server.sqlite'
+            }
+        },
         devMode: false,
         host: 'http://localhost',
         port: 6001,
+        referrers: [],
         sslCertPath: '',
         sslKeyPath: ''
     };
@@ -69,7 +78,7 @@ export class EchoServer {
      * @return {void}
      */
     run(options: any): void {
-        this.options = Object.assign(this._defaultOptions, options);
+        this.options = Object.assign(this.defaultOptions, options);
         this.startup();
         this.server = new Server(this.options);
 

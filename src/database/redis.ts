@@ -13,7 +13,7 @@ export class RedisDatabase implements DatabaseDriver {
      * Create a new cache instance.
      */
     constructor(private options) {
-        this._redis = new Redis();
+        this._redis = new Redis(options.databaseConfig.redis);
     }
 
     /**

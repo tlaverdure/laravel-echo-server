@@ -69,6 +69,8 @@ Edit the default configuration of the server by adding options to your laravel-e
 | `appKey`       | `string`       | Unique app key used in security implementations. |
 | `authHost`     | `http://localhost` | The host of the server that authenticates private and presence channels  |
 | `authPath`     | `/broadcasting/auth` | The route that authenticates private channels  |
+| `database`     | `redis`        | Database used to store data that should be persisted, like presence channel members. Options are currently `redis` and `sqlite` |
+| `databaseConfig` |  `object`    |  Configurations for the different database drivers. |
 | `hostname`     | `http://localhost` | The host of the socket.io server |
 | `port`         | `6001`         | The port that the socket.io server should run on |
 | `sslCertPath`  | `string`       | The path to your server's ssl certificate |
@@ -77,7 +79,6 @@ Edit the default configuration of the server by adding options to your laravel-e
 ### Running with SSL
 
 *   Your client side implementation must acccess the socket.io client from https.
-
 *   The server configuration must set the server host to use https.
 *   The server configuration should include paths to your ssl certificate and key located on your server.
 
@@ -126,6 +127,47 @@ POST http://app.dev:6001/broadcast
  *   **data** - Data you would like to broadcast to channel.
  *   **socket (optional)** - The socket id of the user that initiated the event. When present, the server will only broadcast to others.
 
+## Database
+
+To persist presence channel data, there is support for use of Redis or SQLite as a key/value store. The key being the channel name, and the value being the list of presence channel members.
+
+Each database may be configured in the laravel-echo-server.json file under the `databaseConfig` property. The options get passed through to the database provider, so developers are free to set these up as they wish.
+
+### Redis
+For example, if you wanted to pass a custom configuration to Redis:
+
+``` json
+    ...
+{
+  ...
+  "databaseConfig" : {
+    "redis" : {
+      "port": "3001",
+      "host": "http://redis.app.dev"
+    }
+  }
+  ...
+}
+
+```
+*A full list of redis options can be found [here](https://github.com/luin/ioredis/blob/master/API.md#new-redisport-host-options).*
+
+### SQLite
+With SQLite you may want to change the path where the database is stored:
+
+``` json
+    ...
+{
+  ...
+  "databaseConfig" : {
+    "sqlite" : {
+      "databasePath": "/path/to/laravel-echo-server.sqlite"
+    }
+  }
+  ...
+}
+
+```
 
 ## Presence Channels
 
