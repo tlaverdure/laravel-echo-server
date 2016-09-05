@@ -33,11 +33,11 @@ $   laravel-echo-server init
 
 ```
 
-The cli tool will help you setup a **laravel-echo-sever.json** file in the root directory of your project. This file will be loaded by the server during start up. You may edit this file later on to edit your configuration.
+The cli tool will help you setup a **laravel-echo-sever.json** file in the root directory of your project. This file will be loaded by the server during start up. You may edit this file later on to manage the configuration of your server.
 
 #### App Key
 
-After initial configuration an app key will be stored in the laravel-echo-server.json file. An app key is required to perform some actions on the server. To generate a new app key, use the cli command:
+After initial configuration, an app key will be stored in the laravel-echo-server.json file. An app key is required to perform certain actions on the server. To generate a new app key, use the cli command:
 
 ``` shell
 
@@ -47,7 +47,7 @@ $ laravel-echo-server key:generate
 
 #### Referrers
 
-The server exposes a light http api to perform some functionality. For security purposes, access to these endpoints from http referrers other than the server's host must be registered. This can be done using the cli command:
+The server exposes a light http api to perform broadcasting functionality. For security purposes, access to these endpoints from http referrers other than the server's host must be registered. This can be done using the cli command:
 
 ``` shell
 
@@ -59,6 +59,13 @@ After running this command, an api key for the referrer will be displayed and st
 
 In this example, requests from example.com will be allowed as long as the referrer's api_key is provided with http requests.
 
+``` http
+Request Headers
+
+Auhtorization:  Bearer skti68i...
+
+```
+
 ### Configurable Options
 
 Edit the default configuration of the server by adding options to your laravel-echo-server.json file.
@@ -66,11 +73,11 @@ Edit the default configuration of the server by adding options to your laravel-e
 
 | Title          | Default        | Description |
 | :------------- | :------------- | :-----------|
-| `appKey`       | `string`       | Unique app key used in security implementations. |
+| `appKey`       | `string`       | Unique app key used in security implementations |
 | `authHost`     | `http://localhost` | The host of the server that authenticates private and presence channels  |
 | `authPath`     | `/broadcasting/auth` | The route that authenticates private channels  |
-| `database`     | `redis`        | Database used to store data that should be persisted, like presence channel members. Options are currently `redis` and `sqlite` |
-| `databaseConfig` |  `object`    |  Configurations for the different database drivers. |
+| `database`     | `redis`        | Database used to store data that should persist, like presence channel members. Options are currently `redis` and `sqlite` |
+| `databaseConfig` |  `object`    |  Configurations for the different database drivers |
 | `hostname`     | `http://localhost` | The host of the socket.io server |
 | `port`         | `6001`         | The port that the socket.io server should run on |
 | `sslCertPath`  | `string`       | The path to your server's ssl certificate |
@@ -78,22 +85,22 @@ Edit the default configuration of the server by adding options to your laravel-e
 
 ### Running with SSL
 
-*   Your client side implementation must acccess the socket.io client from https.
+*   Your client side implementation must access the socket.io client from https.
 *   The server configuration must set the server host to use https.
-*   The server configuration should include paths to your ssl certificate and key located on your server.
+*   The server configuration should include paths to both your ssl certificate and key located on your server.
 
-*Note: This library currently supports only serving from either http or https, not both.*
+*Note: This library currently only supports serving from either http or https, not both.*
 
 ## Subscribers
-The Laravel Echo Server subscribes to incoming events with two methods.
+The Laravel Echo Server subscribes to incoming events with two methods: Redis & Http.
 
 ### Redis
 
- Your application can use Redis to publish events to channels. The server will subscribe to those channels and broadcast those messages via socket.io.
+ Your core application can use Redis to publish events to channels. The server will subscribe to those channels and broadcast those messages via socket.io.
 
  ### Http
 
-Using Http, you can publish events to the Laravel Echo Server in the same fashion you would do so with Redis.
+Using Http, you can publish events to the Laravel Echo Server in the same fashion you would with Redis by passing a channel and message to broadcast.
 
 **Request Endpoint**
 
@@ -120,18 +127,18 @@ POST http://app.dev:6001/broadcast
 
 ```
 
-**Channel Name** - The name of the channel to broadcast event to. For private of presence channels prepend `private-` or `presence-`.
+**Channel Name** - The name of the channel to broadcast an event to. For private or presence channels prepend `private-` or `presence-`.
 
  **Message** - Object containing information about the event.
  *   **event** - A string that represents the event key within your app.
  *   **data** - Data you would like to broadcast to channel.
- *   **socket (optional)** - The socket id of the user that initiated the event. When present, the server will only broadcast to others.
+ *   **socket (optional)** - The socket id of the user that initiated the event. When present, the server will only "broadcast to others".
 
 ## Database
 
 To persist presence channel data, there is support for use of Redis or SQLite as a key/value store. The key being the channel name, and the value being the list of presence channel members.
 
-Each database may be configured in the laravel-echo-server.json file under the `databaseConfig` property. The options get passed through to the database provider, so developers are free to set these up as they wish.
+Each database driver may be configured in the laravel-echo-server.json file under the `databaseConfig` property. The options get passed through to the database provider, so developers are free to set these up as they wish.
 
 ### Redis
 For example, if you wanted to pass a custom configuration to Redis:
@@ -150,7 +157,7 @@ For example, if you wanted to pass a custom configuration to Redis:
 }
 
 ```
-*A full list of redis options can be found [here](https://github.com/luin/ioredis/blob/master/API.md#new-redisport-host-options).*
+*A full list of Redis options can be found [here](https://github.com/luin/ioredis/blob/master/API.md#new-redisport-host-options).*
 
 ### SQLite
 With SQLite you may want to change the path where the database is stored:
@@ -171,13 +178,13 @@ With SQLite you may want to change the path where the database is stored:
 
 ## Presence Channels
 
-When users join a presence channel, their presence channel authentication data is stored using redis.
+When users join a presence channel, their presence channel authentication data is stored using Redis.
 
-While presence channels contain a list of users, their will be instances where a user joins a presence channel multiple times. For example, by opening multiple browser tabs. In this situation "joining" and "leaving" events are only emitted to the first and last instance of the user.
+While presence channels contain a list of users, there will be instances where a user joins a presence channel multiple times. For example, this would occur when opening multiple browser tabs. In this situation "joining" and "leaving" events are only emitted to the first and last instance of the user.
 
 ## Client Side Configuration
 
-See the offical Laravel documentation for more information. <https://laravel.com/docs/5.3/broadcasting#introduction>
+See the official Laravel documentation for more information. <https://laravel.com/docs/5.3/broadcasting#introduction>
 
 ### Tips
 
