@@ -51,7 +51,14 @@ var options = {
   host: 'http://app.dev',
   port: 6001,
   sslCertPath: '/path/to/app.dev.cert',
-  sslKeyPath: '/path/to/app.dev.key'
+  sslKeyPath: '/path/to/app.dev.key',
+    redisConfig: {
+    port: 6379,          // Redis port
+    host: '127.0.0.1',   // Redis host
+    family: 4,           // 4 (IPv4) or 6 (IPv6)
+    password: 'auth',
+    db: 0
+  }
 };
 
 echo.run(options);
