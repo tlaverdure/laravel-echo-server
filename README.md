@@ -52,7 +52,7 @@ var options = {
   port: 6001,
   sslCertPath: '/path/to/app.dev.cert',
   sslKeyPath: '/path/to/app.dev.key',
-    redisConfig: {
+  redisConfig: {
     port: 6379,          // Redis port
     host: '127.0.0.1',   // Redis host
     family: 4,           // 4 (IPv4) or 6 (IPv6)
@@ -72,6 +72,7 @@ echo.run(options);
 | `port` | `6001` | The port that the socket.io server should run on |
 | `sslCertPath` | `string` | The path to your server's ssl certificate |
 | `sslKeyPath` | `string` | The path to your server's ssl key |
+| `redisConfig` | `object` | The redis server configration |
 
 ### Running with SSL
 
