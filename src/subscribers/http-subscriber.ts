@@ -19,7 +19,7 @@ export class HttpSubscriber implements Subscriber {
             let body: any = [];
 
             if (req.method == 'POST' && req.url == '/broadcast') {
-                if (req.headers.authorization != this.options.appKey) {
+                if (!this.canAccess(req)) {
                     return this.unauthorizedResponse(req, res);
                 }
 
@@ -65,6 +65,30 @@ export class HttpSubscriber implements Subscriber {
     }
 
     /**
+     * Check is an incoming request can access the api.
+     *
+     * @param  {any} req
+     * @return {boolean}
+     */
+    canAccess(req: any): boolean {
+        if (req.headers.authorization) {
+            let api_key = req.headers.authorization.replace('Bearer ', '');
+            let referrer = this.options.referrers.find((referrer) => {
+                return referrer.apiKey == api_key;
+            });
+
+            if (referrer) {
+                if (referrer.host == '*' ||
+                    referrer.host == req.headers.referer) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Handle unauthoried requests.
      *
      * @param  {any} req
@@ -73,7 +97,7 @@ export class HttpSubscriber implements Subscriber {
      */
     unauthorizedResponse(req: any, res: any): boolean {
         res.statusCode = 403;
-        res.write(JSON.stringify({ error: 'Unauthroized' }));
+        res.write(JSON.stringify({ error: 'Unauthorized' }));
         res.end();
 
         return false;
