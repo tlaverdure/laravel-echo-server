@@ -73,15 +73,15 @@ Edit the default configuration of the server by adding options to your **laravel
 
 | Title          | Default        | Description |
 | :------------- | :------------- | :-----------|
-| `appKey`       | `string`       | Unique app key used in security implementations |
+| `appKey`       | `''`       | Unique app key used in security implementations |
 | `authHost`     | `http://localhost` | The host of the server that authenticates private and presence channels  |
 | `authPath`     | `/broadcasting/auth` | The route that authenticates private channels  |
 | `database`     | `redis`        | Database used to store data that should persist, like presence channel members. Options are currently `redis` and `sqlite` |
-| `databaseConfig` |  `object`    |  Configurations for the different database drivers |
+| `databaseConfig` |  `{}`    |  Configurations for the different database drivers |
 | `hostname`     | `http://localhost` | The host of the socket.io server |
 | `port`         | `6001`         | The port that the socket.io server should run on |
-| `sslCertPath`  | `string`       | The path to your server's ssl certificate |
-| `sslKeyPath`   | `string`       | The path to your server's ssl key |
+| `sslCertPath`  | `''`       | The path to your server's ssl certificate |
+| `sslKeyPath`   | `''`       | The path to your server's ssl key |
 
 ### Running with SSL
 
