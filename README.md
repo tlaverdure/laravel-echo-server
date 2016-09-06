@@ -144,16 +144,13 @@ Each database driver may be configured in the laravel-echo-server.json file unde
 For example, if you wanted to pass a custom configuration to Redis:
 
 ``` json
-    ...
 {
-  ...
   "databaseConfig" : {
     "redis" : {
       "port": "3001",
       "host": "http://redis.app.dev"
     }
   }
-  ...
 }
 
 ```
@@ -165,13 +162,11 @@ With SQLite you may want to change the path where the database is stored:
 ``` json
     ...
 {
-  ...
   "databaseConfig" : {
     "sqlite" : {
       "databasePath": "/path/to/laravel-echo-server.sqlite"
     }
   }
-  ...
 }
 
 ```
