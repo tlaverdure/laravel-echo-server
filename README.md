@@ -25,7 +25,7 @@ $   npm install -g laravel-echo-server
 
 ### Initialize with CLI Tool
 
-Run the init command in your project diretory:
+Run the init command in your project directory:
 
 ``` shell
 
@@ -37,7 +37,7 @@ The cli tool will help you setup a **laravel-echo-sever.json** file in the root 
 
 #### App Key
 
-After initial configuration, an app key will be stored in the laravel-echo-server.json file. An app key is required to perform certain actions on the server. To generate a new app key, use the cli command:
+After initial configuration, an app key will be stored in the **laravel-echo-server.json** file. An app key is required to perform certain actions on the server. To generate a new app key, use the cli command:
 
 ``` shell
 
@@ -47,7 +47,7 @@ $ laravel-echo-server key:generate
 
 #### Referrers
 
-The server exposes a light http api to perform broadcasting functionality. For security purposes, access to these endpoints from http referrers other than the server's host must be registered. This can be done using the cli command:
+The Laravel Echo Server exposes a light http api to perform broadcasting functionality. For security purposes, access to these endpoints from http referrers other than the server's host must be registered. This can be done using the cli command:
 
 ``` shell
 
@@ -55,7 +55,7 @@ $ laravel-echo-server referrer:add example.com
 
 ```
 
-After running this command, an api key for the referrer will be displayed and stored in the laravel-echo-server.json file.
+After running this command, an api key for the referrer will be displayed and stored in the **laravel-echo-server.json** file.
 
 In this example, requests from example.com will be allowed as long as the referrer's api_key is provided with http requests.
 
@@ -68,7 +68,7 @@ Auhtorization:  Bearer skti68i...
 
 ### Configurable Options
 
-Edit the default configuration of the server by adding options to your laravel-echo-server.json file.
+Edit the default configuration of the server by adding options to your **laravel-echo-server.json** file.
 
 
 | Title          | Default        | Description |
@@ -96,11 +96,11 @@ The Laravel Echo Server subscribes to incoming events with two methods: Redis & 
 
 ### Redis
 
- Your core application can use Redis to publish events to channels. The server will subscribe to those channels and broadcast those messages via socket.io.
+ Your core application can use Redis to publish events to channels. The Laravel Echo Server will subscribe to those channels and broadcast those messages via socket.io.
 
- ### Http
+### Http
 
-Using Http, you can publish events to the Laravel Echo Server in the same fashion you would with Redis by passing a channel and message to broadcast.
+Using Http, you can also publish events to the Laravel Echo Server in the same fashion you would with Redis by submitting a `channel` and `message` to the broadcast endpoint.
 
 **Request Endpoint**
 
@@ -138,12 +138,13 @@ POST http://app.dev:6001/broadcast
 
 To persist presence channel data, there is support for use of Redis or SQLite as a key/value store. The key being the channel name, and the value being the list of presence channel members.
 
-Each database driver may be configured in the laravel-echo-server.json file under the `databaseConfig` property. The options get passed through to the database provider, so developers are free to set these up as they wish.
+Each database driver may be configured in the **laravel-echo-server.json** file under the `databaseConfig` property. The options get passed through to the database provider, so developers are free to set these up as they wish.
 
 ### Redis
 For example, if you wanted to pass a custom configuration to Redis:
 
 ``` json
+
 {
   "databaseConfig" : {
     "redis" : {
@@ -157,9 +158,10 @@ For example, if you wanted to pass a custom configuration to Redis:
 *A full list of Redis options can be found [here](https://github.com/luin/ioredis/blob/master/API.md#new-redisport-host-options).*
 
 ### SQLite
-With SQLite you may want to change the path where the database is stored:
+With SQLite you may be interested in changing the path where the database is stored:
 
 ``` json
+
 {
   "databaseConfig" : {
     "sqlite" : {
@@ -182,7 +184,7 @@ See the official Laravel documentation for more information. <https://laravel.co
 
 ### Tips
 
-You can include the socket.io client libray from your running server. For example, if your server is running at `app.dev:6001` you should be able to
+You can include the socket.io client library from your running server. For example, if your server is running at `app.dev:6001` you should be able to
 add a script tag to your html like so:
 
 `<script src="//app.dev:6001/socket.io/socket.io.js"></script>`
