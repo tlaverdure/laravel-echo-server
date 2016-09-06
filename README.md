@@ -15,17 +15,17 @@ official docs: <https://laravel.com/docs/master/broadcasting>
 
 ## Getting Started
 
-Install npm package in your project directory.
+Install npm package globally with the following command:
 
 ``` shell
 
-$   npm install laravel-echo-server --save
+$   npm install -g laravel-echo-server
 
 ```
 
 ### Initialize with CLI Tool
 
-Run the init command.
+Run the init command in your project diretory:
 
 ``` shell
 
