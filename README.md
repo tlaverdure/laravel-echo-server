@@ -160,7 +160,6 @@ For example, if you wanted to pass a custom configuration to Redis:
 With SQLite you may want to change the path where the database is stored:
 
 ``` json
-    ...
 {
   "databaseConfig" : {
     "sqlite" : {
