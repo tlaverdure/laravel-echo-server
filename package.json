@@ -23,10 +23,14 @@
     "test": "mocha --compilers js:babel-core/register"
   },
   "dependencies": {
+    "colors": "^1.1.2",
+    "inquirer": "^1.1.3",
     "ioredis": "^1.15.1",
     "lodash": "^4.12.0",
     "request": "^2.72.0",
-    "socket.io": "^1.4.6"
+    "socket.io": "^1.4.6",
+    "sqlite3": "^3.1.4",
+    "yargs": "^5.0.0"
   },
   "devDependencies": {
     "babel-preset-es2015": "^6.14.0",
@@ -35,5 +39,8 @@
     "sinon": "^1.17.5",
     "typescript": "^1.8.10",
     "typings": "^1.0.4"
+  },
+  "bin": {
+    "laravel-echo-server": "bin/server.js"
   }
 }
