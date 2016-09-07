@@ -95,6 +95,6 @@ export class Server {
 
     httpHandler(req, res) {
         res.setHeader('Content-Type', 'application/json');
-        res.setHeader('X-Porwered-By', 'Laravel Echo Server');
+        res.setHeader('X-Powered-By', 'Laravel Echo Server');
     }
 }
