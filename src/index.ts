@@ -1,3 +1,3 @@
-import {EchoServer} from './echo-server';
+import { EchoServer } from './echo-server';
 
 module.exports = new EchoServer;

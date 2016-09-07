@@ -12,7 +12,8 @@
   },
   "files": [
     "typings/index.d.ts",
-    "src/index.ts"
+    "src/index.ts",
+    "src/cli/index.ts"
   ],
   "exclude": [
     "node_modules"
@@ -20,7 +21,7 @@
   "compileOnSave": false,
   "buildOnSave": false,
   "atom": {
-    "formatOnSave": true,
+    "formatOnSave": false,
     "rewriteTsconfig": false
   }
 }
