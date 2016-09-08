@@ -25,7 +25,6 @@ export class RedisSubscriber implements Subscriber {
     subscribe(callback): void {
         this._redis.psubscribe('*', (err, count) => { });
         this._redis.on('pmessage', (subscribed, channel, message) => {
-            console.log('CHANNEL, MESSAGE', channel, message)
             message = JSON.parse(message);
 
             callback(channel, message);
