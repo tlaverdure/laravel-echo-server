@@ -468,6 +468,8 @@ export class EchoServer {
      */
     protected prepareHeaders(socket: any, options: any): any {
         options.headers['Cookie'] = socket.request.headers.cookie;
+        // Send request as if it were sent as an AJAX request
+        options.headers['X-Requested-With'] = 'XMLHttpRequest';
 
         return options.headers;
     }
