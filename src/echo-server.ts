@@ -182,6 +182,7 @@ export class EchoServer {
             this.onSubscribe(socket);
             this.onUnsubscribe(socket);
             this.onDisconnect(socket);
+            this.onRequest(socket);
         });
     }
 
@@ -193,6 +194,16 @@ export class EchoServer {
      */
     onSubscribe(socket: any): void {
         socket.on('subscribe', data => this.joinChannel(socket, data));
+    }
+
+    /**
+     * On request from a channel.
+     *
+     * @param  {object}  socket
+     * @return {void}
+     */
+    onRequest(socket: any) {
+        socket.on('request', data => this.makeRequest(socket, data));
     }
 
     /**
@@ -265,6 +276,25 @@ export class EchoServer {
 
             socket.leave(data.channel);
         }
+    }
+
+    /**
+     * Make request to Laravel.
+     *
+     * @param  {object} socket
+     * @param  {object} data
+     * @return {object} request
+     */
+    makeRequest(socket: any, data: any) {
+        this.channelAuthentication(socket, data).then(res => {
+            let options = {
+                url: this.options.host + this.options.requestEndpoint + '/' + data.request,
+                form: { data: data.data },
+                headers: (data.auth && data.auth.headers) ? data.auth.headers : {}
+            };
+            return this.severRequest(socket, options);
+        }, error => {
+        });
     }
 
     /**
