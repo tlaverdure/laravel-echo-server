@@ -32,8 +32,8 @@
     "yargs": "^5.0.0"
   },
   "devDependencies": {
-    "typescript": "^1.8.10",
-    "typings": "^1.0.4"
+    "@types/node": "^6.0.38",
+    "typescript": "^2.0.2"
   },
   "bin": {
     "laravel-echo-server": "bin/server.js"

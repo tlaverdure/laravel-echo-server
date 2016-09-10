@@ -100,7 +100,7 @@ export class HttpSubscriber implements Subscriber {
      * @param  {any} req
      * @return {string}
      */
-    getApiToken(req: any): string {
+    getApiToken(req: any): (string | boolean) {
         if (req.headers.authorization) {
             return req.headers.authorization.replace('Bearer ', '');
         }
