@@ -25,7 +25,7 @@ export class Cli {
 
                 process.exit();
             }, (error) => {
-                console.error(error);
+                console.error(colors.error(error));
             });
         }, error => console.error(error));
     }
@@ -122,10 +122,18 @@ export class Cli {
      * @return {void}
      */
     start(yargs): void {
-        var options = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
-        options.devMode = yargs.argv.dev || false;
+        fs.access(CONFIG_FILE, fs.constants.F_OK, (error) => {
+            if (error) {
+                console.error(colors.error('Error: laravel-echo-server.json file not found.'));
 
-        echo.run(options);
+                return false;
+            }
+
+            var options = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
+            options.devMode = yargs.argv.dev || false;
+
+            echo.run(options);
+        });
     }
 
     /**

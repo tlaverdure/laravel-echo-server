@@ -22,5 +22,8 @@
   "atom": {
     "formatOnSave": false,
     "rewriteTsconfig": false
-  }
+  },
+  "typeRoots": [
+    "../node_modules/@types"
+  ]
 }
