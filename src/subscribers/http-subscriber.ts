@@ -28,7 +28,9 @@ export class HttpSubscriber implements Subscriber {
                 req.on('data', (chunk) => body.push(chunk))
                     .on('end', () => this.handleData(req, res, body, callback));
             } else {
-                res.end();
+                if (url.parse(req.url).pathname != '/socket.io/') {
+                    res.end();
+                }
             }
         });
 
