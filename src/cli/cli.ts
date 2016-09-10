@@ -17,7 +17,7 @@ export class Cli {
      */
     init(yargs) {
         this.setupConfig().then((options) => {
-            options = Object.assign(options, echo.defaultOptions);
+            options = Object.assign(echo.defaultOptions, options);
             options.appKey = this.createAppKey();
 
             this.saveConfig(options).then(() => {
