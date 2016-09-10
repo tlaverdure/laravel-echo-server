@@ -1,5 +1,5 @@
-import { Log } from './../log';
 var Redis = require('ioredis');
+import { Log } from './../log';
 import { Subscriber } from './subscriber';
 
 export class RedisSubscriber implements Subscriber {
@@ -13,8 +13,8 @@ export class RedisSubscriber implements Subscriber {
     /**
      * Create a new instance of subscriber.
      */
-    constructor() {
-        this._redis = new Redis();
+    constructor(private options) {
+        this._redis = new Redis(options.databaseConfig.redis);
     }
 
     /**
