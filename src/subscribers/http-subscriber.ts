@@ -1,5 +1,6 @@
 import { Log } from './../log';
 import { Subscriber } from './subscriber';
+var url = require('url');
 
 export class HttpSubscriber implements Subscriber {
     /**
@@ -18,7 +19,7 @@ export class HttpSubscriber implements Subscriber {
         this.http.on('request', (req, res) => {
             let body: any = [];
 
-            if (req.method == 'POST' && req.url == '/broadcast') {
+            if (req.method == 'POST' && url.parse(req.url).pathname == '/broadcast') {
                 if (!this.canAccess(req)) {
                     return this.unauthorizedResponse(req, res);
                 }
@@ -26,6 +27,8 @@ export class HttpSubscriber implements Subscriber {
                 res.on('error', (error) => Log.error(error));
                 req.on('data', (chunk) => body.push(chunk))
                     .on('end', () => this.handleData(req, res, body, callback));
+            } else {
+                res.end();
             }
         });
 
@@ -71,21 +74,43 @@ export class HttpSubscriber implements Subscriber {
      * @return {boolean}
      */
     canAccess(req: any): boolean {
-        if (req.headers.authorization) {
-            let api_key = req.headers.authorization.replace('Bearer ', '');
+        if (this.options.host == req.headers.referer) {
+            return true;
+        }
+
+        let api_key = this.getApiToken(req);
+
+        if (api_key) {
             let referrer = this.options.referrers.find((referrer) => {
                 return referrer.apiKey == api_key;
             });
 
-            if (referrer) {
-                if (referrer.host == '*' ||
-                    referrer.host == req.headers.referer) {
-                    return true;
-                }
+            if (referrer && (referrer.host == '*' ||
+                referrer.host == req.headers.referer)) {
+                return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * Get the api token from the request.
+     *
+     * @param  {any} req
+     * @return {string}
+     */
+    getApiToken(req: any): string {
+        if (req.headers.authorization) {
+            return req.headers.authorization.replace('Bearer ', '');
+        }
+
+        if (url.parse(req.url, true).query.api_key) {
+            return url.parse(req.url, true).query.api_key
+        }
+
+        return false;
+
     }
 
     /**

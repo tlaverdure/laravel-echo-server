@@ -64,6 +64,10 @@ Request Headers
 
 Auhtorization:  Bearer skti68i...
 
+or
+
+http://app.dev:6001/broadcast?api_key=skti68i...
+
 ```
 
 ### Configurable Options
