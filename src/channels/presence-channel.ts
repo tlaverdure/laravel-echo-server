@@ -97,7 +97,7 @@ export class PresenceChannel {
 
                 members = _.uniqBy(members.reverse(), 'user_id');
 
-                this.onSubscribed(socket, members);
+                this.onSubscribed(socket, channel, members);
 
                 if (!is_member) {
                     this.onJoin(socket, channel, member);
@@ -148,7 +148,7 @@ export class PresenceChannel {
             .connected[socket.id]
             .broadcast
             .to(channel)
-            .emit('presence:joining', member);
+            .emit('presence:joining', channel, member);
     }
 
     /**
@@ -161,19 +161,20 @@ export class PresenceChannel {
     onLeave(channel: string, member: any): void {
         this.io
             .to(channel)
-            .emit('presence:leaving', member);
+            .emit('presence:leaving', channel, member);
     }
 
     /**
      * On subscribed event emitter.
      *
+     * @param  {any} socket
      * @param  {string} channel
-     * @param  {member} member
+     * @param  {any[]} members
      * @return {void}
      */
-    onSubscribed(socket, members) {
+    onSubscribed(socket: any, channel: string, members: any[]) {
         this.io
             .to(socket.id)
-            .emit('presence:subscribed', members);
+            .emit('presence:subscribed', channel, members);
     }
 }
