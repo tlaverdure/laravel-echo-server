@@ -79,7 +79,7 @@ Edit the default configuration of the server by adding options to your **laravel
 | :------------- | :------------- | :-----------|
 | `appKey`       | `''`       | Unique app key used in security implementations |
 | `authHost`     | `http://localhost` | The host of the server that authenticates private and presence channels  |
-| `authPath`     | `/broadcasting/auth` | The route that authenticates private channels  |
+| `authEndpoint`     | `/broadcasting/auth` | The route that authenticates private channels  |
 | `database`     | `redis`        | Database used to store data that should persist, like presence channel members. Options are currently `redis` and `sqlite` |
 | `databaseConfig` |  `{}`    |  Configurations for the different database drivers |
 | `hostname`     | `http://localhost` | The host of the socket.io server |
