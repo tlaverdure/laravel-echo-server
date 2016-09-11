@@ -122,7 +122,7 @@ export class Cli {
      * @return {void}
      */
     start(yargs): void {
-        fs.access(CONFIG_FILE, fs.constants.F_OK, (error) => {
+        fs.access(CONFIG_FILE, (error) => {
             if (error) {
                 console.error(colors.error('Error: laravel-echo-server.json file not found.'));
 
