@@ -87,19 +87,19 @@ $ laravel-echo-server start
 Edit the default configuration of the server by adding options to your **laravel-echo-server.json** file.
 
 
-| Title          | Default        | Description |
-| :------------- | :------------- | :-----------|
-| `appKey`       | `''`       | Unique app key used in security implementations |
-| `authEndpoint`     | `/broadcasting/auth` | The route that authenticates private channels  |
-| `authHost`     | `http://localhost` | The host of the server that authenticates private and presence channels  |
-| `database`     | `redis`        | Database used to store data that should persist, like presence channel members. Options are currently `redis` and `sqlite` |
-| `databaseConfig` |  `{}`    |  Configurations for the different database drivers [Example](#database)|
-| `hostname`     | `http://localhost` | The host of the socket.io server ex.`app.dev` |
-| `port`         | `6001`         | The port that the socket.io server should run on |
-| `protocol`     | `http`         | either `http` or `https` |
-| `referrers`     | `[]`         | ex.`['abc.com','xyz.com']` check [Referrers](#referrers) |
-| `sslCertPath`  | `''`       | The path to your server's ssl certificate |
-| `sslKeyPath`   | `''`       | The path to your server's ssl key |
+| Title            | Default              | Description |
+| :--------------- | :------------------- | :-----------|
+| `appKey`         | `''`                 | Unique app key used in security implementations |
+| `authEndpoint`   | `/broadcasting/auth` | The route that authenticates private channels  |
+| `authHost`       | `http://localhost`   | The host of the server that authenticates private and presence channels  |
+| `database`       | `redis`              | Database used to store data that should persist, like presence channel members. Options are currently `redis` and `sqlite` |
+| `databaseConfig` |  `{}`                |  Configurations for the different database drivers [Example](#database)|
+| `host`           | `http://localhost`   | The host of the socket.io server ex.`app.dev` |
+| `port`           | `6001`               | The port that the socket.io server should run on |
+| `protocol`       | `http`               | either `http` or `https` |
+| `referrers`      | `[]`                 | ex.`['abc.com','xyz.com']` check [Referrers](#referrers) |
+| `sslCertPath`    | `''`                 | The path to your server's ssl certificate |
+| `sslKeyPath`     | `''`                 | The path to your server's ssl key |
 
 ### Running with SSL
 
