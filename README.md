@@ -37,7 +37,9 @@ The cli tool will help you setup a **laravel-echo-sever.json** file in the root 
 
 #### App Key
 
-After initial configuration, an app key will be stored in the **laravel-echo-server.json** file. An app key is required to perform certain actions on the server. To generate a new app key, use the cli command:
+After initial configuration, an app key will be stored in the **laravel-echo-server.json** file, app key is required to perform certain actions on the server.
+
+To generate a new app key, use the cli command:
 
 ``` shell
 
@@ -47,7 +49,7 @@ $ laravel-echo-server key:generate
 
 #### Referrers
 
-The Laravel Echo Server exposes a light http api to perform broadcasting functionality. For security purposes, access to these endpoints from http referrers other than the server's host must be registered. This can be done using the cli command:
+The Laravel Echo Server exposes a light http Api to perform broadcasting functionality. For security purposes, access to these endpoints from http referrers other than the server's host must be registered. This can be done using the cli command:
 
 ``` shell
 
@@ -55,7 +57,7 @@ $ laravel-echo-server referrer:add example.com
 
 ```
 
-After running this command, an api key for the referrer will be displayed and stored in the **laravel-echo-server.json** file.
+After running this command, an Api key for the referrer will be displayed and stored in the **laravel-echo-server.json** file.
 
 In this example, requests from example.com will be allowed as long as the referrer's api_key is provided with http requests.
 
@@ -70,6 +72,16 @@ http://app.dev:6001/broadcast?api_key=skti68i...
 
 ```
 
+#### Run The Server
+
+in your project root directory, run
+
+``` shell
+
+$ laravel-echo-server start
+
+```
+
 ### Configurable Options
 
 Edit the default configuration of the server by adding options to your **laravel-echo-server.json** file.
@@ -78,11 +90,11 @@ Edit the default configuration of the server by adding options to your **laravel
 | Title          | Default        | Description |
 | :------------- | :------------- | :-----------|
 | `appKey`       | `''`       | Unique app key used in security implementations |
-| `authHost`     | `http://localhost` | The host of the server that authenticates private and presence channels  |
 | `authEndpoint`     | `/broadcasting/auth` | The route that authenticates private channels  |
+| `authHost`     | `http://localhost` | The host of the server that authenticates private and presence channels  |
 | `database`     | `redis`        | Database used to store data that should persist, like presence channel members. Options are currently `redis` and `sqlite` |
-| `databaseConfig` |  `{}`    |  Configurations for the different database drivers |
-| `hostname`     | `http://localhost` | The host of the socket.io server |
+| `databaseConfig` |  `{}`    |  Configurations for the different database drivers [Example](#database)|
+| `hostname`     | `http://localhost` | The host of the socket.io server ex.`app.dev` |
 | `port`         | `6001`         | The port that the socket.io server should run on |
 | `sslCertPath`  | `''`       | The path to your server's ssl certificate |
 | `sslKeyPath`   | `''`       | The path to your server's ssl key |
