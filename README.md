@@ -97,7 +97,7 @@ Edit the default configuration of the server by adding options to your **laravel
 | `host`           | `http://localhost`   | The host of the socket.io server ex.`app.dev` |
 | `port`           | `6001`               | The port that the socket.io server should run on |
 | `protocol`       | `http`               | either `http` or `https` |
-| `referrers`      | `[]`                 | ex.`['abc.com','xyz.com']` check [Referrers](#referrers) |
+| `referrers`      | `{}`                 | Please see [Referrers](#referrers) |
 | `sslCertPath`    | `''`                 | The path to your server's ssl certificate |
 | `sslKeyPath`     | `''`                 | The path to your server's ssl key |
 
