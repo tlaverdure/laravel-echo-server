@@ -146,8 +146,7 @@ export class EchoServer {
      * @return {any}
      */
     find(socket_id: string): any {
-        return this.server.io.sockets
-            .connected[socket_id];
+        return this.server.io.sockets.connected[socket_id];
     }
 
     /**
