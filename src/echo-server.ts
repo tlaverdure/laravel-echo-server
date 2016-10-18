@@ -27,6 +27,7 @@ export class EchoServer {
         host: 'http://localhost',
         port: 6001,
         referrers: [],
+        socketio: {},
         sslCertPath: '',
         sslKeyPath: ''
     };

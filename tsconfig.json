@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
-    "module": "es2015",
+    "module": "commonjs",
     "moduleResolution": "node",
     "noImplicitAny": false,
     "outDir": "./dist",

@@ -90,7 +90,7 @@ export class Server {
 
         this.http.listen(this.options.port, this.options.host);
 
-        return this.io = io(this.http);
+        return this.io = io(this.http, this.options.socketio);
     }
 
     httpHandler(req, res) {
