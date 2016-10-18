@@ -147,7 +147,7 @@ export class EchoServer {
      */
     find(socket_id: string): any {
         return this.server.io.sockets
-            .connected["/#" + socket_id];
+            .connected[socket_id];
     }
 
     /**
