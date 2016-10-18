@@ -1,6 +1,6 @@
 {
   "name": "laravel-echo-server",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "Laravel Echo Node JS Server for Socket.io",
   "repository": {
     "type": "git",
@@ -32,8 +32,8 @@
     "yargs": "^5.0.0"
   },
   "devDependencies": {
-    "@types/node": "^6.0.38",
-    "typescript": "^2.0.2"
+    "@types/node": "^6.0.45",
+    "typescript": "^2.0.3"
   },
   "bin": {
     "laravel-echo-server": "bin/server.js"

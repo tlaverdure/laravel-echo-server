@@ -10,6 +10,20 @@ const CONFIG_FILE = process.cwd() + '/laravel-echo-server.json';
  */
 export class Cli {
     /**
+     * Default config options.
+     *
+     * @type {any}
+     */
+    defaultOptions: any;
+
+    /**
+     * Create new CLI instance.
+     */
+    constructor() {
+        this.defaultOptions = echo.defaultOptions;
+    }
+
+    /**
      * Initialize server with a configuration file.
      *
      * @param  {Object} yargs
@@ -17,7 +31,7 @@ export class Cli {
      */
     init(yargs) {
         this.setupConfig().then((options) => {
-            options = Object.assign(echo.defaultOptions, options);
+            options = Object.assign({}, this.defaultOptions, options);
             options.appKey = this.createAppKey();
 
             this.saveConfig(options).then(() => {
@@ -97,11 +111,9 @@ export class Cli {
     saveConfig(options): Promise<any> {
         let opts = {};
 
-        Object.keys(options).filter(function(k) {
-            return Object.keys(echo.defaultOptions).indexOf(k) >= 0;
-        }).sort().forEach((option, i, arr) => {
-            opts[option] = options[option];
-        });
+        Object.keys(options).filter(k => {
+            return Object.keys(this.defaultOptions).indexOf(k) >= 0;
+        }).forEach(option => opts[option] = options[option]);
 
         return new Promise((resolve, reject) => {
             if (opts) {
