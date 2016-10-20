@@ -68,6 +68,21 @@ export class EchoServer {
     private httpSub: HttpSubscriber;
 
     /**
+     * @type {boolean}
+     */
+    private redisReady: boolean = false;
+
+    /**
+     * @type {boolean}
+     */
+    private httpReady: boolean = false;
+
+    /**
+     * @type {boolean}
+     */
+    private ioReady: boolean = false;
+
+    /**
      * Create a new instance.
      */
     constructor() { }
@@ -85,7 +100,8 @@ export class EchoServer {
 
         this.server.init().then(io => {
             this.init(io).then(() => {
-                Log.info('\nServer ready!\n');
+                this.ioReady = true;
+                this.onComponentReady();
             }, error => Log.error(error));
         }, error => Log.error(error));
     }
@@ -102,7 +118,7 @@ export class EchoServer {
             this.httpSub = new HttpSubscriber(this.options, this.server.http);
 
             this.listen();
-            this.onConnect();
+            this.addConnectListener();
 
             resolve();
         });
@@ -125,18 +141,50 @@ export class EchoServer {
     }
 
     /**
+     * Called when each stage of the startup process completes.
+     *
+     * @return {void}
+     */
+    onComponentReady(): void {
+        if (this.isReady()) {
+            Log.info('\nServer ready!\n');
+        }
+    }
+
+    /**
+     * Check if all the listeners are up and running and we're good to go.
+     *
+     * @returns {boolean}
+     */
+    isReady(): boolean {
+        return this.redisReady && this.httpReady && this.ioReady;
+    }
+
+    /**
      * Listen for incoming event from subscibers.
      *
      * @return {void}
      */
     listen(): void {
-        this.redisSub.subscribe((channel, message) => {
-            return this.broadcast(channel, message);
-        });
+        this.redisSub.subscribe(
+            (channel, message) => {
+                return this.broadcast(channel, message);
+            },
+            (subscriber) => {
+                this.redisReady = true;
+                this.onComponentReady();
+            }
+        );
 
-        this.httpSub.subscribe((channel, message) => {
-            return this.broadcast(channel, message);
-        });
+        this.httpSub.subscribe(
+            (channel, message) => {
+                return this.broadcast(channel, message);
+            },
+            (subscriber) => {
+                this.httpReady = true;
+                this.onComponentReady();
+            }
+        );
     }
 
     /**
@@ -199,10 +247,10 @@ export class EchoServer {
      *
      * @return {void}
      */
-    onConnect(): void {
+    addConnectListener(): void {
         this.server.io.on('connection', socket => {
-            this.onSubscribe(socket);
-            this.onUnsubscribe(socket);
+            this.addSubscribeListener(socket);
+            this.addUnsubscribeListener(socket);
         });
     }
 
@@ -212,7 +260,7 @@ export class EchoServer {
      * @param  {object} socket
      * @return {void}
      */
-    onSubscribe(socket: any): void {
+    addSubscribeListener(socket: any): void {
         socket.on('subscribe', data => {
             this.channel.join(socket, data);
         });
@@ -224,7 +272,7 @@ export class EchoServer {
      * @param  {object} socket
      * @return {void}
      */
-    onUnsubscribe(socket: any): void {
+    addUnsubscribeListener(socket: any): void {
         socket.on('unsubscribe', data => {
             this.channel.leave(socket, data.channel);
         });

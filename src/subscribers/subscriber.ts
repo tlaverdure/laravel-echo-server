@@ -2,8 +2,9 @@ export interface Subscriber {
     /**
      * Subscribe to incoming events.
      *
-     * @param  {Function} callback
+     * @param  {Function} onMessage
+     * @param  {Function} onReady
      * @return {void}
      */
-    subscribe(callback: Function): void;
+    subscribe(onMessage: Function, onReady?: Function): void;
 }
