@@ -30,6 +30,7 @@ export class Channel {
     constructor(private io, private options) {
         this.private = new PrivateChannel(options);
         this.presence = new PresenceChannel(io, options);
+        this.options = options;
 
         Log.success('Channels are ready.');
     }
@@ -39,14 +40,21 @@ export class Channel {
      *
      * @param  {object} socket
      * @param  {object} data
+     * @param  {Function} callback
      * @return {void}
      */
-    join(socket, data): void {
+    join(socket, data, callback?: Function): void {
         if (data.channel) {
             if (this.isPrivate(data.channel)) {
-                this.joinPrivate(socket, data);
+                this.joinPrivate(socket, data, callback);
             } else {
+                if (this.options.verbose) {
+                    Log.success(socket.id + " joined public channel " + data.channel);
+                }
                 socket.join(data.channel);
+                if (typeof callback === 'function') {
+                    callback(data.channel, socket);
+                }
             }
         }
 
@@ -92,16 +100,28 @@ export class Channel {
      *
      * @param  {object} socket
      * @param  {object} data
+     * @param  {Function} callback
      * @return {void}
      */
-    joinPrivate(socket: any, data: any): void {
+    joinPrivate(socket: any, data: any, callback?: Function): void {
+        if (this.options.verbose) {
+            Log.info(socket.id + " attempting to join private channel " + data.channel);
+        }
         this.private.authenticate(socket, data).then(res => {
+            if (this.options.verbose) {
+                Log.success(socket.id + " successfully authenticated on channel " + data.channel);
+            }
             socket.join(data.channel);
+            if (typeof callback === 'function') {
+                callback(data.channel, socket);
+            }
 
             if (this.isPresence(data.channel)) {
                 this.presence.join(socket, data.channel, res.channel_data);
             }
-        }, error => Log.error(error));
+        }, error => {
+            Log.error(error)
+        });
     }
 
     /**

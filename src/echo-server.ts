@@ -29,7 +29,8 @@ export class EchoServer {
         referrers: [],
         socketio: {},
         sslCertPath: '',
-        sslKeyPath: ''
+        sslKeyPath: '',
+        verbose: false
     };
 
     /**
@@ -83,6 +84,13 @@ export class EchoServer {
     private redisReady: boolean = false;
 
     /**
+     * Function to execute when server is up and running.
+     *
+     * @type {Function}
+     */
+    private onReady: Function;
+
+    /**
      * Create a new instance.
      */
     constructor() { }
@@ -93,7 +101,10 @@ export class EchoServer {
      * @param  {Object} config
      * @return {void}
      */
-    run(options: any): void {
+    run(options: any, callback?: Function): void {
+        if (callback) {
+            this.onReady = callback;
+        }
         this.options = Object.assign(this.defaultOptions, options);
         this.startup();
         this.server = new Server(this.options);
@@ -148,6 +159,9 @@ export class EchoServer {
     onComponentReady(): void {
         if (this.isReady()) {
             Log.info('\nServer ready!\n');
+            if (typeof this.onReady === 'function') {
+                this.onReady(this);
+            }
         }
     }
 
@@ -205,6 +219,10 @@ export class EchoServer {
      * @return {void}
      */
     broadcast(channel: string, message: any): boolean {
+        if (this.options.verbose) {
+            console.log(channel, (message.hasOwnProperty('event') ? message.event : message));
+        }
+
         if (message.socket && this.find(message.socket)) {
             return this.toOthers(this.find(message.socket), channel, message);
         } else {
