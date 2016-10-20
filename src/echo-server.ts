@@ -70,17 +70,17 @@ export class EchoServer {
     /**
      * @type {boolean}
      */
-    private redisReady: boolean = false;
-
-    /**
-     * @type {boolean}
-     */
     private httpReady: boolean = false;
 
     /**
      * @type {boolean}
      */
     private ioReady: boolean = false;
+
+    /**
+     * @type {boolean}
+     */
+    private redisReady: boolean = false;
 
     /**
      * Create a new instance.
@@ -157,7 +157,7 @@ export class EchoServer {
      * @returns {boolean}
      */
     isReady(): boolean {
-        return this.redisReady && this.httpReady && this.ioReady;
+        return this.httpReady && this.ioReady && this.redisReady;
     }
 
     /**
