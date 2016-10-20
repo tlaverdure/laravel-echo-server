@@ -99,9 +99,9 @@ export class EchoServer {
         this.server = new Server(this.options);
 
         this.server.init().then(io => {
+            this.ioReady = true;
+            this.onComponentReady();
             this.init(io).then(() => {
-                this.ioReady = true;
-                this.onComponentReady();
             }, error => Log.error(error));
         }, error => Log.error(error));
     }
