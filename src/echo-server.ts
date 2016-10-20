@@ -29,7 +29,8 @@ export class EchoServer {
         referrers: [],
         socketio: {},
         sslCertPath: '',
-        sslKeyPath: ''
+        sslKeyPath: '',
+        verbose: false
     };
 
     /**
@@ -68,6 +69,28 @@ export class EchoServer {
     private httpSub: HttpSubscriber;
 
     /**
+     * @type {boolean}
+     */
+    private httpReady: boolean = false;
+
+    /**
+     * @type {boolean}
+     */
+    private ioReady: boolean = false;
+
+    /**
+     * @type {boolean}
+     */
+    private redisReady: boolean = false;
+
+    /**
+     * Function to execute when server is up and running.
+     *
+     * @type {Function}
+     */
+    private onReady: Function;
+
+    /**
      * Create a new instance.
      */
     constructor() { }
@@ -78,14 +101,18 @@ export class EchoServer {
      * @param  {Object} config
      * @return {void}
      */
-    run(options: any): void {
+    run(options: any, callback?: Function): void {
+        if (callback) {
+            this.onReady = callback;
+        }
         this.options = Object.assign(this.defaultOptions, options);
         this.startup();
         this.server = new Server(this.options);
 
         this.server.init().then(io => {
+            this.ioReady = true;
+            this.onComponentReady();
             this.init(io).then(() => {
-                Log.info('\nServer ready!\n');
             }, error => Log.error(error));
         }, error => Log.error(error));
     }
@@ -102,7 +129,7 @@ export class EchoServer {
             this.httpSub = new HttpSubscriber(this.options, this.server.http);
 
             this.listen();
-            this.onConnect();
+            this.addConnectListener();
 
             resolve();
         });
@@ -125,18 +152,53 @@ export class EchoServer {
     }
 
     /**
+     * Called when each stage of the startup process completes.
+     *
+     * @return {void}
+     */
+    onComponentReady(): void {
+        if (this.isReady()) {
+            Log.info('\nServer ready!\n');
+            if (typeof this.onReady === 'function') {
+                this.onReady(this);
+            }
+        }
+    }
+
+    /**
+     * Check if all the listeners are up and running and we're good to go.
+     *
+     * @returns {boolean}
+     */
+    isReady(): boolean {
+        return this.httpReady && this.ioReady && this.redisReady;
+    }
+
+    /**
      * Listen for incoming event from subscibers.
      *
      * @return {void}
      */
     listen(): void {
-        this.redisSub.subscribe((channel, message) => {
-            return this.broadcast(channel, message);
-        });
+        this.redisSub.subscribe(
+            (channel, message) => {
+                return this.broadcast(channel, message);
+            },
+            (subscriber) => {
+                this.redisReady = true;
+                this.onComponentReady();
+            }
+        );
 
-        this.httpSub.subscribe((channel, message) => {
-            return this.broadcast(channel, message);
-        });
+        this.httpSub.subscribe(
+            (channel, message) => {
+                return this.broadcast(channel, message);
+            },
+            (subscriber) => {
+                this.httpReady = true;
+                this.onComponentReady();
+            }
+        );
     }
 
     /**
@@ -157,6 +219,10 @@ export class EchoServer {
      * @return {void}
      */
     broadcast(channel: string, message: any): boolean {
+        if (this.options.verbose) {
+            console.log(channel, (message.hasOwnProperty('event') ? message.event : message));
+        }
+
         if (message.socket && this.find(message.socket)) {
             return this.toOthers(this.find(message.socket), channel, message);
         } else {
@@ -199,10 +265,10 @@ export class EchoServer {
      *
      * @return {void}
      */
-    onConnect(): void {
+    addConnectListener(): void {
         this.server.io.on('connection', socket => {
-            this.onSubscribe(socket);
-            this.onUnsubscribe(socket);
+            this.addSubscribeListener(socket);
+            this.addUnsubscribeListener(socket);
         });
     }
 
@@ -212,7 +278,7 @@ export class EchoServer {
      * @param  {object} socket
      * @return {void}
      */
-    onSubscribe(socket: any): void {
+    addSubscribeListener(socket: any): void {
         socket.on('subscribe', data => {
             this.channel.join(socket, data);
         });
@@ -224,7 +290,7 @@ export class EchoServer {
      * @param  {object} socket
      * @return {void}
      */
-    onUnsubscribe(socket: any): void {
+    addUnsubscribeListener(socket: any): void {
         socket.on('unsubscribe', data => {
             this.channel.leave(socket, data.channel);
         });

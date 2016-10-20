@@ -15,7 +15,7 @@ export class HttpSubscriber implements Subscriber {
      *
      * @return {void}
      */
-    subscribe(callback): void {
+    subscribe(onMessage, onReady?): void {
         this.http.on('request', (req, res) => {
             let body: any = [];
 
@@ -26,7 +26,7 @@ export class HttpSubscriber implements Subscriber {
 
                 res.on('error', (error) => Log.error(error));
                 req.on('data', (chunk) => body.push(chunk))
-                    .on('end', () => this.handleData(req, res, body, callback));
+                    .on('end', () => this.handleData(req, res, body, onMessage));
             } else {
                 if (url.parse(req.url).pathname != '/socket.io/') {
                     res.end();
@@ -35,6 +35,9 @@ export class HttpSubscriber implements Subscriber {
         });
 
         Log.success('Listening for http events...');
+        if (typeof onReady === 'function') {
+            onReady(this);
+        }
     }
 
     /**
