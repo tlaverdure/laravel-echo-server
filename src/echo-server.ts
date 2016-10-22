@@ -117,8 +117,7 @@ export class EchoServer {
         Log.title(`\nL A R A V E L  E C H O  S E R V E R\n`);
 
         if (this.options.devMode) {
-            Log.info('Starting server in DEV mode...\n');
-            Log.success('Dev mode activated.');
+            Log.warning('Starting server in DEV mode...\n');
         } else {
             Log.info('Starting server...\n')
         }

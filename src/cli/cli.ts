@@ -142,7 +142,7 @@ export class Cli {
             }
 
             var options = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
-            options.devMode = yargs.argv.dev || false;
+            options.devMode = options.devMode || yargs.argv.dev || false;
 
             echo.run(options);
         });

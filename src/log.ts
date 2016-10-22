@@ -20,7 +20,6 @@ export class Log {
      * Console log heading 1.
      *
      * @param  {string|object} message
-     * @param  {string} status
      * @return {void}
      */
     static title(message: any): void {
@@ -31,7 +30,6 @@ export class Log {
      * Console log heaing 2.
      *
      * @param  {string|object} message
-     * @param  {string} status
      * @return {void}
      */
     static subtitle(message: any): void {
@@ -42,7 +40,6 @@ export class Log {
      * Console log info.
      *
      * @param  {string|object} message
-     * @param  {string} status
      * @return {void}
      */
     static info(message: any): void {
@@ -53,7 +50,6 @@ export class Log {
      * Console log success.
      *
      * @param  {string|object} message
-     * @param  {string} status
      * @return {void}
      */
     static success(message: any): void {
@@ -61,13 +57,24 @@ export class Log {
     }
 
     /**
+     *
+     *
      * Console log info.
      *
      * @param  {string|object} message
-     * @param  {string} status
      * @return {void}
      */
     static error(message: any): void {
         console.log(colors.error(message));
+    }
+
+    /**
+     * Console log warning.
+     *
+     * @param  {string|object} message
+     * @return {void}
+     */
+    static warning(message: any): void {
+        console.log(colors.warn('\u26A0' + message));
     }
 }
