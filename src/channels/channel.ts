@@ -47,6 +47,7 @@ export class Channel {
                 this.joinPrivate(socket, data);
             } else {
                 socket.join(data.channel);
+                this.onJoin(socket, data.channel);
             }
         }
 
@@ -101,6 +102,8 @@ export class Channel {
             if (this.isPresence(data.channel)) {
                 this.presence.join(socket, data.channel, res.channel_data);
             }
+
+            this.onJoin(socket, data.channel);
         }, error => Log.error(error));
     }
 
@@ -115,6 +118,18 @@ export class Channel {
     }
 
     /**
+     * On join a channel log success.
+     *
+     * @param {any} socket
+     * @param {string} channel
+     */
+    onJoin(socket: any, channel: string): void {
+        if (this.options.devMode) {
+            Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} joined channel: ${channel}`);
+        }
+    }
+
+    /**
      * On disconnect from a channel.
      *
      * @param  {object}  socket
@@ -122,5 +137,9 @@ export class Channel {
      */
     onDisconnect(socket: any, channel: string): void {
         socket.on('disconnect', () => this.leave(socket, channel));
+
+        if (this.options.devMode) {
+            Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} left channel: ${channel}`);
+        }
     }
 }
