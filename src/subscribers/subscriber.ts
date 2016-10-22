@@ -5,5 +5,5 @@ export interface Subscriber {
      * @param  {Function} callback
      * @return {void}
      */
-    subscribe(callback: Function): void;
+    subscribe(callback: Function): Promise<any>;
 }

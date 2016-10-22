@@ -22,14 +22,23 @@ export class RedisSubscriber implements Subscriber {
      *
      * @return {void}
      */
-    subscribe(callback): void {
-        this._redis.psubscribe('*', (err, count) => { });
-        this._redis.on('pmessage', (subscribed, channel, message) => {
-            message = JSON.parse(message);
+    subscribe(callback): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this._redis.on('pmessage', (subscribed, channel, message) => {
+                message = JSON.parse(message);
 
-            callback(channel, message);
+                callback(channel, message);
+            });
+
+            this._redis.psubscribe('*', (err, count) => {
+                if (err) {
+                    reject('Redis could not subscribe.')
+                }
+
+                Log.success('Listening for redis events...');
+
+                resolve();
+            });
         });
-
-        Log.success('Listening for redis events...');
     }
 }

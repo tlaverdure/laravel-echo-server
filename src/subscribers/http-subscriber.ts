@@ -15,26 +15,33 @@ export class HttpSubscriber implements Subscriber {
      *
      * @return {void}
      */
-    subscribe(callback): void {
-        this.http.on('request', (req, res) => {
-            let body: any = [];
+    subscribe(callback): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.http.on('request', (req, res) => {
+                let body: any = [];
 
-            if (req.method == 'POST' && url.parse(req.url).pathname == '/broadcast') {
-                if (!this.canAccess(req)) {
-                    return this.unauthorizedResponse(req, res);
-                }
+                if (req.method == 'POST' && url.parse(req.url).pathname == '/broadcast') {
+                    if (!this.canAccess(req)) {
+                        return this.unauthorizedResponse(req, res);
+                    }
 
-                res.on('error', (error) => Log.error(error));
-                req.on('data', (chunk) => body.push(chunk))
-                    .on('end', () => this.handleData(req, res, body, callback));
-            } else {
-                if (url.parse(req.url).pathname != '/socket.io/') {
-                    res.end();
+                    res.on('error', (error) => {
+                        Log.error(error);
+                    });
+
+                    req.on('data', (chunk) => body.push(chunk))
+                        .on('end', () => this.handleData(req, res, body, callback));
+                } else {
+                    if (url.parse(req.url).pathname != '/socket.io/') {
+                        res.end();
+                    }
                 }
-            }
+            });
+
+            Log.success('Listening for http events...');
+
+            resolve();
         });
-
-        Log.success('Listening for http events...');
     }
 
     /**

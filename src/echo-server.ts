@@ -101,10 +101,8 @@ export class EchoServer {
             this.redisSub = new RedisSubscriber(this.options);
             this.httpSub = new HttpSubscriber(this.options, this.server.http);
 
-            this.listen();
             this.onConnect();
-
-            resolve();
+            this.listen().then(() => resolve());
         });
     }
 
@@ -128,13 +126,17 @@ export class EchoServer {
      *
      * @return {void}
      */
-    listen(): void {
-        this.redisSub.subscribe((channel, message) => {
-            return this.broadcast(channel, message);
-        });
+    listen(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            let http = this.httpSub.subscribe((channel, message) => {
+                return this.broadcast(channel, message);
+            });
 
-        this.httpSub.subscribe((channel, message) => {
-            return this.broadcast(channel, message);
+            let redis = this.redisSub.subscribe((channel, message) => {
+                return this.broadcast(channel, message);
+            });
+
+            Promise.all([http, redis]).then(() => resolve());
         });
     }
 
