@@ -18,7 +18,7 @@
   },
   "scripts": {
     "compile": "tsc",
-    "compile watch": "tsc -w",
+    "compile:watch": "tsc -w",
     "prepublish": "npm run compile"
   },
   "dependencies": {
