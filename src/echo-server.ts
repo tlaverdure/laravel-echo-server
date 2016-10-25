@@ -2,6 +2,7 @@ import { HttpSubscriber, RedisSubscriber } from './subscribers';
 import { Channel } from './channels';
 import { Server } from './server';
 import { Log } from './log';
+const pkg = require('../package.json');
 
 /**
  * Echo server class.
@@ -113,6 +114,7 @@ export class EchoServer {
      */
     startup(): void {
         Log.title(`\nL A R A V E L  E C H O  S E R V E R\n`);
+        Log.info(`version ${pkg.version}\n`);
 
         if (this.options.devMode) {
             Log.warning('Starting server in DEV mode...\n');
