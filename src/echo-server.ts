@@ -77,18 +77,21 @@ export class EchoServer {
      * Start the Echo Server.
      *
      * @param  {Object} config
-     * @return {void}
+     * @return {Promise}
      */
-    run(options: any): void {
-        this.options = Object.assign(this.defaultOptions, options);
-        this.startup();
-        this.server = new Server(this.options);
+    run(options: any): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.options = Object.assign(this.defaultOptions, options);
+            this.startup();
+            this.server = new Server(this.options);
 
-        this.server.init().then(io => {
-            this.init(io).then(() => {
-                Log.info('\nServer ready!\n');
+            this.server.init().then(io => {
+                this.init(io).then(() => {
+                    Log.info('\nServer ready!\n');
+                    resolve(this);
+                }, error => Log.error(error));
             }, error => Log.error(error));
-        }, error => Log.error(error));
+        });
     }
 
     /**
