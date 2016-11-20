@@ -31,7 +31,8 @@ export class RedisSubscriber implements Subscriber {
 
                 if (_this.options.devMode)
                 {
-                    Log.info(channel, message);
+                    Log.info(channel);
+                    Log.info(message.event);
                 }
 
                 callback(channel, message);
