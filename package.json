@@ -22,6 +22,7 @@
     "prepublish": "npm run compile"
   },
   "dependencies": {
+    "@types/node": "^6.0.53",
     "colors": "^1.1.2",
     "inquirer": "^1.1.3",
     "ioredis": "^1.15.1",
