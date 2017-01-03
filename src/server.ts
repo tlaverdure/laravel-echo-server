@@ -93,7 +93,13 @@ export class Server {
         return this.io = io(this.http, this.options.socketio);
     }
 
-    httpHandler(req, res) {
+    /**
+     * Http handler for http server.
+     *
+     * @param  {any} req
+     * @param  {any} res
+     */
+    httpHandler(req, res): void {
         res.setHeader('Content-Type', 'application/json');
         res.setHeader('X-Powered-By', 'Laravel Echo Server');
     }
