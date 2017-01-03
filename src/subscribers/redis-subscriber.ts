@@ -12,6 +12,8 @@ export class RedisSubscriber implements Subscriber {
 
     /**
      * Create a new instance of subscriber.
+     *
+     * @param {any} options
      */
     constructor(private options) {
         this._redis = new Redis(options.databaseConfig.redis);
@@ -20,7 +22,7 @@ export class RedisSubscriber implements Subscriber {
     /**
      * Subscribe to events to broadcast.
      *
-     * @return {void}
+     * @return {Promise<any>}
      */
     subscribe(callback): Promise<any> {
 

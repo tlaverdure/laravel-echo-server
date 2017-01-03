@@ -60,10 +60,10 @@ export class PresenceChannel {
      *
      * @param  {string} channel
      * @param  {any[]} members
-     * @param  {[any]} member
-     * @return {[type]}
+     * @param  {any[]} member
+     * @return {Promise<any>}
      */
-    removeInactive(channel: string, members: any[], member: any) {
+    removeInactive(channel: string, members: any[], member: any): Promise<any> {
         return new Promise((resolve, reject) => {
             this.io.of('/').in(channel).clients((error, clients) => {
                 members = members || [];
@@ -73,7 +73,7 @@ export class PresenceChannel {
 
                 this.db.set(channel + ':members', members);
 
-                resolve(members)
+                resolve(members);
             });
         });
     }
