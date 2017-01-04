@@ -49,7 +49,7 @@ $ laravel-echo-server key:generate
 
 #### Referrers
 
-The Laravel Echo Server exposes a light http Api to perform broadcasting functionality. For security purposes, access to these endpoints from http referrers other than the server's host must be registered. This can be done using the cli command:
+The Laravel Echo Server exposes a light http Api to perform broadcasting functionality. For security purposes, access to these endpoints from http referrers must be registered. This can be done using the cli command:
 
 ``` shell
 
@@ -119,7 +119,7 @@ The Laravel Echo Server subscribes to incoming events with two methods: Redis & 
 
 ### Http
 
-Using Http, you can also publish events to the Laravel Echo Server in the same fashion you would with Redis by submitting a `channel` and `message` to the broadcast endpoint.
+Using Http, you can also publish events to the Laravel Echo Server in the same fashion you would with Redis by submitting a `channel` and `message` to the broadcast endpoint. You need to register you referrer as described in the [Referrers](#referrers) section and provide the correct API key.
 
 **Request Endpoint**
 
