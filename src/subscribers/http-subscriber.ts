@@ -83,10 +83,6 @@ export class HttpSubscriber implements Subscriber {
      * @return {boolean}
      */
     canAccess(req: any): boolean {
-        if (this.options.host == req.headers.referer) {
-            return true;
-        }
-
         let api_key = this.getApiToken(req);
 
         if (api_key) {
