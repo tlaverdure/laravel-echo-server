@@ -7,10 +7,11 @@ export class HttpSubscriber implements Subscriber {
      * Create new instance of http subscriber.
      *
      * @param  {any} io
+     * @param  {any} channel
      * @param  {any} options
      * @param  {any} express
      */
-    constructor(private io, private options, private express) { }
+    constructor(private io, private channel, private options, private express) { }
 
     /**
      * Subscribe to events to broadcast.
@@ -65,6 +66,33 @@ export class HttpSubscriber implements Subscriber {
 
                 var room = this.io.sockets.adapter.rooms[req.params.channelName];
                 res.json({user_count: room.length});
+            })
+
+            // Get information about just 1 channel
+            this.express.get('/channels/:channelName/users', (req, res) => {
+                if (!this.canAccess(req)) {
+                    return this.unauthorizedResponse(req, res);
+                }
+
+                var channelName = req.params.channelName;
+                if ( ! this.channel.isPresence(channelName)) {
+                    return this.badResponse(
+                        req,
+                        res,
+                        'User list is only possible for Presence Channels'
+                    );
+                }
+
+
+                this.channel.presence.getMembers(channelName).then(members => {
+
+                    var users = [];
+                    members.forEach((member) => {
+                        users.push({id: member.user_id, info: member.user_info});
+                    })
+                    res.json({users: users});
+                }, error => Log.error(error));
+
             })
 
             // Broadcast a message to a channel
