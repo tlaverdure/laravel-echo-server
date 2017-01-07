@@ -104,7 +104,7 @@ export class EchoServer {
         return new Promise((resolve, reject) => {
             this.channel = new Channel(io, this.options);
             this.redisSub = new RedisSubscriber(this.options);
-            this.httpSub = new HttpSubscriber(this.options, this.server.http);
+            this.httpSub = new HttpSubscriber(io, this.options, this.server.express);
 
             this.onConnect();
             this.listen().then(() => resolve());

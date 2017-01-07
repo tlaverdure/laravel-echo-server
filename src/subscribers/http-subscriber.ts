@@ -6,9 +6,11 @@ export class HttpSubscriber implements Subscriber {
     /**
      * Create new instance of http subscriber.
      *
-     * @param  {any} http
+     * @param  {any} io
+     * @param  {any} options
+     * @param  {any} express
      */
-    constructor(private options, private http) { }
+    constructor(private io, private options, private express) { }
 
     /**
      * Subscribe to events to broadcast.
@@ -17,26 +19,69 @@ export class HttpSubscriber implements Subscriber {
      */
     subscribe(callback): Promise<any> {
         return new Promise((resolve, reject) => {
-            this.http.on('request', (req, res) => {
-                let body: any = [];
 
-                if (req.method == 'POST' && url.parse(req.url).pathname == '/broadcast') {
-                    if (!this.canAccess(req)) {
-                        return this.unauthorizedResponse(req, res);
-                    }
-
-                    res.on('error', (error) => {
-                        Log.error(error);
-                    });
-
-                    req.on('data', (chunk) => body.push(chunk))
-                        .on('end', () => this.handleData(req, res, body, callback));
-                } else {
-                    if (url.parse(req.url).pathname != '/socket.io/') {
-                        res.end();
-                    }
+            // Get status info about the sockets and connections
+            this.express.get('/status', (req, res) => {
+                if (!this.canAccess(req)) {
+                    return this.unauthorizedResponse(req, res);
                 }
-            });
+
+                res.json({user_count: this.io.engine.clientsCount})
+            })
+
+            // The user count for all channels
+            this.express.get('/channels', (req, res) => {
+                if (!this.canAccess(req)) {
+                    return this.unauthorizedResponse(req, res);
+                }
+
+                var prefix = url.parse(req.url, true).query.filter_by_prefix
+
+                var rooms = this.io.sockets.adapter.rooms;
+
+                var channels = {};
+                Object.keys(rooms).forEach(function (channelName) {
+                    // Skip rooms with the socket name
+                    if (rooms[channelName].sockets[channelName]) {
+                        return;
+                    }
+
+                    // If filter is given, check if matches
+                    if (prefix && ! channelName.startsWith(prefix)) {
+                        return;
+                    }
+
+                    channels[channelName] = {user_count: rooms[channelName].length};
+                });
+
+                res.json({channels: channels});
+            })
+
+            // Get information about just 1 channel
+            this.express.get('/channels/:channelName', (req, res) => {
+                if (!this.canAccess(req)) {
+                    return this.unauthorizedResponse(req, res);
+                }
+
+                var room = this.io.sockets.adapter.rooms[req.params.channelName];
+                res.json({user_count: room.length});
+            })
+
+            // Broadcast a message to a channel
+            this.express.post('/broadcast', (req, res) => {
+                let body: any = [];
+                if (!this.canAccess(req)) {
+                    return this.unauthorizedResponse(req, res);
+                }
+
+                res.on('error', (error) => {
+                    Log.error(error);
+                });
+
+                req.on('data', (chunk) => body.push(chunk))
+                    .on('end', () => this.handleData(req, res, body, callback));
+            })
+
 
             Log.success('Listening for http events...');
 
@@ -72,8 +117,7 @@ export class HttpSubscriber implements Subscriber {
             );
         }
 
-        res.write(JSON.stringify({ message: 'ok' }))
-        res.end();
+        res.json({ message: 'ok' })
     }
 
     /**
@@ -127,8 +171,7 @@ export class HttpSubscriber implements Subscriber {
      */
     unauthorizedResponse(req: any, res: any): boolean {
         res.statusCode = 403;
-        res.write(JSON.stringify({ error: 'Unauthorized' }));
-        res.end();
+        res.json({ error: 'Unauthorized' });
 
         return false;
     }
@@ -143,8 +186,7 @@ export class HttpSubscriber implements Subscriber {
      */
     badResponse(req: any, res: any, message: string): boolean {
         res.statusCode = 400;
-        res.write(JSON.stringify({ error: message }));
-        res.end();
+        res.json({ error: message });
 
         return false;
     }

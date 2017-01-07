@@ -1,6 +1,7 @@
 var fs = require('fs');
 var http = require('http');
 var https = require('https');
+var express = require('express');
 var io = require('socket.io');
 import { Log } from './log';
 
@@ -10,7 +11,7 @@ export class Server {
      *
      * @type {any}
      */
-    public http: any;
+    public express: any;
 
     /**
      * Socket.io client.
@@ -82,25 +83,16 @@ export class Server {
      * @return {any}
      */
     httpServer(secure: boolean) {
+        this.express = express();
+
         if (secure) {
-            this.http = https.createServer(this.options, this.httpHandler);
+            var httpServer = https.createServer(this.options, this.express);
         } else {
-            this.http = http.createServer(this.httpHandler);
+            var httpServer = http.createServer(this.express);
         }
 
-        this.http.listen(this.options.port, this.options.host);
+        httpServer.listen(this.options.port, this.options.host);
 
-        return this.io = io(this.http, this.options.socketio);
-    }
-
-    /**
-     * Http handler for http server.
-     *
-     * @param  {any} req
-     * @param  {any} res
-     */
-    httpHandler(req, res): void {
-        res.setHeader('Content-Type', 'application/json');
-        res.setHeader('X-Powered-By', 'Laravel Echo Server');
+        return this.io = io(httpServer, this.options.socketio);
     }
 }
