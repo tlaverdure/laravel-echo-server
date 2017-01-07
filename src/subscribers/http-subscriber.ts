@@ -83,12 +83,10 @@ export class HttpSubscriber implements Subscriber {
                     );
                 }
 
-
                 this.channel.presence.getMembers(channelName).then(members => {
-
                     var users = [];
                     members.forEach((member) => {
-                        users.push({id: member.user_id, info: member.user_info});
+                        users.push({id: member.user_id});
                     })
                     res.json({users: users});
                 }, error => Log.error(error));
