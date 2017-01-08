@@ -23,19 +23,11 @@ export class HttpSubscriber implements Subscriber {
 
             // Get status info about the sockets and connections
             this.express.get('/status', (req, res) => {
-                if (!this.canAccess(req)) {
-                    return this.unauthorizedResponse(req, res);
-                }
-
                 res.json({user_count: this.io.engine.clientsCount})
             })
 
             // The user count for all channels
             this.express.get('/channels', (req, res) => {
-                if (!this.canAccess(req)) {
-                    return this.unauthorizedResponse(req, res);
-                }
-
                 var prefix = url.parse(req.url, true).query.filter_by_prefix
 
                 var rooms = this.io.sockets.adapter.rooms;
@@ -60,20 +52,12 @@ export class HttpSubscriber implements Subscriber {
 
             // Get information about just 1 channel
             this.express.get('/channels/:channelName', (req, res) => {
-                if (!this.canAccess(req)) {
-                    return this.unauthorizedResponse(req, res);
-                }
-
                 var room = this.io.sockets.adapter.rooms[req.params.channelName];
                 res.json({user_count: room.length});
             })
 
             // Get information about just 1 channel
             this.express.get('/channels/:channelName/users', (req, res) => {
-                if (!this.canAccess(req)) {
-                    return this.unauthorizedResponse(req, res);
-                }
-
                 var channelName = req.params.channelName;
                 if ( ! this.channel.isPresence(channelName)) {
                     return this.badResponse(
@@ -96,10 +80,6 @@ export class HttpSubscriber implements Subscriber {
             // Broadcast a message to a channel
             this.express.post('/broadcast', (req, res) => {
                 let body: any = [];
-                if (!this.canAccess(req)) {
-                    return this.unauthorizedResponse(req, res);
-                }
-
                 res.on('error', (error) => {
                     Log.error(error);
                 });
@@ -144,62 +124,6 @@ export class HttpSubscriber implements Subscriber {
         }
 
         res.json({ message: 'ok' })
-    }
-
-    /**
-     * Check is an incoming request can access the api.
-     *
-     * @param  {any} req
-     * @return {boolean}
-     */
-    canAccess(req: any): boolean {
-        let api_key = this.getApiToken(req);
-
-        if (api_key) {
-            let referrer = this.options.referrers.find((referrer) => {
-                return referrer.apiKey == api_key;
-            });
-
-            if (referrer && (referrer.host == '*' ||
-                referrer.host == req.headers.referer)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Get the api token from the request.
-     *
-     * @param  {any} req
-     * @return {string}
-     */
-    getApiToken(req: any): (string | boolean) {
-        if (req.headers.authorization) {
-            return req.headers.authorization.replace('Bearer ', '');
-        }
-
-        if (url.parse(req.url, true).query.api_key) {
-            return url.parse(req.url, true).query.api_key
-        }
-
-        return false;
-
-    }
-
-    /**
-     * Handle unauthoried requests.
-     *
-     * @param  {any} req
-     * @param  {any} res
-     * @return {boolean}
-     */
-    unauthorizedResponse(req: any, res: any): boolean {
-        res.statusCode = 403;
-        res.json({ error: 'Unauthorized' });
-
-        return false;
     }
 
     /**

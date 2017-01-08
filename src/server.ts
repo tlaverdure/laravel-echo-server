@@ -2,6 +2,7 @@ var fs = require('fs');
 var http = require('http');
 var https = require('https');
 var express = require('express');
+var url = require('url');
 var io = require('socket.io');
 import { Log } from './log';
 
@@ -93,6 +94,76 @@ export class Server {
 
         httpServer.listen(this.options.port, this.options.host);
 
+        this.authorizeRequests();
+
         return this.io = io(httpServer, this.options.socketio);
+    }
+
+    /**
+     * Attach global protection to HTTP routes, to verify the API key
+     */
+    authorizeRequests() {
+        this.express.use((req, res, next) => {
+            if (!this.canAccess(req)) {
+                return this.unauthorizedResponse(req, res);
+            }
+            next();
+        });
+    }
+
+    /**
+     * Check is an incoming request can access the api.
+     *
+     * @param  {any} req
+     * @return {boolean}
+     */
+    canAccess(req: any): boolean {
+        let api_key = this.getApiToken(req);
+
+        if (api_key) {
+            let referrer = this.options.referrers.find((referrer) => {
+                return referrer.apiKey == api_key;
+            });
+
+            if (referrer && (referrer.host == '*' ||
+                referrer.host == req.headers.referer)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get the api token from the request.
+     *
+     * @param  {any} req
+     * @return {string}
+     */
+    getApiToken(req: any): (string | boolean) {
+        if (req.headers.authorization) {
+            return req.headers.authorization.replace('Bearer ', '');
+        }
+
+        if (url.parse(req.url, true).query.api_key) {
+            return url.parse(req.url, true).query.api_key
+        }
+
+        return false;
+
+    }
+
+    /**
+     * Handle unauthorized requests.
+     *
+     * @param  {any} req
+     * @param  {any} res
+     * @return {boolean}
+     */
+    unauthorizedResponse(req: any, res: any): boolean {
+        res.statusCode = 403;
+        res.json({ error: 'Unauthorized' });
+
+        return false;
     }
 }
