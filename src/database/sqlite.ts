@@ -17,7 +17,7 @@ export class SQLiteDatabase implements DatabaseDriver {
         this._sqlite = new sqlite3.cached.Database(path);
         this._sqlite.serialize(() => {
             this._sqlite.run('CREATE TABLE IF NOT EXISTS key_value (key VARCHAR(255), value TEXT)');
-            this._sqlite.run('CREATE UNIQUE INDEX key_index ON key_value (key)');
+            this._sqlite.run('CREATE UNIQUE INDEX IF NOT EXISTS key_index ON key_value (key)');
         });
     }
 
