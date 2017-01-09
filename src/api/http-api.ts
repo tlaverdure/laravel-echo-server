@@ -18,7 +18,7 @@ export class HttpApi {
         })
 
         // The user count for all channels
-        this.express.get('/channels', (req, res) => {
+        this.express.get('/apps/*/channels', (req, res) => {
             var prefix = url.parse(req.url, true).query.filter_by_prefix;
 
             var rooms = this.io.sockets.adapter.rooms;
@@ -35,20 +35,20 @@ export class HttpApi {
                     return;
                 }
 
-                channels[channelName] = {user_count: rooms[channelName].length};
+                channels[channelName] = {user_count: rooms[channelName].length, occupied: rooms[channelName].length > 0};
             });
 
             res.json({channels: channels});
         })
 
         // Get information about just 1 channel
-        this.express.get('/channels/:channelName', (req, res) => {
+        this.express.get('/apps/*/channels/:channelName', (req, res) => {
             var room = this.io.sockets.adapter.rooms[req.params.channelName];
-            res.json({user_count: room.length});
+            res.json({user_count: room.length, occupied: room.length > 0});
         })
 
         // Get information about just 1 channel
-        this.express.get('/channels/:channelName/users', (req, res) => {
+        this.express.get('/apps/*/channels/:channelName/users', (req, res) => {
             var channelName = req.params.channelName;
             if ( ! this.channel.isPresence(channelName)) {
                 return this.badResponse(

@@ -19,7 +19,7 @@ export class HttpSubscriber implements Subscriber {
         return new Promise((resolve, reject) => {
 
             // Broadcast a message to a channel
-            this.express.post('/broadcast', (req, res) => {
+            this.express.post('/apps/*/events', (req, res) => {
                 let body: any = [];
                 res.on('error', (error) => {
                     Log.error(error);
@@ -47,19 +47,18 @@ export class HttpSubscriber implements Subscriber {
     handleData(req, res, body, broadcast): boolean {
         body = JSON.parse(Buffer.concat(body).toString());
 
-        if (body.channel && body.message) {
-            if (!broadcast(body.channel, body.message)) {
-                return this.badResponse(
-                    req,
-                    res,
-                    `Could not broadcast to channel: ${body.channel}`
-                );
+        if ((body.channels || body.channel) && body.name && body.data) {
+            var message = {
+                event: body.name,
+                data: JSON.parse(body.data),
             }
+            var channels = body.channels || [body.channel];
+            channels.forEach(channel => broadcast(channel, message));
         } else {
             return this.badResponse(
                 req,
                 res,
-                'Event must include channel and message'
+                'Event must include channel, event name and data'
             );
         }
 

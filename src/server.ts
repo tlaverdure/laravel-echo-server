@@ -118,15 +118,14 @@ export class Server {
      * @return {boolean}
      */
     canAccess(req: any): boolean {
-        let api_key = this.getApiToken(req);
+        let api_key = this.getAuthKey(req);
 
         if (api_key) {
             let referrer = this.options.referrers.find((referrer) => {
                 return referrer.apiKey == api_key;
             });
 
-            if (referrer && (referrer.host == '*' ||
-                referrer.host == req.headers.referer)) {
+            if (referrer) {
                 return true;
             }
         }
@@ -140,13 +139,13 @@ export class Server {
      * @param  {any} req
      * @return {string}
      */
-    getApiToken(req: any): (string | boolean) {
+    getAuthKey(req: any): (string | boolean) {
         if (req.headers.authorization) {
             return req.headers.authorization.replace('Bearer ', '');
         }
 
-        if (url.parse(req.url, true).query.api_key) {
-            return url.parse(req.url, true).query.api_key
+        if (url.parse(req.url, true).query.auth_key) {
+            return url.parse(req.url, true).query.auth_key
         }
 
         return false;

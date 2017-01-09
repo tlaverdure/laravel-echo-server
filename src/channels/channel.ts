@@ -100,7 +100,12 @@ export class Channel {
             socket.join(data.channel);
 
             if (this.isPresence(data.channel)) {
-                this.presence.join(socket, data.channel, res.channel_data);
+                var member = res.channel_data;
+                try {
+                    member = JSON.parse(res.channel_data);
+                } catch (e) {}
+
+                this.presence.join(socket, data.channel, member);
             }
 
             this.onJoin(socket, data.channel);
