@@ -1,5 +1,6 @@
 import { Log } from './../log';
 var url = require('url');
+var _ = require('lodash');
 
 export class HttpApi {
     /**
@@ -35,7 +36,7 @@ export class HttpApi {
                     return;
                 }
 
-                channels[channelName] = {user_count: rooms[channelName].length, occupied: rooms[channelName].length > 0};
+                channels[channelName] = {subscription_count: rooms[channelName].length, occupied: rooms[channelName].length > 0};
             });
 
             res.json({channels: channels});
@@ -43,8 +44,18 @@ export class HttpApi {
 
         // Get information about just 1 channel
         this.express.get('/apps/*/channels/:channelName', (req, res) => {
-            var room = this.io.sockets.adapter.rooms[req.params.channelName];
-            res.json({user_count: room.length, occupied: room.length > 0});
+            var channelName = req.params.channelName;
+            var room = this.io.sockets.adapter.rooms[channelName];
+            var result = {subscription_count: room.length, occupied: room.length > 0};
+            if ( this.channel.isPresence(channelName)) {
+                this.channel.presence.getMembers(channelName).then(members => {
+                    members = _.uniqBy(members, 'user_id');
+                    result['user_count'] = members.length;
+                    res.json(result);
+                })
+            } else {
+                res.json(result);
+            }
         })
 
         // Get information about just 1 channel
