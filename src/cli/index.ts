@@ -8,7 +8,8 @@ let cli = new Cli();
  */
 var argv = yargs.usage("$0 command")
     .command("init", "Initialize server with a config file.", yargs => cli.init(yargs))
-    .command("key:generate", "Generate an app key.", yargs => cli.keyGenerate())
+    .command("client:add", "Register a client that can make api requests.", () => cli.clientAdd(yargs))
+    .command("client:remove", "Remove a client that has been registered.", yargs => cli.clientRemove(yargs))
     .command("apikey:generate", "Generate an api key to make api requests.", () => cli.apiKeyGenerate())
     .command("start", "Start up the server.", cli.start)
     .demand(1, "Please provide a valid command.")

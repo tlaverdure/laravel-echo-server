@@ -19,7 +19,7 @@ export class HttpSubscriber implements Subscriber {
         return new Promise((resolve, reject) => {
 
             // Broadcast a message to a channel
-            this.express.post('/apps/*/events', (req, res) => {
+            this.express.post('/apps/:appId/events', (req, res) => {
                 let body: any = [];
                 res.on('error', (error) => {
                     Log.error(error);

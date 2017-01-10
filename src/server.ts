@@ -103,7 +103,7 @@ export class Server {
      * Attach global protection to HTTP routes, to verify the API key
      */
     authorizeRequests() {
-        this.express.use((req, res, next) => {
+        this.express.param('appId', (req, res, next) => {
             if (!this.canAccess(req)) {
                 return this.unauthorizedResponse(req, res);
             }
@@ -118,10 +118,31 @@ export class Server {
      * @return {boolean}
      */
     canAccess(req: any): boolean {
-        let api_key = this.getAuthKey(req);
+        let appId = this.getAppId(req);
+        let key = this.getAuthKey(req);
 
-        if (api_key && this.options.apiKey) {
-            return api_key === this.options.apiKey;
+        if (key && appId) {
+            let client = this.options.clients.find((client) => {
+                return client.appId === appId;
+            });
+
+            if (client) {
+                return client.key === key;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get the appId from the URL
+     *
+     * @param  {any} req
+     * @return {string}
+     */
+    getAppId(req: any): (string | boolean) {
+        if (req.params.appId) {
+            return req.params.appId;
         }
 
         return false;

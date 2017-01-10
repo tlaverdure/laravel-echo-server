@@ -47,19 +47,19 @@ $ laravel-echo-server key:generate
 
 ```
 
-#### API Key
+#### API Clients
 
-The Laravel Echo Server exposes a light http Api to perform broadcasting functionality. For security purposes, access to these endpoints from http referrers must be authenticated with an API key. This can be generated using the cli command:
+The Laravel Echo Server exposes a light http Api to perform broadcasting functionality. For security purposes, access to these endpoints from http referrers must be authenticated with an API id + key. This can be generated using the cli command:
 
 ``` shell
 
-$ laravel-echo-server apikey:generate
+$ laravel-echo-server client:add myAppId
 
 ```
 
-After running this command, the Api key will be displayed and stored in the **laravel-echo-server.json** file.
+If you run it without argument, it will generate an appId for you. After running this command, the client appId + API key will be displayed and stored in the **laravel-echo-server.json** file.
 
-In this example, requests will be allowed as long as the api_key is provided with http requests.
+In this example, requests will be allowed as long as the appId + key is provided with http requests.
 
 ``` http
 Request Headers
@@ -68,9 +68,11 @@ Auhtorization:  Bearer skti68i...
 
 or
 
-http://app.dev:6001/broadcast?auth_key=skti68i...
+http://app.dev:6001/apps/myAppId/events?auth_key=skti68i...
 
 ```
+
+You can remove clients with `laravel-echo-server client:remove myAppId`
 
 #### Run The Server
 
@@ -119,13 +121,13 @@ The Laravel Echo Server subscribes to incoming events with two methods: Redis & 
 
 ### Http
 
-Using Http, you can also publish events to the Laravel Echo Server in the same fashion you would with Redis by submitting a `channel` and `message` to the broadcast endpoint. You need to generate an API key as described in the [API Key](#api-key) section and provide the correct API key.
+Using Http, you can also publish events to the Laravel Echo Server in the same fashion you would with Redis by submitting a `channel` and `message` to the broadcast endpoint. You need to generate an API key as described in the [API Clients](#api-clients) section and provide the correct API key.
 
 **Request Endpoint**
 
 ``` http
 
-POST http://app.dev:6001/apps/echo/events?auth_key=skti68i...
+POST http://app.dev:6001/apps/your-app-id/events?auth_key=skti68i...
 
 ```
 
@@ -152,14 +154,14 @@ POST http://app.dev:6001/apps/echo/events?auth_key=skti68i...
 
 ### Pusher
 
-The HTTP subscriber is compatible with the Laravel Pusher subscriber. Just configure the host + port for your Socket.IO server and set the api key in config/broadcasting.php
+The HTTP subscriber is compatible with the Laravel Pusher subscriber. Just configure the host + port for your Socket.IO server and set the app ID + key in config/broadcasting.php. Secret is not required.
 
 ```php
  'pusher' => [
     'driver' => 'pusher',
-    'key' => skti68i...,
+    'key' => env('PUSHER_KEY'),
     'secret' => null,
-    'app_id' => null,
+    'app_id' => env('PUSHER_APP_ID'),
     'options' => [
         'host' => 'localhost',
         'port' => 6001,

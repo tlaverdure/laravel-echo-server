@@ -14,7 +14,7 @@ export class HttpApi {
 
     init() {
         // Get status info about the sockets and connections
-        this.express.get('/apps/*/status', (req, res) => {
+        this.express.get('/apps/:appId/status', (req, res) => {
             res.json({
                 subscription_count: this.io.engine.clientsCount,
                 uptime: process.uptime(),
@@ -23,7 +23,7 @@ export class HttpApi {
         })
 
         // The user count for all channels
-        this.express.get('/apps/*/channels', (req, res) => {
+        this.express.get('/apps/:appId/channels', (req, res) => {
             var prefix = url.parse(req.url, true).query.filter_by_prefix;
 
             var rooms = this.io.sockets.adapter.rooms;
@@ -50,7 +50,7 @@ export class HttpApi {
         })
 
         // Get information about just 1 channel
-        this.express.get('/apps/*/channels/:channelName', (req, res) => {
+        this.express.get('/apps/:appId/channels/:channelName', (req, res) => {
             var channelName = req.params.channelName;
             var room = this.io.sockets.adapter.rooms[channelName];
 
@@ -70,7 +70,7 @@ export class HttpApi {
         })
 
         // Get information about just 1 channel
-        this.express.get('/apps/*/channels/:channelName/users', (req, res) => {
+        this.express.get('/apps/:appId/channels/:channelName/users', (req, res) => {
             var channelName = req.params.channelName;
             if ( ! this.channel.isPresence(channelName)) {
                 return this.badResponse(

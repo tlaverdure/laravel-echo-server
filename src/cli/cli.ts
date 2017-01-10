@@ -187,6 +187,22 @@ export class Cli {
     }
 
     /**
+     * Create an api key for the HTTP API.
+     *
+     * @param  {string} app_key
+     * @return {string}
+     */
+    createAppId(app_key: string): string {
+        var hash = Math.random().toString(31).substring(7).slice(0, 16);
+        let api_key = hash.concat(app_key);
+        api_key = api_key.split('')
+            .sort(() => 0.5 - Math.random())
+            .join('').slice(0, 16);
+
+        return api_key;
+    }
+
+    /**
      * Generate the API key
      *
      * @return {void}
@@ -196,6 +212,70 @@ export class Cli {
         options.apiKey = this.createApiKey(options.appKey);
 
         console.log(colors.green('API Key: ' + options.apiKey))
+
+        this.saveConfig(options);
+    }
+
+    /**
+     * Add a registered referrer.
+     *
+     * @param  {Object} yargs
+     * @return {void}
+     */
+    clientAdd(yargs): void {
+        var options = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
+        var appId = yargs.argv._[1] || this.createAppId(options.appKey);
+        options.clients = options.clients || [];
+
+        if (appId && options.appKey) {
+            var index = null;
+            var client = options.clients.find((client, i) => {
+                index = i;
+                return client.appId == appId;
+            });
+
+            if (client) {
+                client.key = this.createApiKey(options.appKey);
+                options.clients[index] = client;
+            } else {
+                client = {
+                    appId: appId,
+                    key: this.createApiKey(options.appKey)
+                };
+
+                options.clients.push(client);
+            }
+
+            console.log(colors.green('API Client added!' ));
+            console.log(colors.magenta('appId: ' + client.appId));
+            console.log(colors.magenta('key: ' + client.key))
+
+            this.saveConfig(options);
+        }
+    }
+
+    /**
+     * Remove a registered referrer.
+     *
+     * @param  {Object} yargs
+     * @return {void}
+     */
+    clientRemove(yargs): void {
+        var options = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
+        var appId = yargs.argv._[1] || null;
+        options.clients = options.clients || [];
+
+        var index = null;
+        var client = options.clients.find((client, i) => {
+            index = i;
+            return client.appId == appId;
+        });
+
+        if (index >= 0) {
+            options.clients.splice(index, 1);
+        }
+
+        console.log(colors.green('Client removed: ' + appId));
 
         this.saveConfig(options);
     }
