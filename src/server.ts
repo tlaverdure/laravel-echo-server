@@ -120,14 +120,8 @@ export class Server {
     canAccess(req: any): boolean {
         let api_key = this.getAuthKey(req);
 
-        if (api_key) {
-            let referrer = this.options.referrers.find((referrer) => {
-                return referrer.apiKey == api_key;
-            });
-
-            if (referrer) {
-                return true;
-            }
+        if (api_key && this.options.apiKey) {
+            return api_key === this.options.apiKey;
         }
 
         return false;

@@ -17,6 +17,7 @@ export class EchoServer {
      */
     public defaultOptions: any = {
         appKey: '',
+        apiKey: '',
         authHost: null,
         authEndpoint: '/broadcasting/auth',
         database: 'redis',
@@ -29,7 +30,6 @@ export class EchoServer {
         devMode: false,
         host: 'http://localhost',
         port: 6001,
-        referrers: [],
         socketio: {},
         sslCertPath: '',
         sslKeyPath: ''

@@ -48,9 +48,16 @@ export class HttpSubscriber implements Subscriber {
         body = JSON.parse(Buffer.concat(body).toString());
 
         if ((body.channels || body.channel) && body.name && body.data) {
+
+            var data = body.data;
+            try {
+                data = JSON.parse(data);
+            } catch (e) {}
+
             var message = {
                 event: body.name,
-                data: JSON.parse(body.data),
+                data: data,
+                socket: body.socket_id
             }
             var channels = body.channels || [body.channel];
             channels.forEach(channel => broadcast(channel, message));

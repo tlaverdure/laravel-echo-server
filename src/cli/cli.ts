@@ -171,7 +171,7 @@ export class Cli {
     }
 
     /**
-     * Create an api key for a referrer.
+     * Create an api key for the HTTP API.
      *
      * @param  {string} app_key
      * @return {string}
@@ -187,64 +187,15 @@ export class Cli {
     }
 
     /**
-     * Add a registered referrer.
+     * Generate the API key
      *
-     * @param  {Object} yargs
      * @return {void}
      */
-    referrerAdd(yargs): void {
+    apiKeyGenerate(): void {
         var options = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
-        var host = yargs.argv._[1] || null;
-        options.referrers = options.referrers || [];
+        options.apiKey = this.createApiKey(options.appKey);
 
-        if (host && options.appKey) {
-            var index = null;
-            var referrer = options.referrers.find((referrer, i) => {
-                index = i;
-                return referrer.host == host;
-            });
-
-            if (referrer) {
-                referrer.apiKey = this.createApiKey(options.appKey);
-                options.referrers[index] = referrer;
-            } else {
-                referrer = {
-                    host: host,
-                    apiKey: this.createApiKey(options.appKey)
-                };
-
-                options.referrers.push(referrer);
-            }
-
-            console.log(colors.green('Referrer added: ' + host));
-            console.log(colors.green('API Key: ' + referrer.apiKey))
-
-            this.saveConfig(options);
-        }
-    }
-
-    /**
-     * Remove a registered referrer.
-     *
-     * @param  {Object} yargs
-     * @return {void}
-     */
-    referrerRemove(yargs): void {
-        var options = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
-        var host = yargs.argv._[1] || null;
-        options.referrers = options.referrers || [];
-
-        var index = null;
-        var referrer = options.referrers.find((referrer, i) => {
-            index = i;
-            return referrer.host == host;
-        });
-
-        if (index >= 0) {
-            options.referrers.splice(index, 1);
-        }
-
-        console.log(colors.green('Referrer removed: ' + host));
+        console.log(colors.green('API Key: ' + options.apiKey))
 
         this.saveConfig(options);
     }
