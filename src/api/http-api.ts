@@ -14,8 +14,12 @@ export class HttpApi {
 
     init() {
         // Get status info about the sockets and connections
-        this.express.get('/status', (req, res) => {
-            res.json({user_count: this.io.engine.clientsCount})
+        this.express.get('/apps/*/status', (req, res) => {
+            res.json({
+                subscription_count: this.io.engine.clientsCount,
+                uptime: process.uptime(),
+                memory_usage: process.memoryUsage(),
+            })
         })
 
         // The user count for all channels
@@ -36,7 +40,10 @@ export class HttpApi {
                     return;
                 }
 
-                channels[channelName] = {subscription_count: rooms[channelName].length, occupied: rooms[channelName].length > 0};
+                channels[channelName] = {
+                    subscription_count: rooms[channelName].length,
+                    occupied: true
+                };
             });
 
             res.json({channels: channels});
@@ -46,11 +53,15 @@ export class HttpApi {
         this.express.get('/apps/*/channels/:channelName', (req, res) => {
             var channelName = req.params.channelName;
             var room = this.io.sockets.adapter.rooms[channelName];
-            var result = {subscription_count: room.length, occupied: room.length > 0};
+
+            var result = {
+                subscription_count: room.length,
+                occupied: true
+            };
+
             if ( this.channel.isPresence(channelName)) {
                 this.channel.presence.getMembers(channelName).then(members => {
-                    members = _.uniqBy(members, 'user_id');
-                    result['user_count'] = members.length;
+                    result['user_count'] = _.uniqBy(members, 'user_id').length;
                     res.json(result);
                 })
             } else {
@@ -74,6 +85,7 @@ export class HttpApi {
                 _.uniqBy(members, 'user_id').forEach((member) => {
                     users.push({id: member.user_id});
                 })
+
                 res.json({users: users});
             }, error => Log.error(error));
 
