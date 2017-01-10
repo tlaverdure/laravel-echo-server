@@ -168,12 +168,14 @@ For example, if you wanted to pass a custom configuration to Redis:
   "databaseConfig" : {
     "redis" : {
       "port": "3001",
-      "host": "http://redis.app.dev"
+      "host": "redis.app.dev"
     }
   }
 }
 
 ```
+*Note: No scheme (http/https etc) should be used for the host address*
+
 *A full list of Redis options can be found [here](https://github.com/luin/ioredis/blob/master/API.md#new-redisport-host-options).*
 
 ### SQLite
