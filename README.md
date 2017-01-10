@@ -175,10 +175,11 @@ use Illuminate\Support\Facades\Broadcast;
 /** @var Pusher $pusher */
 $pusher = Broadcast::getPusher();
 
-dump($pusher->get_channels());
-dump($pusher->get_channels( array( 'filter_by_prefix' => 'private-' ) ));
-dump($pusher->get_channel_info('presence-chat'));
-dump($pusher->get( '/channels/presence-chat/users' ));
+dump($pusher->get('/status')); // Get total number of clients, uptime, memory usage
+dump($pusher->get_channels());  // List of all channels
+dump($pusher->get_channels(['filter_by_prefix' => 'private-'])); 
+dump($pusher->get_channel_info('presence-chat'));       // Info about 1 channel
+dump($pusher->get('/channels/presence-chat/users'));    // List of users
 ```
 
 ## Database
