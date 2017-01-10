@@ -136,10 +136,12 @@ export class Channel {
      * @return {void}
      */
     onDisconnect(socket: any, channel: string): void {
-        socket.on('disconnect', () => this.leave(socket, channel));
+        socket.on('disconnect', () => {
+            this.leave(socket, channel);
 
-        if (this.options.devMode) {
-            Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} left channel: ${channel}`);
-        }
+            if (this.options.devMode) {
+                Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} left channel: ${channel}`);
+            }
+        });
     }
 }
