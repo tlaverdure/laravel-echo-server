@@ -55,6 +55,24 @@ export class Channel {
     }
 
     /**
+     * Trigger a client message
+     *
+     * @param  {object} socket
+     * @param  {object} data
+     * @return {void}
+     */
+    trigger(socket, data): void {
+        if (data.channel && this.isPrivate(data.channel)) {
+            this.io
+                .sockets
+                .connected[socket.id]
+                .broadcast
+                .to(data.channel)
+                .emit(data.event, data.channel, data.data);
+        }
+    }
+
+    /**
      * Leave a channel.
      *
      * @param  {object} socket

@@ -210,6 +210,7 @@ export class EchoServer {
         this.server.io.on('connection', socket => {
             this.onSubscribe(socket);
             this.onUnsubscribe(socket);
+            this.onTrigger(socket);
         });
     }
 
@@ -234,6 +235,18 @@ export class EchoServer {
     onUnsubscribe(socket: any): void {
         socket.on('unsubscribe', data => {
             this.channel.leave(socket, data.channel);
+        });
+    }
+
+    /**
+     * On triggers from a client.
+     *
+     * @param  {object} socket
+     * @return {void}
+     */
+    onTrigger(socket: any): void {
+        socket.on('trigger', data => {
+            this.channel.trigger(socket, data);
         });
     }
 }
