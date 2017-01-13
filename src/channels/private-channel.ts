@@ -32,7 +32,7 @@ export class PrivateChannel {
             rejectUnauthorized: false
         };
 
-        return this.severRequest(socket, options);
+        return this.serverRequest(socket, options);
     }
 
     /**
@@ -52,17 +52,34 @@ export class PrivateChannel {
      * @param  {object} options
      * @return {Promise<any>}
      */
-    protected severRequest(socket: any, options: any): Promise<any> {
+    protected serverRequest(socket: any, options: any): Promise<any> {
         return new Promise<any>((resolve, reject) => {
             options.headers = this.prepareHeaders(socket, options);
 
             this.request.post(options, (error, response, body, next) => {
-                if (!error && response.statusCode == 200) {
-                    resolve(JSON.parse(response.body));
-                } else {
+                if (error) {
+                    if (this.options.devMode) {
+                        Log.error(`[${new Date().toLocaleTimeString()}] - Error authenticating ${socket.id} for ${options.form.channel_name}`);
+                    }
+
                     Log.error(error);
 
-                    reject('Could not send authentication request.');
+                    reject('Error sending authentication request.');
+                } else {
+                    if (response.statusCode == 200) {
+                        if (this.options.devMode) {
+                            Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} authenticated for: ${options.form.channel_name}`);
+                        }
+
+                        resolve(JSON.parse(response.body));
+                    } else {
+                        if (this.options.devMode) {
+                            Log.warning(`[${new Date().toLocaleTimeString()}] - ${socket.id} could not be authenticated for ${options.form.channel_name}`);
+                            Log.error(response.body);
+                        }
+                        
+                        reject('Client can not be authenticated, got HTTP status ' + response.statusCode);
+                    }
                 }
             });
         });
