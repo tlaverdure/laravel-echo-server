@@ -69,9 +69,9 @@ export class Channel {
      * @return {void}
      */
     clientEvent(socket, data): void {
-        if (data.channel && this.isPrivate(data.channel)
+        if (data.event && this.isClientEvent(data.event)
+            && data.channel && this.isPrivate(data.channel)
             && this.isInChannel(socket, data.channel)
-            && this.isClientEvent(data.event)
         ) {
             this.io
                 .sockets
@@ -184,7 +184,7 @@ export class Channel {
             let regex = new RegExp(clientEvent.replace('\*', '.*'));
             if (regex.test(event)) isClientEvent = true;
         });
-        
+
         return isClientEvent;
     }
 
