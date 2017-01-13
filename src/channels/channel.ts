@@ -11,6 +11,13 @@ export class Channel {
     protected _privateChannels: string[] = ['private-*', 'presence-*'];
 
     /**
+     * Allowed client events
+     *
+     * @type {array}
+     */
+    protected _clientEvents: string[] = ['client-*'];
+
+    /**
      * Private channel instance.
      *
      * @type {PrivateChannel}
@@ -61,8 +68,11 @@ export class Channel {
      * @param  {object} data
      * @return {void}
      */
-    trigger(socket, data): void {
-        if (data.channel && this.isPrivate(data.channel)) {
+    clientEvent(socket, data): void {
+        if (data.channel && this.isPrivate(data.channel)
+            && this.isInChannel(socket, data.channel)
+            && this.isClientEvent(data.event)
+        ) {
             this.io
                 .sockets
                 .connected[socket.id]
@@ -159,5 +169,33 @@ export class Channel {
         if (this.options.devMode) {
             Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} left channel: ${channel}`);
         }
+    }
+
+    /**
+     * Check if client is a client event
+     *
+     * @param  {string} event
+     * @return {boolean}
+     */
+    isClientEvent(event: string): boolean {
+        let isClientEvent = false;
+
+        this._clientEvents.forEach(clientEvent => {
+            let regex = new RegExp(clientEvent.replace('\*', '.*'));
+            if (regex.test(event)) isClientEvent = true;
+        });
+        
+        return isClientEvent;
+    }
+
+    /**
+     * Check if a socket has joined a channel.
+     *
+     * @param socket
+     * @param channel
+     * @returns {boolean}
+     */
+    isInChannel(socket: any, channel: string): boolean {
+        return this.io.sockets.adapter.sids[socket.id][channel];
     }
 }

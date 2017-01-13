@@ -210,7 +210,7 @@ export class EchoServer {
         this.server.io.on('connection', socket => {
             this.onSubscribe(socket);
             this.onUnsubscribe(socket);
-            this.onTrigger(socket);
+            this.onClientEvent(socket);
         });
     }
 
@@ -239,14 +239,14 @@ export class EchoServer {
     }
 
     /**
-     * On triggers from a client.
+     * On client events.
      *
      * @param  {object} socket
      * @return {void}
      */
-    onTrigger(socket: any): void {
-        socket.on('trigger', data => {
-            this.channel.trigger(socket, data);
+    onClientEvent(socket: any): void {
+        socket.on('client event', data => {
+            this.channel.clientEvent(socket, data);
         });
     }
 }
