@@ -136,7 +136,7 @@ export class Channel {
      * @return {void}
      */
     onDisconnect(socket: any, channel: string): void {
-        socket.on('disconnect', () => {
+        socket.once('disconnect', () => {
             this.leave(socket, channel);
 
             if (this.options.devMode) {
