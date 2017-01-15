@@ -59,8 +59,6 @@ export class Channel {
                 this.onJoin(socket, data.channel);
             }
         }
-
-        this.onDisconnect(socket, data.channel);
     }
 
     /**
@@ -77,7 +75,6 @@ export class Channel {
             }
 
             socket.leave(channel);
-            this.unbind(socket, channel);
 
             if (this.options.devMode) {
                 Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} left channel: ${channel}`);
@@ -141,53 +138,5 @@ export class Channel {
         if (this.options.devMode) {
             Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} joined channel: ${channel}`);
         }
-    }
-
-    /**
-     * On disconnect from a channel.
-     *
-     * @param  {object}  socket
-     * @param  {string}  channel
-     * @return {void}
-     */
-    onDisconnect(socket: any, channel: string): void {
-        this.on(socket, channel, 'disconnect', () => this.leave(socket, channel));
-    }
-
-    /**
-     * Listen to an event for a specific socket + channel and store it.
-     *
-     * @param socket
-     * @param channel
-     * @param event
-     * @param callback
-     */
-    on(socket: any, channel: string, event: string, callback: any): void {
-
-        this.events[socket.id] = this.events[socket.id] || [];
-        this.events[socket.id][channel] = this.events[socket.id][channel] || [];
-        this.events[socket.id][channel][event] = this.events[socket.id][channel][event] || [];
-        this.events[socket.id][channel][event].push(callback);
-
-        socket.on(event, callback);
-    }
-
-    /**
-     * Remove listeners for all events for a specific socket + channel.
-     *
-     * @param socket
-     * @param channel
-     */
-    unbind(socket: any, channel: string): void {
-        if (this.events[socket.id] && this.events[socket.id][channel]) {
-            Object.keys(this.events[socket.id][channel]).forEach(event => {
-                this.events[socket.id][channel][event].forEach(callback => {
-                    socket.removeListener(event, callback);
-                });
-
-                delete this.events[event];
-            });
-        }
-
     }
 }
