@@ -211,7 +211,7 @@ add a script tag to your html like so:
 `<script src="//app.dev:6001/socket.io/socket.io.js"></script>`
 
 #### Better performance with [µWebSockets](https://github.com/uWebSockets/uWebSockets)
-For extra performance, you can use the faster `uws` engine, instead of `ws`, by setting this `wsEngine` option for Socket.IO:
+For extra performance, you can use the faster `uws` engine instead of `ws`, by setting the `wsEngine` option for Socket.IO in `laravel-echo-server.json`:
 
 ```js
 "socketio": {
