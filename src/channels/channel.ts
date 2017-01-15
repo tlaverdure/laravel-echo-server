@@ -11,13 +11,6 @@ export class Channel {
     protected _privateChannels: string[] = ['private-*', 'presence-*'];
 
     /**
-     * Event fired per socket/channel
-     *
-     * @type {Array}
-     */
-    protected events = [];
-
-    /**
      * Private channel instance.
      *
      * @type {PrivateChannel}
@@ -30,8 +23,6 @@ export class Channel {
      * @type {PresenceChannel}
      */
     presence: PresenceChannel;
-
-
 
     /**
      * Create a new channel instance.
