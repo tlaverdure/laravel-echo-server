@@ -64,14 +64,14 @@ export class PrivateChannel {
 
                     Log.error(error);
 
-                    reject('Error sending authentication request.');
+                    reject({reason: 'Error sending authentication request.', status: 0});
                 } else if (response.statusCode !== 200) {
                     if (this.options.devMode) {
                         Log.warning(`[${new Date().toLocaleTimeString()}] - ${socket.id} could not be authenticated for ${options.form.channel_name}`);
                         Log.error(response.body);
                     }
 
-                    reject('Client can not be authenticated, got HTTP status ' + response.statusCode);
+                    reject({reason: 'Client can not be authenticated, got HTTP status ' + response.statusCode, status: response.statusCode});
                 } else {
                     if (this.options.devMode) {
                         Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} authenticated for: ${options.form.channel_name}`);
