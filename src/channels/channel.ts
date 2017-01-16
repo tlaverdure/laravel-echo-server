@@ -67,16 +67,14 @@ export class Channel {
      * @return {void}
      */
     clientEvent(socket, data): void {
-        if (data.event && this.isClientEvent(data.event)
-            && data.channel && this.isPrivate(data.channel)
-            && this.isInChannel(socket, data.channel)
-        ) {
-            this.io
-                .sockets
-                .connected[socket.id]
-                .broadcast
-                .to(data.channel)
-                .emit(data.event, data.channel, data.data);
+        if (data.event && data.channel) {
+            if (this.isClientEvent(data.event) &&
+                this.isPrivate(data.channel) &&
+                this.isInChannel(socket, data.channel)) {
+                this.io.sockets.connected[socket.id]
+                    .broadcast.to(data.channel)
+                    .emit(data.event, data.channel, data.data);
+            }
         }
     }
 
@@ -134,7 +132,7 @@ export class Channel {
                 var member = res.channel_data;
                 try {
                     member = JSON.parse(res.channel_data);
-                } catch (e) {}
+                } catch (e) { }
 
                 this.presence.join(socket, data.channel, member);
             }
@@ -190,6 +188,6 @@ export class Channel {
      * @returns {boolean}
      */
     isInChannel(socket: any, channel: string): boolean {
-        return !! socket.rooms[channel];
+        return !!socket.rooms[channel];
     }
 }
