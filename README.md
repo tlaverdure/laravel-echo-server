@@ -235,8 +235,19 @@ While presence channels contain a list of users, there will be instances where a
 See the official Laravel documentation for more information. <https://laravel.com/docs/5.3/broadcasting#introduction>
 
 ### Tips
-
+#### Socket.io client library
 You can include the socket.io client library from your running server. For example, if your server is running at `app.dev:6001` you should be able to
 add a script tag to your html like so:
 
 `<script src="//app.dev:6001/socket.io/socket.io.js"></script>`
+
+#### Better performance with [µWebSockets](https://github.com/uWebSockets/uWebSockets)
+For extra performance, you can use the faster `uws` engine instead of `ws`, by setting the `wsEngine` option for Socket.IO in `laravel-echo-server.json`:
+
+```js
+"socketio": {
+    "wsEngine": "uws"
+},
+```
+
+See https://github.com/uWebSockets/uWebSockets for more information.
