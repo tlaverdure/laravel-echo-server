@@ -196,6 +196,6 @@ export class Channel {
      * @returns {boolean}
      */
     isInChannel(socket: any, channel: string): boolean {
-        return this.io.sockets.adapter.sids[socket.id][channel];
+        return !! socket.rooms[channel];
     }
 }
