@@ -57,9 +57,10 @@ export class Channel {
      *
      * @param  {object} socket
      * @param  {string} channel
+     * @param  {string} reason
      * @return {void}
      */
-    leave(socket: any, channel: string): void {
+    leave(socket: any, channel: string, reason: string): void {
         if (channel) {
             if (this.isPresence(channel)) {
                 this.presence.leave(socket, channel)
@@ -68,7 +69,7 @@ export class Channel {
             socket.leave(channel);
 
             if (this.options.devMode) {
-                Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} left channel: ${channel}`);
+                Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} left channel: ${channel} (${reason})`);
             }
         }
     }
