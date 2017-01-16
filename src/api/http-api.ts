@@ -127,7 +127,7 @@ export class HttpApi {
         this.channel.presence.getMembers(channelName).then(members => {
             let users = [];
 
-            _.uniqBy(members, 'user_id').forEach((member) => {
+            _.uniqBy(members, 'user_id').forEach((member: any) => {
                 users.push({ id: member.user_id });
             });
 
