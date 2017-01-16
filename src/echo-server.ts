@@ -2,6 +2,7 @@ import { HttpSubscriber, RedisSubscriber } from './subscribers';
 import { Channel } from './channels';
 import { Server } from './server';
 import { Log } from './log';
+import { HttpApi } from './api';
 
 const packageFile = require('../package.json');
 
@@ -28,7 +29,7 @@ export class EchoServer {
         devMode: false,
         host: 'http://localhost',
         port: 6001,
-        referrers: [],
+        clients: [],
         socketio: {},
         sslCertPath: '',
         sslKeyPath: ''
@@ -70,6 +71,13 @@ export class EchoServer {
     private httpSub: HttpSubscriber;
 
     /**
+     * Http api instance.
+     *
+     * @type {HttpApi}
+     */
+    private httpApi: HttpApi;
+
+    /**
      * Create a new instance.
      */
     constructor() { }
@@ -104,7 +112,9 @@ export class EchoServer {
         return new Promise((resolve, reject) => {
             this.channel = new Channel(io, this.options);
             this.redisSub = new RedisSubscriber(this.options);
-            this.httpSub = new HttpSubscriber(this.options, this.server.http);
+            this.httpSub = new HttpSubscriber(this.server.express);
+            this.httpApi = new HttpApi(io, this.channel, this.server.express);
+            this.httpApi.init();
 
             this.onConnect();
             this.listen().then(() => resolve());
@@ -210,6 +220,7 @@ export class EchoServer {
         this.server.io.on('connection', socket => {
             this.onSubscribe(socket);
             this.onUnsubscribe(socket);
+            this.onDisconnecting(socket);
             this.onClientEvent(socket);
         });
     }
@@ -234,7 +245,22 @@ export class EchoServer {
      */
     onUnsubscribe(socket: any): void {
         socket.on('unsubscribe', data => {
-            this.channel.leave(socket, data.channel);
+            this.channel.leave(socket, data.channel, 'unsubscribed');
+        });
+    }
+
+    /**
+     * On socket disconnecting.
+     *
+     * @return {void}
+     */
+    onDisconnecting(socket: any): void {
+        socket.on('disconnecting', (reason) => {
+            Object.keys(socket.rooms).forEach(room => {
+                if (room !== socket.id) {
+                    this.channel.leave(socket, room, reason);
+                }
+            });
         });
     }
 

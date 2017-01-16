@@ -57,8 +57,6 @@ export class Channel {
                 this.onJoin(socket, data.channel);
             }
         }
-
-        this.onDisconnect(socket, data.channel);
     }
 
     /**
@@ -87,15 +85,20 @@ export class Channel {
      *
      * @param  {object} socket
      * @param  {string} channel
+     * @param  {string} reason
      * @return {void}
      */
-    leave(socket: any, channel: string): void {
+    leave(socket: any, channel: string, reason: string): void {
         if (channel) {
             if (this.isPresence(channel)) {
                 this.presence.leave(socket, channel)
             }
 
             socket.leave(channel);
+
+            if (this.options.devMode) {
+                Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} left channel: ${channel} (${reason})`);
+            }
         }
     }
 
@@ -128,7 +131,12 @@ export class Channel {
             socket.join(data.channel);
 
             if (this.isPresence(data.channel)) {
-                this.presence.join(socket, data.channel, res.channel_data);
+                var member = res.channel_data;
+                try {
+                    member = JSON.parse(res.channel_data);
+                } catch (e) {}
+
+                this.presence.join(socket, data.channel, member);
             }
 
             this.onJoin(socket, data.channel);
@@ -154,20 +162,6 @@ export class Channel {
     onJoin(socket: any, channel: string): void {
         if (this.options.devMode) {
             Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} joined channel: ${channel}`);
-        }
-    }
-
-    /**
-     * On disconnect from a channel.
-     *
-     * @param  {object}  socket
-     * @return {void}
-     */
-    onDisconnect(socket: any, channel: string): void {
-        socket.on('disconnect', () => this.leave(socket, channel));
-
-        if (this.options.devMode) {
-            Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} left channel: ${channel}`);
         }
     }
 

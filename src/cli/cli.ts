@@ -171,7 +171,7 @@ export class Cli {
     }
 
     /**
-     * Create an api key for a referrer.
+     * Create an api key for the HTTP API.
      *
      * @param  {string} app_key
      * @return {string}
@@ -187,37 +187,68 @@ export class Cli {
     }
 
     /**
+     * Create an api key for the HTTP API.
+     *
+     * @param  {string} app_key
+     * @return {string}
+     */
+    createAppId(app_key: string): string {
+        var hash = Math.random().toString(31).substring(7).slice(0, 16);
+        let api_key = hash.concat(app_key);
+        api_key = api_key.split('')
+            .sort(() => 0.5 - Math.random())
+            .join('').slice(0, 16);
+
+        return api_key;
+    }
+
+    /**
+     * Generate the API key
+     *
+     * @return {void}
+     */
+    apiKeyGenerate(): void {
+        var options = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
+        options.apiKey = this.createApiKey(options.appKey);
+
+        console.log(colors.green('API Key: ' + options.apiKey))
+
+        this.saveConfig(options);
+    }
+
+    /**
      * Add a registered referrer.
      *
      * @param  {Object} yargs
      * @return {void}
      */
-    referrerAdd(yargs): void {
+    clientAdd(yargs): void {
         var options = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
-        var host = yargs.argv._[1] || null;
-        options.referrers = options.referrers || [];
+        var appId = yargs.argv._[1] || this.createAppId(options.appKey);
+        options.clients = options.clients || [];
 
-        if (host && options.appKey) {
+        if (appId && options.appKey) {
             var index = null;
-            var referrer = options.referrers.find((referrer, i) => {
+            var client = options.clients.find((client, i) => {
                 index = i;
-                return referrer.host == host;
+                return client.appId == appId;
             });
 
-            if (referrer) {
-                referrer.apiKey = this.createApiKey(options.appKey);
-                options.referrers[index] = referrer;
+            if (client) {
+                client.key = this.createApiKey(options.appKey);
+                options.clients[index] = client;
             } else {
-                referrer = {
-                    host: host,
-                    apiKey: this.createApiKey(options.appKey)
+                client = {
+                    appId: appId,
+                    key: this.createApiKey(options.appKey)
                 };
 
-                options.referrers.push(referrer);
+                options.clients.push(client);
             }
 
-            console.log(colors.green('Referrer added: ' + host));
-            console.log(colors.green('API Key: ' + referrer.apiKey))
+            console.log(colors.green('API Client added!' ));
+            console.log(colors.magenta('appId: ' + client.appId));
+            console.log(colors.magenta('key: ' + client.key))
 
             this.saveConfig(options);
         }
@@ -229,22 +260,22 @@ export class Cli {
      * @param  {Object} yargs
      * @return {void}
      */
-    referrerRemove(yargs): void {
+    clientRemove(yargs): void {
         var options = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
-        var host = yargs.argv._[1] || null;
-        options.referrers = options.referrers || [];
+        var appId = yargs.argv._[1] || null;
+        options.clients = options.clients || [];
 
         var index = null;
-        var referrer = options.referrers.find((referrer, i) => {
+        var client = options.clients.find((client, i) => {
             index = i;
-            return referrer.host == host;
+            return client.appId == appId;
         });
 
         if (index >= 0) {
-            options.referrers.splice(index, 1);
+            options.clients.splice(index, 1);
         }
 
-        console.log(colors.green('Referrer removed: ' + host));
+        console.log(colors.green('Client removed: ' + appId));
 
         this.saveConfig(options);
     }
