@@ -1,6 +1,6 @@
 import { Log } from './../log';
 var url = require('url');
-var _ = require('lodash');
+import * as _ from 'lodash';
 
 export class HttpApi {
     /**
@@ -12,84 +12,127 @@ export class HttpApi {
      */
     constructor(private io, private channel, private express) { }
 
-    init() {
-        // Get status info about the sockets and connections
-        this.express.get('/apps/:appId/status', (req, res) => {
-            res.json({
-                subscription_count: this.io.engine.clientsCount,
-                uptime: process.uptime(),
-                memory_usage: process.memoryUsage(),
-            })
-        })
+    /**
+     * Initialize the API.
+     */
+    init(): void {
+        this.express.get(
+            '/apps/:appId/status',
+            (req, res) => this.getStatus(req, res)
+        );
 
-        // The user count for all channels
-        this.express.get('/apps/:appId/channels', (req, res) => {
-            var prefix = url.parse(req.url, true).query.filter_by_prefix;
+        this.express.get(
+            '/apps/:appId/channels',
+            (req, res) => this.getChannels(req, res)
+        );
 
-            var rooms = this.io.sockets.adapter.rooms;
+        this.express.get(
+            '/apps/:appId/channels/:channelName',
+            (req, res) => this.getChannel(req, res)
+        );
 
-            var channels = {};
-            Object.keys(rooms).forEach(function (channelName) {
-                // Skip rooms with the socket name
-                if (rooms[channelName].sockets[channelName]) {
-                    return;
-                }
+        this.express.get(
+            '/apps/:appId/channels/:channelName/users',
+            (req, res) => this.getChannelUsers(req, res)
+        );
+    }
 
-                // If filter is given, check if matches
-                if (prefix && ! channelName.startsWith(prefix)) {
-                    return;
-                }
+    /**
+     * Get the status of the server.
+     *
+     * @param {any} req
+     * @param {any} res
+     */
+    getStatus(req: any, res: any): void {
+        res.json({
+            subscription_count: this.io.engine.clientsCount,
+            uptime: process.uptime(),
+            memory_usage: process.memoryUsage(),
+        });
+    }
 
-                channels[channelName] = {
-                    subscription_count: rooms[channelName].length,
-                    occupied: true
-                };
-            });
+    /**
+     * Get a list of the open channels on the server.
+     *
+     * @param {any} req
+     * @param {any} res
+     */
+    getChannels(req: any, res: any): void {
+        var prefix = url.parse(req.url, true).query.filter_by_prefix;
+        var rooms = this.io.sockets.adapter.rooms;
+        var channels = {};
 
-            res.json({channels: channels});
-        })
+        Object.keys(rooms).forEach(function(channelName) {
+            if (rooms[channelName].sockets[channelName]) {
+                return;
+            }
 
-        // Get information about just 1 channel
-        this.express.get('/apps/:appId/channels/:channelName', (req, res) => {
-            var channelName = req.params.channelName;
-            var room = this.io.sockets.adapter.rooms[channelName];
+            if (prefix && !channelName.startsWith(prefix)) {
+                return;
+            }
 
-            var result = {
-                subscription_count: room.length,
+            channels[channelName] = {
+                subscription_count: rooms[channelName].length,
                 occupied: true
             };
+        });
 
-            if ( this.channel.isPresence(channelName)) {
-                this.channel.presence.getMembers(channelName).then(members => {
-                    result['user_count'] = _.uniqBy(members, 'user_id').length;
-                    res.json(result);
-                })
-            } else {
-                res.json(result);
-            }
-        })
+        res.json({ channels: channels });
+    }
 
-        // Get information about just 1 channel
-        this.express.get('/apps/:appId/channels/:channelName/users', (req, res) => {
-            var channelName = req.params.channelName;
-            if ( ! this.channel.isPresence(channelName)) {
-                return this.badResponse(
-                    req,
-                    res,
-                    'User list is only possible for Presence Channels'
-                );
-            }
+    /**
+     * Get a information about a channel.
+     *
+     * @param  {any} req
+     * @param  {any} res
+     */
+    getChannel(req: any, res: any): void {
+        var channelName = req.params.channelName;
+        var room = this.io.sockets.adapter.rooms[channelName];
 
+        var result = {
+            subscription_count: room.length,
+            occupied: true
+        };
+
+        if (this.channel.isPresence(channelName)) {
             this.channel.presence.getMembers(channelName).then(members => {
-                var users = [];
-                _.uniqBy(members, 'user_id').forEach((member) => {
-                    users.push({id: member.user_id});
-                })
+                result['user_count'] = _.uniqBy(members, 'user_id').length;
 
-                res.json({users: users});
-            }, error => Log.error(error));
+                res.json(result);
+            });
+        } else {
+            res.json(result);
+        }
+    }
 
-        })
+    /**
+     * Get the users of a channel.
+     *
+     * @param  {any} req
+     * @param  {any} res
+     * @return {boolean}
+     */
+    getChannelUsers(req: any, res: any): boolean {
+        let channelName = req.params.channelName;
+
+        if (!this.channel.isPresence(channelName)) {
+            return this.badResponse(
+                req,
+                res,
+                'User list is only possible for Presence Channels'
+            );
+        }
+
+        this.channel.presence.getMembers(channelName).then(members => {
+            let users = [];
+
+            _.uniqBy(members, 'user_id').forEach((member) => {
+                users.push({ id: member.user_id });
+            });
+
+            res.json({ users: users });
+        }, error => Log.error(error));
     }
 
     /**
