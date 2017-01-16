@@ -37,7 +37,7 @@ The cli tool will help you setup a **laravel-echo-sever.json** file in the root 
 
 #### App Key
 
-After initial configuration, an app key will be stored in the **laravel-echo-server.json** file, app key is required to perform certain actions on the server.
+After initial configuration, an app key will be stored in the **laravel-echo-server.json** file, and this key is required to perform certain actions on the server.
 
 To generate a new app key, use the cli command:
 
@@ -49,17 +49,17 @@ $ laravel-echo-server key:generate
 
 #### API Clients
 
-The Laravel Echo Server exposes a light http Api to perform broadcasting functionality. For security purposes, access to these endpoints from http referrers must be authenticated with an API id + key. This can be generated using the cli command:
+The Laravel Echo Server exposes a light http API to perform broadcasting functionality. For security purposes, access to these endpoints from http referrers must be authenticated with an API id and key. This can be generated using the cli command:
 
 ``` shell
 
-$ laravel-echo-server client:add myAppId
+$ laravel-echo-server client:add APP_ID
 
 ```
 
-If you run it without argument, it will generate an appId for you. After running this command, the client appId + API key will be displayed and stored in the **laravel-echo-server.json** file.
+If you run `client:add` without an app id argument, one will be generated for you. After running this command, the client id and key will be displayed and stored in the **laravel-echo-server.json** file.
 
-In this example, requests will be allowed as long as the appId + key is provided with http requests.
+In this example, requests will be allowed as long as the app id and key are both provided with http requests.
 
 ``` http
 Request Headers
@@ -68,11 +68,11 @@ Auhtorization:  Bearer skti68i...
 
 or
 
-http://app.dev:6001/apps/myAppId/events?auth_key=skti68i...
+http://app.dev:6001/apps/APP_ID/events?auth_key=skti68i...
 
 ```
 
-You can remove clients with `laravel-echo-server client:remove myAppId`
+You can remove clients with `laravel-echo-server client:remove APP_ID`
 
 #### Run The Server
 
@@ -89,8 +89,8 @@ $ laravel-echo-server start
 Edit the default configuration of the server by adding options to your **laravel-echo-server.json** file.
 
 
-| Title            | Default              | Description |
-| :--------------- | :------------------- | :-----------|
+| Title            | Default              | Description                 |
+| :--------------- | :------------------- | :---------------------------|
 | `appKey`         | `''`                 | Unique app key used in security implementations |
 | `apiKey`         | `''`                 | Private API key used to authorize HTTP requests |
 | `authEndpoint`   | `/broadcasting/auth` | The route that authenticates private channels  |
@@ -154,7 +154,7 @@ POST http://app.dev:6001/apps/your-app-id/events?auth_key=skti68i...
 
 ### Pusher
 
-The HTTP subscriber is compatible with the Laravel Pusher subscriber. Just configure the host + port for your Socket.IO server and set the app ID + key in config/broadcasting.php. Secret is not required.
+The HTTP subscriber is compatible with the Laravel Pusher subscriber. Just configure the host and port for your Socket.IO server and set the app id and key in config/broadcasting.php. Secret is not required.
 
 ```php
  'pusher' => [
@@ -171,17 +171,31 @@ The HTTP subscriber is compatible with the Laravel Pusher subscriber. Just confi
 
 You can now send events using HTTP, without using Redis. This also allows you to use the Pusher API to list channels/users as described in the [Pusher PHP library](https://github.com/pusher/pusher-http-php)
 
+## HTTP API
+The HTTP API exposes endpoints that allow you to gather information about your running server and channels.
+
+**Status**
+Get total number of clients, uptime of the server, and memory usage.
+
+``` http
+GET /apps/:APP_ID/status
 ```
-use Illuminate\Support\Facades\Broadcast;
+**Channels**
+List of all channels.
 
-/** @var Pusher $pusher */
-$pusher = Broadcast::getPusher();
+``` http
+GET /apps/:APP_ID/channels
+```
+**Channel**
+Get information about a particular channel.
 
-dump($pusher->get('/status')); // Get total number of clients, uptime, memory usage
-dump($pusher->get_channels());  // List of all channels
-dump($pusher->get_channels(['filter_by_prefix' => 'private-'])); 
-dump($pusher->get_channel_info('presence-chat'));       // Info about 1 channel
-dump($pusher->get('/channels/presence-chat/users'));    // List of users
+``` http
+GET /apps/:APP_ID/channels/:CHANNEL_NAME
+```
+**Channel Users**
+List of users on a channel.
+``` http
+GET /apps/:APP_ID/channels/:CHANNEL_NAME/users
 ```
 
 ## Database
@@ -232,22 +246,28 @@ While presence channels contain a list of users, there will be instances where a
 
 ## Client Side Configuration
 
-See the official Laravel documentation for more information. <https://laravel.com/docs/5.3/broadcasting#introduction>
+See the official Laravel documentation for more information. <https://laravel.com/docs/master/broadcasting#introduction>
 
 ### Tips
 #### Socket.io client library
 You can include the socket.io client library from your running server. For example, if your server is running at `app.dev:6001` you should be able to
 add a script tag to your html like so:
 
-`<script src="//app.dev:6001/socket.io/socket.io.js"></script>`
+```
+
+<script src="//app.dev:6001/socket.io/socket.io.js"></script>
+
+```
 
 #### Better performance with [µWebSockets](https://github.com/uWebSockets/uWebSockets)
 For extra performance, you can use the faster `uws` engine instead of `ws`, by setting the `wsEngine` option for Socket.IO in `laravel-echo-server.json`:
 
 ```js
+
 "socketio": {
     "wsEngine": "uws"
-},
+}
+
 ```
 
-See https://github.com/uWebSockets/uWebSockets for more information.
+See [https://github.com/uWebSockets/uWebSockets](https://github.com/uWebSockets/uWebSockets) for more information.
