@@ -11,6 +11,13 @@ export class Channel {
     protected _privateChannels: string[] = ['private-*', 'presence-*'];
 
     /**
+     * Allowed client events
+     *
+     * @type {array}
+     */
+    protected _clientEvents: string[] = ['client-*'];
+
+    /**
      * Private channel instance.
      *
      * @type {PrivateChannel}
@@ -49,6 +56,27 @@ export class Channel {
                 socket.join(data.channel);
                 this.onJoin(socket, data.channel);
             }
+        }
+    }
+
+    /**
+     * Trigger a client message
+     *
+     * @param  {object} socket
+     * @param  {object} data
+     * @return {void}
+     */
+    clientEvent(socket, data): void {
+        if (data.event && this.isClientEvent(data.event)
+            && data.channel && this.isPrivate(data.channel)
+            && this.isInChannel(socket, data.channel)
+        ) {
+            this.io
+                .sockets
+                .connected[socket.id]
+                .broadcast
+                .to(data.channel)
+                .emit(data.event, data.channel, data.data);
         }
     }
 
@@ -135,5 +163,33 @@ export class Channel {
         if (this.options.devMode) {
             Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} joined channel: ${channel}`);
         }
+    }
+
+    /**
+     * Check if client is a client event
+     *
+     * @param  {string} event
+     * @return {boolean}
+     */
+    isClientEvent(event: string): boolean {
+        let isClientEvent = false;
+
+        this._clientEvents.forEach(clientEvent => {
+            let regex = new RegExp(clientEvent.replace('\*', '.*'));
+            if (regex.test(event)) isClientEvent = true;
+        });
+
+        return isClientEvent;
+    }
+
+    /**
+     * Check if a socket has joined a channel.
+     *
+     * @param socket
+     * @param channel
+     * @returns {boolean}
+     */
+    isInChannel(socket: any, channel: string): boolean {
+        return !! socket.rooms[channel];
     }
 }

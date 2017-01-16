@@ -221,6 +221,7 @@ export class EchoServer {
             this.onSubscribe(socket);
             this.onUnsubscribe(socket);
             this.onDisconnecting(socket);
+            this.onClientEvent(socket);
         });
     }
 
@@ -260,6 +261,18 @@ export class EchoServer {
                     this.channel.leave(socket, room, reason);
                 }
             });
+        });
+    }
+
+    /**
+     * On client events.
+     *
+     * @param  {object} socket
+     * @return {void}
+     */
+    onClientEvent(socket: any): void {
+        socket.on('client event', data => {
+            this.channel.clientEvent(socket, data);
         });
     }
 }
