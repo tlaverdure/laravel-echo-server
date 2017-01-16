@@ -220,6 +220,7 @@ export class EchoServer {
         this.server.io.on('connection', socket => {
             this.onSubscribe(socket);
             this.onUnsubscribe(socket);
+            this.onDisconnecting(socket);
             this.onClientEvent(socket);
         });
     }
