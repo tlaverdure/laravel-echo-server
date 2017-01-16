@@ -1,8 +1,8 @@
 import { HttpSubscriber, RedisSubscriber } from './subscribers';
 import { Channel } from './channels';
 import { Server } from './server';
-import { Log } from './log';
 import { HttpApi } from './api';
+import { Log } from './log';
 
 const packageFile = require('../package.json');
 
@@ -19,6 +19,7 @@ export class EchoServer {
         appKey: '',
         authHost: null,
         authEndpoint: '/broadcasting/auth',
+        clients: [],
         database: 'redis',
         databaseConfig: {
             redis: {},
@@ -29,7 +30,6 @@ export class EchoServer {
         devMode: false,
         host: 'http://localhost',
         port: 6001,
-        clients: [],
         socketio: {},
         sslCertPath: '',
         sslKeyPath: ''
