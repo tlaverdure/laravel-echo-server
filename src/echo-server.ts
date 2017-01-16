@@ -220,6 +220,7 @@ export class EchoServer {
         this.server.io.on('connection', socket => {
             this.onSubscribe(socket);
             this.onUnsubscribe(socket);
+            this.onDisconnecting(socket);
         });
     }
 
@@ -243,7 +244,22 @@ export class EchoServer {
      */
     onUnsubscribe(socket: any): void {
         socket.on('unsubscribe', data => {
-            this.channel.leave(socket, data.channel);
+            this.channel.leave(socket, data.channel, 'unsubscribed');
+        });
+    }
+
+    /**
+     * On socket disconnecting.
+     *
+     * @return {void}
+     */
+    onDisconnecting(socket: any): void {
+        socket.on('disconnecting', (reason) => {
+            Object.keys(socket.rooms).forEach(room => {
+                if (room !== socket.id) {
+                    this.channel.leave(socket, room, reason);
+                }
+            });
         });
     }
 }
