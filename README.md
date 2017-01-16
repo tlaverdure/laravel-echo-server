@@ -270,4 +270,4 @@ For extra performance, you can use the faster `uws` engine instead of `ws`, by s
 
 ```
 
-See [https://github.com/uWebSockets/uWebSockets](https://github.com/uWebSockets/uWebSockets) for more information.
+See <https://github.com/uWebSockets/uWebSockets> for more information.
