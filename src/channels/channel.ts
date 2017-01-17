@@ -138,7 +138,14 @@ export class Channel {
             }
 
             this.onJoin(socket, data.channel);
-        }, error => Log.error(error));
+        }, error => {
+            Log.error(error.reason);
+
+            this.io
+                .sockets
+                .to(socket.id)
+                .emit('subscription_error', data.channel, error.status);
+        });
     }
 
     /**
