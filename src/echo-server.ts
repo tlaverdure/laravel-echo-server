@@ -30,6 +30,7 @@ export class EchoServer {
         devMode: false,
         host: 'http://localhost',
         port: 6001,
+        protocol: "http",
         socketio: {},
         sslCertPath: '',
         sslKeyPath: ''
