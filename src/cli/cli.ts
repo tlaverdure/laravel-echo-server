@@ -2,7 +2,7 @@ let fs = require('fs');
 let colors = require("colors");
 let echo = require('./../../dist');
 let inquirer = require('inquirer');
-
+const crypto = require('crypto');
 const CONFIG_FILE = process.cwd() + '/laravel-echo-server.json';
 
 /**
@@ -32,7 +32,6 @@ export class Cli {
     init(yargs) {
         this.setupConfig().then((options) => {
             options = Object.assign({}, this.defaultOptions, options);
-            options.appKey = this.createAppKey();
 
             this.saveConfig(options).then(() => {
                 console.log('Configuration file saved. Run ' + colors.magenta.bold('laravel-echo-server start') + ' to run server.');
@@ -153,67 +152,26 @@ export class Cli {
      *
      * @return {string}
      */
-    createAppKey(): string {
-        return Math.random().toString(31).substring(7).slice(0, 60);
-    }
-
-    /**
-     * Generate an app key and save to config.
-     *
-     * @return {void}
-     */
-    keyGenerate(): void {
-        var key = this.createAppKey();
-        var options = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
-        options.appKey = key;
-
-        this.saveConfig(options);
+    getRandomString(bytes: number): string {
+        return crypto.randomBytes(bytes).toString('hex');
     }
 
     /**
      * Create an api key for the HTTP API.
      *
-     * @param  {string} app_key
      * @return {string}
      */
-    createApiKey(app_key: string): string {
-        var hash = Math.random().toString(31).substring(7).slice(0, 60);
-        let api_key = hash.concat(app_key);
-        api_key = api_key.split('')
-            .sort(() => 0.5 - Math.random())
-            .join('').slice(0, 60);
-
-        return api_key;
+    createApiKey(): string {
+        return this.getRandomString(16);
     }
 
     /**
      * Create an api key for the HTTP API.
      *
-     * @param  {string} app_key
      * @return {string}
      */
-    createAppId(app_key: string): string {
-        var hash = Math.random().toString(31).substring(7).slice(0, 16);
-        let api_key = hash.concat(app_key);
-        api_key = api_key.split('')
-            .sort(() => 0.5 - Math.random())
-            .join('').slice(0, 16);
-
-        return api_key;
-    }
-
-    /**
-     * Generate the API key
-     *
-     * @return {void}
-     */
-    apiKeyGenerate(): void {
-        var options = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
-        options.apiKey = this.createApiKey(options.appKey);
-
-        console.log(colors.green('API Key: ' + options.apiKey))
-
-        this.saveConfig(options);
+    createAppId(): string {
+        return this.getRandomString(8);
     }
 
     /**
@@ -224,10 +182,10 @@ export class Cli {
      */
     clientAdd(yargs): void {
         var options = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
-        var appId = yargs.argv._[1] || this.createAppId(options.appKey);
+        var appId = yargs.argv._[1] || this.createAppId();
         options.clients = options.clients || [];
 
-        if (appId && options.appKey) {
+        if (appId) {
             var index = null;
             var client = options.clients.find((client, i) => {
                 index = i;
@@ -235,18 +193,19 @@ export class Cli {
             });
 
             if (client) {
-                client.key = this.createApiKey(options.appKey);
+                client.key = this.createApiKey();
                 options.clients[index] = client;
+                console.log(colors.green('API Client updated!' ));
             } else {
                 client = {
                     appId: appId,
-                    key: this.createApiKey(options.appKey)
+                    key: this.createApiKey()
                 };
 
                 options.clients.push(client);
+                console.log(colors.green('API Client added!' ));
             }
-
-            console.log(colors.green('API Client added!' ));
+            
             console.log(colors.magenta('appId: ' + client.appId));
             console.log(colors.magenta('key: ' + client.key))
 
