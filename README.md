@@ -35,18 +35,6 @@ $   laravel-echo-server init
 
 The cli tool will help you setup a **laravel-echo-sever.json** file in the root directory of your project. This file will be loaded by the server during start up. You may edit this file later on to manage the configuration of your server.
 
-#### App Key
-
-After initial configuration, an app key will be stored in the **laravel-echo-server.json** file, and this key is required to perform certain actions on the server.
-
-To generate a new app key, use the cli command:
-
-``` shell
-
-$ laravel-echo-server key:generate
-
-```
-
 #### API Clients
 
 The Laravel Echo Server exposes a light http API to perform broadcasting functionality. For security purposes, access to these endpoints from http referrers must be authenticated with an API id and key. This can be generated using the cli command:
@@ -91,8 +79,6 @@ Edit the default configuration of the server by adding options to your **laravel
 
 | Title            | Default              | Description                 |
 | :--------------- | :------------------- | :---------------------------|
-| `appKey`         | `''`                 | Unique app key used in security implementations |
-| `apiKey`         | `''`                 | Private API key used to authorize HTTP requests |
 | `authEndpoint`   | `/broadcasting/auth` | The route that authenticates private channels  |
 | `authHost`       | `http://localhost`   | The host of the server that authenticates private and presence channels  |
 | `database`       | `redis`              | Database used to store data that should persist, like presence channel members. Options are currently `redis` and `sqlite` |

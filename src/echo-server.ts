@@ -16,7 +16,6 @@ export class EchoServer {
      * @type {object}
      */
     public defaultOptions: any = {
-        appKey: '',
         authHost: null,
         authEndpoint: '/broadcasting/auth',
         clients: [],
