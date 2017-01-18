@@ -62,11 +62,12 @@ export class Cli {
         return inquirer.prompt([
             {
                 name: 'devMode',
-                message: 'Do you want to run this server in development mode?',
                 default: false,
+                message: 'Do you want to run this server in development mode?',
                 type: 'confirm'
             },{
                 name: 'host',
+                default: 'http://localhost',
                 message: 'Enter the host for the server.'
             }, {
                 name: 'port',
@@ -83,6 +84,7 @@ export class Cli {
                 type: 'confirm'
             }, {
                 name: 'authHost',
+                default: 'http://localhost',
                 message: 'Enter the host of your authentication server.',
                 when: function(options) {
                     return options.verifyAuthServer;
@@ -116,9 +118,9 @@ export class Cli {
                 }
             }, {
                 name: 'addClient',
+                default: false,
                 message: 'Do you want to setup a client ID/Key for HTTP API?',
-                type: 'confirm',
-                default: false
+                type: 'confirm'
             }
         ]);
     }
