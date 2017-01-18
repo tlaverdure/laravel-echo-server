@@ -33,6 +33,16 @@ export class Cli {
         this.setupConfig().then((options) => {
             options = Object.assign({}, this.defaultOptions, options);
 
+            if (options.addClient) {
+                let client = {
+                    appId: this.createAppId(),
+                    key: this.createApiKey()
+                };
+                options.clients.push(client);
+                console.log('appId: ' + colors.magenta(client.appId));
+                console.log('key: ' + colors.magenta(client.key));
+            }
+
             this.saveConfig(options).then(() => {
                 console.log('Configuration file saved. Run ' + colors.magenta.bold('laravel-echo-server start') + ' to run server.');
 
@@ -49,10 +59,16 @@ export class Cli {
      * @return {Promise}
      */
     setupConfig() {
-        return inquirer.prompt([{
-            name: 'host',
-            message: 'Enter the host for the server.'
-        }, {
+        return inquirer.prompt([
+            {
+                name: 'devMode',
+                message: 'Do you want to run this server in development mode?',
+                default: false,
+                type: 'confirm'
+            },{
+                name: 'host',
+                message: 'Enter the host for the server.'
+            }, {
                 name: 'port',
                 default: '6001',
                 message: 'Which port would you like to serve from?'
@@ -98,7 +114,13 @@ export class Cli {
                 when: function(options) {
                     return options.protocol == 'https';
                 }
-            }]);
+            }, {
+                name: 'addClient',
+                message: 'Do you want to setup a client ID/Key for HTTP API?',
+                type: 'confirm',
+                default: false
+            }
+        ]);
     }
 
     /**
