@@ -8,7 +8,7 @@ export class HttpSubscriber implements Subscriber {
      *
      * @param  {any} express
      */
-    constructor(private express) { }
+    constructor(private express, private options) { }
 
     /**
      * Subscribe to events to broadcast.
@@ -60,6 +60,12 @@ export class HttpSubscriber implements Subscriber {
                 socket: body.socket_id
             }
             var channels = body.channels || [body.channel];
+
+            if (this.options.devMode) {
+                Log.info("Channel: " + channels.join(', '));
+                Log.info("Event: " + message.event);
+            }
+
             channels.forEach(channel => broadcast(channel, message));
         } else {
             return this.badResponse(

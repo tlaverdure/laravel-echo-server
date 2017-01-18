@@ -111,7 +111,7 @@ export class EchoServer {
         return new Promise((resolve, reject) => {
             this.channel = new Channel(io, this.options);
             this.redisSub = new RedisSubscriber(this.options);
-            this.httpSub = new HttpSubscriber(this.server.express);
+            this.httpSub = new HttpSubscriber(this.server.express, this.options);
             this.httpApi = new HttpApi(io, this.channel, this.server.express);
             this.httpApi.init();
 
