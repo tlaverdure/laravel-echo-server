@@ -66,10 +66,6 @@ export class Cli {
                 message: 'Do you want to run this server in development mode?',
                 type: 'confirm'
             },{
-                name: 'host',
-                default: 'http://localhost',
-                message: 'Enter the host for the server.'
-            }, {
                 name: 'port',
                 default: '6001',
                 message: 'Which port would you like to serve from?'
@@ -79,26 +75,13 @@ export class Cli {
                 type: 'list',
                 choices: ['redis', 'sqlite']
             }, {
-                name: 'verifyAuthServer',
-                message: 'Will you be authenticating users from a different host?',
-                type: 'confirm'
-            }, {
                 name: 'authHost',
                 default: 'http://localhost',
-                message: 'Enter the host of your authentication server.',
-                when: function(options) {
-                    return options.verifyAuthServer;
-                }
+                message: 'Enter the host of your Laravel authentication server.',
             }, {
-                name: 'verifyAuthPath',
-                message: 'Is this the right endpoint for authentication /broadcasting/auth?',
-                type: 'confirm'
-            }, {
-                name: 'authPath',
+                name: 'authEndpoint',
+                default: '/broadcasting/auth',
                 message: 'Enter the path to send authentication requests to.',
-                when: function(options) {
-                    return !options.verifyAuthPath;
-                }
             }, {
                 name: 'protocol',
                 message: 'Will you be serving on http or https?',
@@ -119,7 +102,7 @@ export class Cli {
             }, {
                 name: 'addClient',
                 default: false,
-                message: 'Do you want to setup a client ID/Key for HTTP API?',
+                message: 'Do you want to generate a client ID/Key for HTTP API?',
                 type: 'confirm'
             }
         ]);

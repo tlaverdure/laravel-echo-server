@@ -16,7 +16,7 @@ export class EchoServer {
      * @type {object}
      */
     public defaultOptions: any = {
-        authHost: null,
+        authHost: 'http://localhost',
         authEndpoint: '/broadcasting/auth',
         clients: [],
         database: 'redis',
@@ -27,7 +27,7 @@ export class EchoServer {
             }
         },
         devMode: false,
-        host: 'http://localhost',
+        host: null,
         port: 6001,
         protocol: "http",
         socketio: {},
