@@ -82,8 +82,8 @@ Edit the default configuration of the server by adding options to your **laravel
 | `authEndpoint`   | `/broadcasting/auth` | The route that authenticates private channels  |
 | `authHost`       | `http://localhost`   | The host of the server that authenticates private and presence channels  |
 | `database`       | `redis`              | Database used to store data that should persist, like presence channel members. Options are currently `redis` and `sqlite` |
-| `databaseConfig` |  `{}`                |  Configurations for the different database drivers [Example](#database)|
-| `host`           | `http://localhost`   | The host of the socket.io server ex.`app.dev` |
+| `databaseConfig` |  `{}`                | Configurations for the different database drivers [Example](#database)|
+| `host`           | `null`               | The host of the socket.io server ex.`app.dev`. `null` will accept connections on any IP-address |
 | `port`           | `6001`               | The port that the socket.io server should run on |
 | `protocol`       | `http`               | either `http` or `https` |
 | `sslCertPath`    | `''`                 | The path to your server's ssl certificate |
