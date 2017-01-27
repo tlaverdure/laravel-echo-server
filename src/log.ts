@@ -53,7 +53,7 @@ export class Log {
      * @return {void}
      */
     static success(message: any): void {
-        console.log(colors.green('\u2714'), message);
+        console.log(colors.green('\u2714 '), message);
     }
 
     /**
@@ -75,6 +75,6 @@ export class Log {
      * @return {void}
      */
     static warning(message: any): void {
-        console.log(colors.warn('\u26A0' + message));
+        console.log(colors.warn('\u26A0 ' + message));
     }
 }
