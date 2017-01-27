@@ -39,6 +39,7 @@ export class Cli {
                     key: this.createApiKey()
                 };
                 options.clients.push(client);
+
                 console.log('appId: ' + colors.magenta(client.appId));
                 console.log('key: ' + colors.magenta(client.key));
             }
@@ -65,7 +66,7 @@ export class Cli {
                 default: false,
                 message: 'Do you want to run this server in development mode?',
                 type: 'confirm'
-            },{
+            }, {
                 name: 'port',
                 default: '6001',
                 message: 'Which port would you like to serve from?'
@@ -78,10 +79,6 @@ export class Cli {
                 name: 'authHost',
                 default: 'http://localhost',
                 message: 'Enter the host of your Laravel authentication server.',
-            }, {
-                name: 'authEndpoint',
-                default: '/broadcasting/auth',
-                message: 'Enter the path to send authentication requests to.',
             }, {
                 name: 'protocol',
                 message: 'Will you be serving on http or https?',
@@ -148,6 +145,7 @@ export class Cli {
             }
 
             var options = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
+
             options.devMode = options.devMode || yargs.argv.dev || false;
 
             echo.run(options);
@@ -201,8 +199,10 @@ export class Cli {
 
             if (client) {
                 client.key = this.createApiKey();
+
                 options.clients[index] = client;
-                console.log(colors.green('API Client updated!' ));
+
+                console.log(colors.green('API Client updated!'));
             } else {
                 client = {
                     appId: appId,
@@ -210,9 +210,10 @@ export class Cli {
                 };
 
                 options.clients.push(client);
-                console.log(colors.green('API Client added!' ));
+
+                console.log(colors.green('API Client added!'));
             }
-            
+
             console.log(colors.magenta('appId: ' + client.appId));
             console.log(colors.magenta('key: ' + client.key))
 
@@ -232,6 +233,7 @@ export class Cli {
         options.clients = options.clients || [];
 
         var index = null;
+
         var client = options.clients.find((client, i) => {
             index = i;
             return client.appId == appId;
