@@ -137,20 +137,24 @@ export class Cli {
      * @return {void}
      */
     start(yargs): void {
-        fs.access(CONFIG_FILE, fs.F_OK, (error) => {
+        let dir = yargs.argv.dir ? yargs.argv.dir.replace(/\/?$/, '/') : null;
+        let configFile = dir ? dir + 'laravel-echo-server.json' : CONFIG_FILE;
+
+        fs.access(configFile, fs.F_OK, (error) => {
             if (error) {
                 console.error(colors.error('Error: laravel-echo-server.json file not found.'));
 
                 return false;
             }
 
-            var options = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
+            var options = JSON.parse(fs.readFileSync(configFile, 'utf8'));
 
-            options.devMode = options.devMode || yargs.argv.dev || false;
+            options.devMode = yargs.argv.dev || options.devMode || false;
 
             echo.run(options);
         });
     }
+
 
     /**
      * Create an app key for server.
