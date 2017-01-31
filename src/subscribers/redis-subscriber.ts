@@ -31,13 +31,14 @@ export class RedisSubscriber implements Subscriber {
                 try {
                     message = JSON.parse(message);
 
-					if (this.options.devMode) {
-						Log.info("Channel: " + channel);
-						Log.info("Event: " + message.event);
-					}
+                    if (this.options.devMode) {
+                        Log.info("Channel: " + channel);
+                        Log.info("Event: " + message.event);
+                    }
 
                     callback(channel, message);
-                } catch(e){
+                    console.log('CHANNEL', channel)
+                } catch (e) {
                     Log.info("No JSON message");
                 }
             });

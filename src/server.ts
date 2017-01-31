@@ -34,7 +34,8 @@ export class Server {
     init(): Promise<any> {
         return new Promise((resolve, reject) => {
             this.serverProtocol().then(() => {
-                Log.success(`Running at ${this.options.host} on port ${this.options.port}`);
+                let host = this.options.host || 'localhost';
+                Log.success(`Running at ${host} on port ${this.options.port}`);
 
                 resolve(this.io);
             }, error => reject(error));

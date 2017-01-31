@@ -141,9 +141,7 @@ export class Channel {
         }, error => {
             Log.error(error.reason);
 
-            this.io
-                .sockets
-                .to(socket.id)
+            this.io.sockets.to(socket.id)
                 .emit('subscription_error', data.channel, error.status);
         });
     }
