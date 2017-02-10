@@ -155,7 +155,6 @@ export class Cli {
         });
     }
 
-
     /**
      * Create an app key for server.
      *

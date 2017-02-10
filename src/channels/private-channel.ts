@@ -55,6 +55,7 @@ export class PrivateChannel {
     protected serverRequest(socket: any, options: any): Promise<any> {
         return new Promise<any>((resolve, reject) => {
             options.headers = this.prepareHeaders(socket, options);
+            let body;
 
             this.request.post(options, (error, response, body, next) => {
                 if (error) {
@@ -77,7 +78,14 @@ export class PrivateChannel {
                         Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} authenticated for: ${options.form.channel_name}`);
                     }
 
-                    resolve(JSON.parse(response.body));
+                    try {
+                        body = JSON.parse(response.body);
+                    } catch (e) {
+                        body = response.body
+                    }
+
+                    resolve(response);
+
                 }
             });
         });
