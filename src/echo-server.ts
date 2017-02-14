@@ -164,6 +164,7 @@ export class EchoServer {
             if (this.options.receivingMethods.includes('http')) {
                 promises.push(this.httpSub.subscribe(this.broadcast.bind(this)));
             }
+
             if (this.options.receivingMethods.includes('redis')) {
                 promises.push(this.redisSub.subscribe(this.broadcast.bind(this)));
             }
