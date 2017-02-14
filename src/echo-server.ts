@@ -1,4 +1,4 @@
-import { HttpSubscriber, RedisSubscriber } from './subscribers';
+import { HttpSubscriber, RedisSubscriber, SocketSubscriber } from './subscribers';
 import { Channel } from './channels';
 import { Server } from './server';
 import { HttpApi } from './api';
@@ -26,6 +26,8 @@ export class EchoServer {
                 databasePath: '/database/laravel-echo-server.sqlite'
             }
         },
+        socket: false,
+        isConnector: true,
         devMode: false,
         host: null,
         port: 6001,
@@ -71,6 +73,13 @@ export class EchoServer {
     private httpSub: HttpSubscriber;
 
     /**
+     * Socket subscriber instance
+     *
+     * @type {SocketSubscriber}
+     */
+    private socketSub: SocketSubscriber;
+
+    /**
      * Http api instance.
      *
      * @type {HttpApi}
@@ -112,6 +121,7 @@ export class EchoServer {
         return new Promise((resolve, reject) => {
             this.channel = new Channel(io, this.options);
             this.redisSub = new RedisSubscriber(this.options);
+            this.socketSub = new SocketSubscriber(this.options);
             this.httpSub = new HttpSubscriber(this.server.express, this.options);
             this.httpApi = new HttpApi(io, this.channel, this.server.express);
             this.httpApi.init();
@@ -133,7 +143,14 @@ export class EchoServer {
         if (this.options.devMode) {
             Log.warning('Starting server in DEV mode...\n');
         } else {
-            Log.info('Starting server...\n')
+            Log.info('Starting server...\n');
+        }
+
+        if (this.options.isConnector) {
+            Log.info('This is a connecting server.\n');
+        }
+        else {
+            Log.warning('This is not a connecting server.\n');
         }
     }
 
@@ -152,7 +169,9 @@ export class EchoServer {
                 return this.broadcast(channel, message);
             });
 
-            Promise.all([http, redis]).then(() => resolve());
+            let socket = this.socketSub.subscribe(this.broadcast.bind(this));
+
+            Promise.all([http, redis, socket]).then(() => resolve());
         });
     }
 
@@ -190,8 +209,7 @@ export class EchoServer {
      * @return {boolean}
      */
     toOthers(socket: any, channel: string, message: any): boolean {
-        socket.broadcast.to(channel)
-            .emit(message.event, channel, message.data);
+        this.to(socket.broadcast, channel, message);
 
         return true
     }
@@ -205,10 +223,27 @@ export class EchoServer {
      * @return {boolean}
      */
     toAll(channel: string, message: any): boolean {
-        this.server.io.to(channel)
-            .emit(message.event, channel, message.data);
+        this.to(this.server.io, channel, message);
 
         return true
+    }
+
+    /**
+     * Emits to the socket depending on whether
+     * @param network
+     * @param channel
+     * @param message
+     */
+    private to (network: any, channel: string, message: any) {
+        if (this.options.isConnector) {
+            network.to(channel).emit(message.event, channel, message.data);
+        }
+        else {
+            network.sockets.emit('event', {
+                channel,
+                message
+            });
+        }
     }
 
     /**
