@@ -4,12 +4,26 @@ const client = require('socket.io-client');
 
 export class SocketSubscriber implements Subscriber {
     private io;
-    private isSubscribed : boolean = false;
 
     constructor (private options) {
         if (typeof options.socket === 'object' && options.socket.hasOwnProperty('host')) {
-            this.isSubscribed = true;
             this.io = client(options.socket.host, options.socket.opts);
+
+            this.io.on( 'connect', () => {
+                Log.success('Connected to socket server!');
+            });
+
+            this.io.on( 'connect_error', e => {
+                Log.error('Socket Error: ' + e + '\n');
+            });
+
+            this.io.on( 'connect_timeout', () => {
+                Log.error('Socket Timeout...\n');
+            });
+
+            this.io.on( 'error', e => {
+                Log.error(`Socket Error: ${e}\n`);
+            });
         }
     }
 
@@ -17,8 +31,8 @@ export class SocketSubscriber implements Subscriber {
      * Whether or not a subscription to a socket provider has been registered
      * @return {boolean}
      */
-    get hasSubscription () : boolean {
-        return this.isSubscribed;
+    get isSubscribed () : boolean {
+        return typeof this.io !== 'undefined';
     }
 
     /**
@@ -29,7 +43,15 @@ export class SocketSubscriber implements Subscriber {
      */
     subscribe(callback: Function): Promise<any> {
         if (this.isSubscribed) {
-            this.io.on('event', ({channel, message}) => callback(channel, message));
+            this.io.on('event', ({channel, message}) => {
+
+                if (this.options.devMode) {
+                    Log.info("Channel: " + channel);
+                    Log.info("Event: " + message.event);
+                }
+
+                callback(channel, message);
+            });
             Log.success('Listening for socket events...');
         }
 

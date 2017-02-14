@@ -27,7 +27,8 @@ export class EchoServer {
             }
         },
         socket: false,
-        isConnector: true,
+        eventForwarding: false,
+        receivingMethods: ['redis', 'socket', 'http'],
         devMode: false,
         host: null,
         port: 6001,
@@ -146,11 +147,8 @@ export class EchoServer {
             Log.info('Starting server...\n');
         }
 
-        if (this.options.isConnector) {
-            Log.info('This is a connecting server.\n');
-        }
-        else {
-            Log.warning('This is not a connecting server.\n');
+        if (this.options.eventForwarding) {
+            Log.warning('This server is forwarding its events...\n');
         }
     }
 
@@ -161,17 +159,20 @@ export class EchoServer {
      */
     listen(): Promise<any> {
         return new Promise((resolve, reject) => {
-            let http = this.httpSub.subscribe((channel, message) => {
-                return this.broadcast(channel, message);
-            });
+            const promises = [];
 
-            let redis = this.redisSub.subscribe((channel, message) => {
-                return this.broadcast(channel, message);
-            });
+            if (this.options.receivingMethods.includes('http')) {
+                promises.push(this.httpSub.subscribe(this.broadcast.bind(this)));
+            }
+            if (this.options.receivingMethods.includes('redis')) {
+                promises.push(this.redisSub.subscribe(this.broadcast.bind(this)));
+            }
 
-            let socket = this.socketSub.subscribe(this.broadcast.bind(this));
+            if (this.options.receivingMethods.includes('socket')) {
+                promises.push(this.socketSub.subscribe(this.broadcast.bind(this)));
+            }
 
-            Promise.all([http, redis, socket]).then(() => resolve());
+            Promise.all(promises).then(() => resolve());
         });
     }
 
@@ -235,14 +236,14 @@ export class EchoServer {
      * @param message
      */
     private to (network: any, channel: string, message: any) {
-        if (this.options.isConnector) {
-            network.to(channel).emit(message.event, channel, message.data);
-        }
-        else {
-            network.sockets.emit('event', {
+        if (this.options.eventForwarding) {
+            network.emit('event', {
                 channel,
                 message
             });
+        }
+        else {
+            network.to(channel).emit(message.event, channel, message.data);
         }
     }
 
