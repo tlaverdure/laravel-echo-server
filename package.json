@@ -34,9 +34,7 @@
     "yargs": "^5.0.0"
   },
   "optionalDependencies": {
-    "uws": "0.12.0",
-    "typescript": "^2.0.3",
-    "@types/node": "^6.0.60"
+    "uws": "0.12.0"
   },
   "devDependencies": {
     "@types/node": "^6.0.60",
