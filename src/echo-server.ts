@@ -255,6 +255,10 @@ export class EchoServer {
      */
     onConnect(): void {
         this.server.io.on('connection', socket => {
+            if (this.options.eventForwarding) {
+                Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} connected`);
+            }
+
             this.onSubscribe(socket);
             this.onUnsubscribe(socket);
             this.onDisconnecting(socket);
