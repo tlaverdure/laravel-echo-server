@@ -1,6 +1,6 @@
 {
   "name": "kevupton-laravel-echo-server",
-  "version": "1.2.6",
+  "version": "1.2.7",
   "description": "Laravel Echo Node JS Server for Socket.io",
   "repository": {
     "type": "git",
