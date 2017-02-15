@@ -84,8 +84,7 @@ export class PrivateChannel {
                         body = response.body
                     }
 
-                    resolve(response);
-
+                    resolve(body);
                 }
             });
         });
