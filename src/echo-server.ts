@@ -1,4 +1,4 @@
-import { HttpSubscriber, RedisSubscriber } from './subscribers';
+import { HttpSubscriber, RedisSubscriber, SocketSubscriber } from './subscribers';
 import { Channel } from './channels';
 import { Server } from './server';
 import { HttpApi } from './api';
@@ -26,6 +26,9 @@ export class EchoServer {
                 databasePath: '/database/laravel-echo-server.sqlite'
             }
         },
+        socket: false,
+        eventForwarding: false,
+        receivingMethods: ['redis', 'socket', 'http'],
         devMode: false,
         host: null,
         port: 6001,
@@ -71,6 +74,13 @@ export class EchoServer {
     private httpSub: HttpSubscriber;
 
     /**
+     * Socket subscriber instance
+     *
+     * @type {SocketSubscriber}
+     */
+    private socketSub: SocketSubscriber;
+
+    /**
      * Http api instance.
      *
      * @type {HttpApi}
@@ -112,6 +122,7 @@ export class EchoServer {
         return new Promise((resolve, reject) => {
             this.channel = new Channel(io, this.options);
             this.redisSub = new RedisSubscriber(this.options);
+            this.socketSub = new SocketSubscriber(this.options);
             this.httpSub = new HttpSubscriber(this.server.express, this.options);
             this.httpApi = new HttpApi(io, this.channel, this.server.express);
             this.httpApi.init();
@@ -133,7 +144,11 @@ export class EchoServer {
         if (this.options.devMode) {
             Log.warning('Starting server in DEV mode...\n');
         } else {
-            Log.info('Starting server...\n')
+            Log.info('Starting server...\n');
+        }
+
+        if (this.options.eventForwarding) {
+            Log.warning('This server is forwarding its events...\n');
         }
     }
 
@@ -144,15 +159,21 @@ export class EchoServer {
      */
     listen(): Promise<any> {
         return new Promise((resolve, reject) => {
-            let http = this.httpSub.subscribe((channel, message) => {
-                return this.broadcast(channel, message);
-            });
+            const promises = [];
 
-            let redis = this.redisSub.subscribe((channel, message) => {
-                return this.broadcast(channel, message);
-            });
+            if (this.options.receivingMethods.includes('http')) {
+                promises.push(this.httpSub.subscribe(this.broadcast.bind(this)));
+            }
 
-            Promise.all([http, redis]).then(() => resolve());
+            if (this.options.receivingMethods.includes('redis')) {
+                promises.push(this.redisSub.subscribe(this.broadcast.bind(this)));
+            }
+
+            if (this.options.receivingMethods.includes('socket')) {
+                promises.push(this.socketSub.subscribe(this.broadcast.bind(this)));
+            }
+
+            Promise.all(promises).then(() => resolve());
         });
     }
 
@@ -190,8 +211,7 @@ export class EchoServer {
      * @return {boolean}
      */
     toOthers(socket: any, channel: string, message: any): boolean {
-        socket.broadcast.to(channel)
-            .emit(message.event, channel, message.data);
+        this.to(socket.broadcast, channel, message);
 
         return true
     }
@@ -205,10 +225,27 @@ export class EchoServer {
      * @return {boolean}
      */
     toAll(channel: string, message: any): boolean {
-        this.server.io.to(channel)
-            .emit(message.event, channel, message.data);
+        this.to(this.server.io, channel, message);
 
         return true
+    }
+
+    /**
+     * Emits to the socket depending on whether
+     * @param network
+     * @param channel
+     * @param message
+     */
+    private to (network: any, channel: string, message: any) {
+        if (this.options.eventForwarding) {
+            network.emit('event', {
+                channel,
+                message
+            });
+        }
+        else {
+            network.to(channel).emit(message.event, channel, message.data);
+        }
     }
 
     /**
@@ -218,6 +255,10 @@ export class EchoServer {
      */
     onConnect(): void {
         this.server.io.on('connection', socket => {
+            if (this.options.eventForwarding && this.options.devMode) {
+                Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} child connected`);
+            }
+
             this.onSubscribe(socket);
             this.onUnsubscribe(socket);
             this.onDisconnecting(socket);
@@ -256,6 +297,10 @@ export class EchoServer {
      */
     onDisconnecting(socket: any): void {
         socket.on('disconnecting', (reason) => {
+            if (this.options.eventForwarding && this.options.devMode) {
+                Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} child disconnected`);
+            }
+
             Object.keys(socket.rooms).forEach(room => {
                 if (room !== socket.id) {
                     this.channel.leave(socket, room, reason);
