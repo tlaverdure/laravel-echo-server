@@ -255,7 +255,7 @@ export class EchoServer {
      */
     onConnect(): void {
         this.server.io.on('connection', socket => {
-            if (this.options.eventForwarding) {
+            if (this.options.eventForwarding && this.options.devMode) {
                 Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} connected`);
             }
 
@@ -297,6 +297,10 @@ export class EchoServer {
      */
     onDisconnecting(socket: any): void {
         socket.on('disconnecting', (reason) => {
+            if (this.options.eventForwarding && this.options.devMode) {
+                Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} disconnected`);
+            }
+
             Object.keys(socket.rooms).forEach(room => {
                 if (room !== socket.id) {
                     this.channel.leave(socket, room, reason);
