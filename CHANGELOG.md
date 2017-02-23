@@ -1,7 +1,7 @@
 # 1.2.0
 
 ## Upgrade Guide
-* Re-install laravel-echo-server globably using the command.
+* Re-install laravel-echo-server globally using the command.
 ```
 npm install -g laravel-echo-server
 ```
