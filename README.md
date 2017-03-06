@@ -245,6 +245,8 @@ add a script tag to your html like so:
 
 ```
 
+_Note: When using the socket.io client library from your running server, remember to check that the `io` global variable is defined before subscribing to events._ 
+
 #### Better performance with [µWebSockets](https://github.com/uWebSockets/uWebSockets)
 For extra performance, you can use the faster `uws` engine instead of `ws`, by setting the `wsEngine` option for Socket.IO in `laravel-echo-server.json`:
 
