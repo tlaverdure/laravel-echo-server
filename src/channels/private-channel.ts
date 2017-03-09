@@ -26,7 +26,7 @@ export class PrivateChannel {
      */
     authenticate(socket: any, data: any): Promise<any> {
         let options = {
-            url: this.authHost() + this.options.authEndpoint,
+            url: this.authHost(socket) + this.options.authEndpoint,
             form: { channel_name: data.channel },
             headers: (data.auth && data.auth.headers) ? data.auth.headers : {},
             rejectUnauthorized: false
@@ -36,11 +36,24 @@ export class PrivateChannel {
     }
 
     /**
+     * Is the socket source listed in the allowedSourceList array
+     * defined in the laravel-echo-server.json file?
+     *
+     * @return {boolean}
+     */
+    protected socketIsFromApprovedSource(socket): boolean {
+        return this.options.allowedSourceList.indexOf(socket.conn.request.headers.origin) !== -1;
+    }
+
+    /**
      * Get the auth endpoint.
      *
      * @return {string}
      */
-    protected authHost(): string {
+    protected authHost(socket): string {
+        if(this.options.authHost === '<source>' && this.socketIsFromApprovedSource(socket))
+            return socket.conn.request.headers.origin;
+
         return (this.options.authHost) ?
             this.options.authHost : this.options.host;
     }

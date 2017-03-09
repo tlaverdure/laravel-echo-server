@@ -17,6 +17,7 @@ export class EchoServer {
      */
     public defaultOptions: any = {
         authHost: 'http://localhost',
+        allowedSourceList: [],
         authEndpoint: '/broadcasting/auth',
         clients: [],
         database: 'redis',
