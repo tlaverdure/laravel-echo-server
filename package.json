@@ -28,12 +28,9 @@
     "ioredis": "^1.15.1",
     "lodash": "^4.12.0",
     "request": "^2.72.0",
-    "socket.io": "^1.5.0",
+    "socket.io": "^2.0.1",
     "sqlite3": "^3.1.8",
     "yargs": "^5.0.0"
-  },
-  "optionalDependencies": {
-    "uws": "0.14.1"
   },
   "devDependencies": {
     "@types/node": "^6.0.60",
