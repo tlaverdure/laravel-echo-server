@@ -98,7 +98,7 @@ export class Cli {
                 }
             }, {
                 name: 'ssPassphrase',
-                message: 'Enter the passphrase to use for the certificate.',
+                message: 'Enter the pass phrase to use for the certificate.',
                 when: function(options) {
                     return options.protocol == 'https';
                 }
