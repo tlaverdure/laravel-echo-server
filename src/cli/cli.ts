@@ -97,6 +97,12 @@ export class Cli {
                     return options.protocol == 'https';
                 }
             }, {
+                name: 'ssPassphrase',
+                message: 'Enter the passphrase to use for the certificate.',
+                when: function(options) {
+                    return options.protocol == 'https';
+                }
+            }, {
                 name: 'addClient',
                 default: false,
                 message: 'Do you want to generate a client ID/Key for HTTP API?',

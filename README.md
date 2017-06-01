@@ -1,4 +1,4 @@
-# Laravel Echo Server
+﻿# Laravel Echo Server
 
 NodeJs server for Laravel Echo broadcasting with Socket.io.
 
@@ -88,6 +88,7 @@ Edit the default configuration of the server by adding options to your **laravel
 | `protocol`       | `http`               | either `http` or `https` |
 | `sslCertPath`    | `''`                 | The path to your server's ssl certificate |
 | `sslKeyPath`     | `''`                 | The path to your server's ssl key |
+| `sslPassphrase`  | `''`                 | The pass phrase phrase to use for the certificate (if applicable) |
 | `socketio`       | `{}`                 | Options to pass to the socket.io instance ([available options](https://github.com/socketio/engine.io#methods-1)) |
 
 ### Running with SSL
