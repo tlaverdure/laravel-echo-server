@@ -1,3 +1,8 @@
+
+# 1.2.8
+
+Updated to socket.io v2
+
 # 1.2.0
 
 ## Upgrade Guide
