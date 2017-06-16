@@ -1,5 +1,5 @@
 
-# 1.2.8
+# 1.2.9
 
 Updated to socket.io v2
 
