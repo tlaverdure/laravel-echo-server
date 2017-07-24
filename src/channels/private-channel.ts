@@ -1,6 +1,7 @@
 var request = require('request');
 import { Channel } from './channel';
 import { Log } from './../log';
+var url = require('url');
 
 export class PrivateChannel {
     /**
@@ -25,8 +26,14 @@ export class PrivateChannel {
      * @return {Promise<any>}
      */
     authenticate(socket: any, data: any): Promise<any> {
+        var authHost = this.authHost();
+        var referer = url.parse(socket.request.headers.referer);
+        
+        if(referer.hostname.substr(referer.hostname.indexOf('.'))===authHost)
+            authHost = referer.protocol+"//"+referer.host;
+        
         let options = {
-            url: this.authHost() + this.options.authEndpoint,
+            url: authHost + this.options.authEndpoint,
             form: { channel_name: data.channel },
             headers: (data.auth && data.auth.headers) ? data.auth.headers : {},
             rejectUnauthorized: false
