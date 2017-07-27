@@ -1,28 +1,30 @@
-var request = require('request');
+let request = require('request');
+let url = require('url');
 import { Channel } from './channel';
 import { Log } from './../log';
-var url = require('url');
 
 export class PrivateChannel {
     /**
      * Request client.
      *
-     * @type {object}
+     * @type {any}
      */
     private request: any;
 
     /**
      * Create a new private channel instance.
+     *
+     * @param {any} options
      */
-    constructor(private options) {
+    constructor(private options: any) {
         this.request = request;
     }
 
     /**
      * Send authentication request to application server.
      *
-     * @param  {object} socket
-     * @param  {object} data
+     * @param  {any} socket
+     * @param  {any} data
      * @return {Promise<any>}
      */
     authenticate(socket: any, data: any): Promise<any> {
@@ -37,37 +39,51 @@ export class PrivateChannel {
     }
 
     /**
-     * Get the auth endpoint.
+     * Get the auth host based on the Socket.
      *
+     * @param {any} socket
      * @return {string}
      */
     protected authHost(socket: any): string {
-        let referer: Object = url.parse(socket.request.headers.referer);
-        let authHostSelected: string = 'http://localhost';
-        let authHosts: any = (this.options.authHost) ?
+        let referer = url.parse(socket.request.headers.referer);
+        let authHostSelected = 'http://localhost';
+        let authHosts = (this.options.authHost) ?
             this.options.authHost : this.options.host;
-        
-        if(typeof authHosts === "string")
+
+        if (typeof authHosts === "string") {
             authHosts = [authHosts];
-        
-        for(let authHost of authHosts)
-        {
+        }
+
+        for (let authHost of authHosts) {
             authHostSelected = authHost;
-            if(referer.hostname.substr(referer.hostname.indexOf('.')) === authHostSelected || referer.protocol + "//" + referer.host === authHostSelected || referer.host === authHostSelected)
-            {
-                authHostSelected = referer.protocol+"//"+referer.host;
+
+            if (this.hasMatchingHost(referer, authHost)) {
+                authHostSelected = `${referer.protocol}//${referer.host}`;
                 break;
             }
-        }
+        };
 
         return authHostSelected;
     }
 
     /**
+     * Check if there is a matching auth host.
+     *
+     * @param  {any}  referer
+     * @param  {any}  host
+     * @return {boolean}
+     */
+    protected hasMatchingHost(referer: any, host: any): boolean {
+        return referer.hostname.substr(referer.hostname.indexOf('.')) === host ||
+            `${referer.protocol}//${referer.host}` === host ||
+            referer.host === host;
+    }
+
+    /**
      * Send a request to the server.
      *
-     * @param  {object} socket
-     * @param  {object} options
+     * @param  {any} socket
+     * @param  {any} options
      * @return {Promise<any>}
      */
     protected serverRequest(socket: any, options: any): Promise<any> {
@@ -111,7 +127,8 @@ export class PrivateChannel {
     /**
      * Prepare headers for request to app server.
      *
-     * @param  {object} options
+     * @param  {any} socket
+     * @param  {any} options
      * @return {any}
      */
     protected prepareHeaders(socket: any, options: any): any {
