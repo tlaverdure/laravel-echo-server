@@ -1,6 +1,7 @@
 var request = require('request');
 import { Channel } from './channel';
 import { Log } from './../log';
+var url = require('url');
 
 export class PrivateChannel {
     /**
@@ -26,7 +27,7 @@ export class PrivateChannel {
      */
     authenticate(socket: any, data: any): Promise<any> {
         let options = {
-            url: this.authHost() + this.options.authEndpoint,
+            url: this.authHost(socket) + this.options.authEndpoint,
             form: { channel_name: data.channel },
             headers: (data.auth && data.auth.headers) ? data.auth.headers : {},
             rejectUnauthorized: false
@@ -40,9 +41,26 @@ export class PrivateChannel {
      *
      * @return {string}
      */
-    protected authHost(): string {
-        return (this.options.authHost) ?
+    protected authHost(socket: any): string {
+        let referer: Object = url.parse(socket.request.headers.referer);
+        let authHostSelected: string = 'http://localhost';
+        let authHosts: any = (this.options.authHost) ?
             this.options.authHost : this.options.host;
+        
+        if(typeof authHosts === "string")
+            authHosts = [authHosts];
+        
+        for(let authHost of authHosts)
+        {
+            authHostSelected = authHost;
+            if(referer.hostname.substr(referer.hostname.indexOf('.')) === authHostSelected || referer.protocol + "//" + referer.host === authHostSelected || referer.host === authHostSelected)
+            {
+                authHostSelected = referer.protocol+"//"+referer.host;
+                break;
+            }
+        }
+
+        return authHostSelected;
     }
 
     /**
