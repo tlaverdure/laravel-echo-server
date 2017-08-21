@@ -88,7 +88,7 @@ Edit the default configuration of the server by adding options to your **laravel
 | `protocol`         | `http`               | either `http` or `https` |
 | `sslCertPath`      | `''`                 | The path to your server's ssl certificate |
 | `sslKeyPath`       | `''`                 | The path to your server's ssl key |
-| `sslChainCertPath` | `''`                 | The path to your server's ssl chain certificate |
+| `sslCertChainPath` | `''`                 | The path to your server's ssl certificate chain |
 | `sslPassphrase`    | `''`                 | The pass phrase to use for the certificate (if applicable) |
 | `socketio`         | `{}`                 | Options to pass to the socket.io instance ([available options](https://github.com/socketio/engine.io#methods-1)) |
 
