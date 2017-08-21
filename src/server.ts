@@ -73,6 +73,7 @@ export class Server {
             Object.assign(this.options, {
                 cert: fs.readFileSync(this.options.sslCertPath),
                 key: fs.readFileSync(this.options.sslKeyPath),
+                ca: (this.options.sslChainCertPath) ? fs.readFileSync(this.options.sslChainCertPath) : '',
                 passphrase: this.options.sslPassphrase,
             });
 
