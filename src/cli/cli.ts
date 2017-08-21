@@ -91,12 +91,6 @@ export class Cli {
                     return options.protocol == 'https';
                 }
             }, {
-                name: 'sslCertChainPath',
-                message: 'Enter the path to your SSL certificate chain file.',
-                when: function(options) {
-                    return options.protocol == 'https';
-                }
-            }, {
                 name: 'sslKeyPath',
                 message: 'Enter the path to your SSL key file.',
                 when: function(options) {
