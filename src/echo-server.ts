@@ -33,6 +33,7 @@ export class EchoServer {
         socketio: {},
         sslCertPath: '',
         sslKeyPath: '',
+        sslCertChainPath: '',
         sslPassphrase: ''
     };
 
