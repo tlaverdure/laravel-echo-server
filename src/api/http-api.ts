@@ -89,10 +89,11 @@ export class HttpApi {
     getChannel(req: any, res: any): void {
         var channelName = req.params.channelName;
         var room = this.io.sockets.adapter.rooms[channelName];
+        var subscriptionCount = room ? room.length : 0;
 
         var result = {
-            subscription_count: room.length,
-            occupied: true
+            subscription_count: subscriptionCount,
+            occupied: !!subscriptionCount
         };
 
         if (this.channel.isPresence(channelName)) {
