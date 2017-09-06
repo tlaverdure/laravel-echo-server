@@ -9,6 +9,7 @@ export class HttpApi {
      * @param  {any} io
      * @param  {any} channel
      * @param  {any} express
+     * @param  {any} options object apiOriginAllow
      */
     constructor(private io, private channel, private express, private options) { }
 
@@ -16,11 +17,11 @@ export class HttpApi {
      * Initialize the API.
      */
     init(): void {
-        if(this.options.apiOriginAllow.allowCors){
+        if(this.options.allowCors){
             this.express.use( (req, res, next) => {
-                res.header('Access-Control-Allow-Origin', this.options.apiOriginAllow.allowOrigin);
-                res.header('Access-Control-Allow-Methods', this.options.apiOriginAllow.allowMethods);
-                res.header('Access-Control-Allow-Headers', this.options.apiOriginAllow.allowHeaders);
+                res.header('Access-Control-Allow-Origin', this.options.allowOrigin);
+                res.header('Access-Control-Allow-Methods', this.options.allowMethods);
+                res.header('Access-Control-Allow-Headers', this.options.allowHeaders);
                 next();
             });
         }
