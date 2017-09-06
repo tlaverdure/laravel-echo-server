@@ -186,6 +186,24 @@ List of users on a channel.
 GET /apps/:APP_ID/channels/:CHANNEL_NAME/users
 ```
 
+**Cross Domain Access To API**
+Cross domain access can be specified in laravel-echo-server.json file by changing `allowCors` in `apiOriginAllow` to `true`. You can then set the CORS origin domain you want to allow, the http allow methods as a comma separated string (only GET works since it's read only data, at least as of right now) and the allow headers to allow to the API to receive.
+
+Example below:
+
+``` json
+{
+  "apiOriginAllow":{
+    "allowCors" : true,
+    "allowOrigin" : "http://127.0.0.1",
+    "allowMethods" : "GET",
+    "allowHeaders" : "Origin, Content-Type, X-Auth-Token, X-Requested-With, Accept, Authorization, X-CSRF-TOKEN, X-Socket-Id"
+  }
+}
+
+```
+This allows you to ping the API via AJAX calls from your app that could be running on the same domain but different port or it could be entirely different domain.
+
 ## Database
 
 To persist presence channel data, there is support for use of Redis or SQLite as a key/value store. The key being the channel name, and the value being the list of presence channel members.
