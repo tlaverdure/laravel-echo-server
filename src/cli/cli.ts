@@ -115,7 +115,7 @@ export class Cli {
                 type: 'confirm'
             },{
                 name: 'allowOrigin',
-                default: 'http://localhost',
+                default: 'http://localhost:80',
                 message: 'Enter the domain you want CORS access to:',
                 when: function(options){
                     return options.corsAllow == true;
