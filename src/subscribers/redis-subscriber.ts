@@ -28,6 +28,12 @@ export class RedisSubscriber implements Subscriber {
 
         return new Promise((resolve, reject) => {
             this._redis.on('pmessage', (subscribed, channel, message) => {
+
+                // Ingore socket.io-redis adapter messages.
+                if (channel.startsWith("adapter")) {
+                  return;
+                }
+
                 try {
                     message = JSON.parse(message);
 
