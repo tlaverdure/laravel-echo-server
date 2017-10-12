@@ -1,5 +1,5 @@
 import { Log } from './../log';
-var url = require('url');
+let url = require('url');
 import * as _ from 'lodash';
 
 export class HttpApi {
@@ -9,7 +9,7 @@ export class HttpApi {
      * @param  {any} io
      * @param  {any} channel
      * @param  {any} express
-     * @param  {any} options object apiOriginAllow
+     * @param  {object} options object
      */
     constructor(private io, private channel, private express, private options) { }
 
@@ -17,14 +17,7 @@ export class HttpApi {
      * Initialize the API.
      */
     init(): void {
-        if(this.options.allowCors){
-            this.express.use( (req, res, next) => {
-                res.header('Access-Control-Allow-Origin', this.options.allowOrigin);
-                res.header('Access-Control-Allow-Methods', this.options.allowMethods);
-                res.header('Access-Control-Allow-Headers', this.options.allowHeaders);
-                next();
-            });
-        }
+        this.corsMiddleware();
 
         this.express.get(
             '/apps/:appId/status',
@@ -48,6 +41,20 @@ export class HttpApi {
     }
 
     /**
+     * Add CORS middleware if applicable.
+     */
+    corsMiddleware(): void {
+        if (this.options.allowCors) {
+            this.express.use((req, res, next) => {
+                res.header('Access-Control-Allow-Origin', this.options.allowOrigin);
+                res.header('Access-Control-Allow-Methods', this.options.allowMethods);
+                res.header('Access-Control-Allow-Headers', this.options.allowHeaders);
+                next();
+            });
+        }
+    }
+
+    /**
      * Get the status of the server.
      *
      * @param {any} req
@@ -68,9 +75,9 @@ export class HttpApi {
      * @param {any} res
      */
     getChannels(req: any, res: any): void {
-        var prefix = url.parse(req.url, true).query.filter_by_prefix;
-        var rooms = this.io.sockets.adapter.rooms;
-        var channels = {};
+        let prefix = url.parse(req.url, true).query.filter_by_prefix;
+        let rooms = this.io.sockets.adapter.rooms;
+        let channels = {};
 
         Object.keys(rooms).forEach(function(channelName) {
             if (rooms[channelName].sockets[channelName]) {
@@ -97,11 +104,11 @@ export class HttpApi {
      * @param  {any} res
      */
     getChannel(req: any, res: any): void {
-        var channelName = req.params.channelName;
-        var room = this.io.sockets.adapter.rooms[channelName];
-        var subscriptionCount = room ? room.length : 0;
+        let channelName = req.params.channelName;
+        let room = this.io.sockets.adapter.rooms[channelName];
+        let subscriptionCount = room ? room.length : 0;
 
-        var result = {
+        let result = {
             subscription_count: subscriptionCount,
             occupied: !!subscriptionCount
         };
