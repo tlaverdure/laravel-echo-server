@@ -1,3 +1,6 @@
+# 1.3.2
+
+Added CORS support to the HTTP API.
 
 # 1.2.9
 
