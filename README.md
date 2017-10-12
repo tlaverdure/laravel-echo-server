@@ -188,7 +188,7 @@ GET /apps/:APP_ID/channels/:CHANNEL_NAME/users
 ```
 
 ## Cross Domain Access To API
-Cross domain access can be specified in laravel-echo-server.json file by changing `allowCors` in `apiOriginAllow` to `true`. You can then set the CORS origin domain you want to allow, the http allow methods as a comma separated string (only GET and POST works as of right now) and the allow headers to allow to the API to receive.
+Cross domain access can be specified in the laravel-echo-server.json file by changing `allowCors` in `apiOriginAllow` to `true`. You can then set the CORS Access-Control-Allow-Origin, Access-Control-Allow-Methods as a comma separated string (GET and POST are enabled by default) and the Access-Control-Allow-Headers that the API can receive.
 
 Example below:
 
@@ -203,7 +203,7 @@ Example below:
 }
 
 ```
-This allows you to ping the API via AJAX calls from your app that could be running on the same domain but different port or it could be entirely different domain.
+This allows you to send requests to the API via AJAX from an app that may be running on the same domain but a different port or an entirely different domain.
 
 ## Database
 
