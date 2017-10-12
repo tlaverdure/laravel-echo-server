@@ -9,13 +9,23 @@ export class HttpApi {
      * @param  {any} io
      * @param  {any} channel
      * @param  {any} express
+     * @param  {any} options object apiOriginAllow
      */
-    constructor(private io, private channel, private express) { }
+    constructor(private io, private channel, private express, private options) { }
 
     /**
      * Initialize the API.
      */
     init(): void {
+        if(this.options.allowCors){
+            this.express.use( (req, res, next) => {
+                res.header('Access-Control-Allow-Origin', this.options.allowOrigin);
+                res.header('Access-Control-Allow-Methods', this.options.allowMethods);
+                res.header('Access-Control-Allow-Headers', this.options.allowHeaders);
+                next();
+            });
+        }
+
         this.express.get(
             '/apps/:appId/status',
             (req, res) => this.getStatus(req, res)

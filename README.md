@@ -91,6 +91,7 @@ Edit the default configuration of the server by adding options to your **laravel
 | `sslCertChainPath` | `''`                 | The path to your server's ssl certificate chain |
 | `sslPassphrase`    | `''`                 | The pass phrase to use for the certificate (if applicable) |
 | `socketio`         | `{}`                 | Options to pass to the socket.io instance ([available options](https://github.com/socketio/engine.io#methods-1)) |
+| `apiOriginAllow`   | `{}`                 | Configuration to allow API be accessed over CORS. [Example](#cross-domain-access-to-api)|
 
 ### Running with SSL
 
@@ -185,6 +186,24 @@ List of users on a channel.
 ``` http
 GET /apps/:APP_ID/channels/:CHANNEL_NAME/users
 ```
+
+## Cross Domain Access To API
+Cross domain access can be specified in laravel-echo-server.json file by changing `allowCors` in `apiOriginAllow` to `true`. You can then set the CORS origin domain you want to allow, the http allow methods as a comma separated string (only GET and POST works as of right now) and the allow headers to allow to the API to receive.
+
+Example below:
+
+``` json
+{
+  "apiOriginAllow":{
+    "allowCors" : true,
+    "allowOrigin" : "http://127.0.0.1",
+    "allowMethods" : "GET, POST",
+    "allowHeaders" : "Origin, Content-Type, X-Auth-Token, X-Requested-With, Accept, Authorization, X-CSRF-TOKEN, X-Socket-Id"
+  }
+}
+
+```
+This allows you to ping the API via AJAX calls from your app that could be running on the same domain but different port or it could be entirely different domain.
 
 ## Database
 

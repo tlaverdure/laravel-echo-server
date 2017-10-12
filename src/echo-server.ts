@@ -34,7 +34,13 @@ export class EchoServer {
         sslCertPath: '',
         sslKeyPath: '',
         sslCertChainPath: '',
-        sslPassphrase: ''
+        sslPassphrase: '',
+        apiOriginAllow:{
+            allowCors : false,
+            allowOrigin : '',
+            allowMethods : '',
+            allowHeaders : ''
+        }
     };
 
     /**
@@ -115,7 +121,7 @@ export class EchoServer {
             this.channel = new Channel(io, this.options);
             this.redisSub = new RedisSubscriber(this.options);
             this.httpSub = new HttpSubscriber(this.server.express, this.options);
-            this.httpApi = new HttpApi(io, this.channel, this.server.express);
+            this.httpApi = new HttpApi(io, this.channel, this.server.express, this.options.apiOriginAllow);
             this.httpApi.init();
 
             this.onConnect();

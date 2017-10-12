@@ -32,7 +32,7 @@ export class Cli {
     init(yargs) {
         this.setupConfig().then((options) => {
             options = Object.assign({}, this.defaultOptions, options);
-
+            
             if (options.addClient) {
                 let client = {
                     appId: this.createAppId(),
@@ -42,6 +42,13 @@ export class Cli {
 
                 console.log('appId: ' + colors.magenta(client.appId));
                 console.log('key: ' + colors.magenta(client.key));
+            }
+
+            if(options.corsAllow){
+                options.apiOriginAllow.allowCors = true;
+                options.apiOriginAllow.allowOrigin = options.allowOrigin;
+                options.apiOriginAllow.allowMethods = options.allowMethods;
+                options.apiOriginAllow.allowHeaders = options.allowHeaders;
             }
 
             this.saveConfig(options).then(() => {
@@ -101,6 +108,32 @@ export class Cli {
                 default: false,
                 message: 'Do you want to generate a client ID/Key for HTTP API?',
                 type: 'confirm'
+            }, {
+                name: 'corsAllow',
+                default: false,
+                message: 'Do you want to setup cross domain access to API? Useful for AJAX request to API on same domain different port.',
+                type: 'confirm'
+            },{
+                name: 'allowOrigin',
+                default: 'http://localhost:80',
+                message: 'Enter the domain you want CORS access to:',
+                when: function(options){
+                    return options.corsAllow == true;
+                }
+            },{
+                name: 'allowMethods',
+                default: 'GET, POST',
+                message: 'Enter the CORS HTTP methods you want to allow:',
+                when: function(options){
+                    return options.corsAllow == true;
+                }
+            },{
+                name: 'allowHeaders',
+                default: 'Origin, Content-Type, X-Auth-Token, X-Requested-With, Accept, Authorization, X-CSRF-TOKEN, X-Socket-Id',
+                message: 'Enter the CORS headers you want to allow:',
+                when: function(options){
+                    return options.corsAllow == true;
+                }
             }
         ]);
     }
