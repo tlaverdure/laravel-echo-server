@@ -87,6 +87,12 @@ export class PresenceChannel {
      * @param  {object}  member
      */
     join(socket: any, channel: string, member: any) {
+        if (!member) {
+            Log.error('Unable to join channel. Member data for presence channel missing');
+
+            return;
+        }
+
         this.isMember(channel, member).then(is_member => {
             this.getMembers(channel).then(members => {
                 members = members || [];
@@ -103,7 +109,6 @@ export class PresenceChannel {
                     this.onJoin(socket, channel, member);
                 }
             }, error => Log.error(error));
-
         }, () => {
             Log.error('Error retrieving pressence channel members.');
         });
