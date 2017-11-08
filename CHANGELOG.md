@@ -1,3 +1,7 @@
+# 1.3.3
+
+Return a better error when member data is not present when joining presence channels.
+
 # 1.3.2
 
 Added CORS support to the HTTP API.
