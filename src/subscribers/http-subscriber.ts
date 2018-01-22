@@ -27,7 +27,7 @@ export class HttpSubscriber implements Subscriber {
 
                 req.on('data', (chunk) => body.push(chunk))
                     .on('end', () => this.handleData(req, res, body, callback));
-            })
+            });
 
             Log.success('Listening for http events...');
 
@@ -52,7 +52,7 @@ export class HttpSubscriber implements Subscriber {
             var data = body.data;
             try {
                 data = JSON.parse(data);
-            } catch (e) {}
+            } catch (e) { }
 
             var message = {
                 event: body.name,

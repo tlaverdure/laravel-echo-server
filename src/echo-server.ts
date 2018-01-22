@@ -35,11 +35,11 @@ export class EchoServer {
         sslKeyPath: '',
         sslCertChainPath: '',
         sslPassphrase: '',
-        apiOriginAllow:{
-            allowCors : false,
-            allowOrigin : '',
-            allowMethods : '',
-            allowHeaders : ''
+        apiOriginAllow: {
+            allowCors: false,
+            allowOrigin: '',
+            allowMethods: '',
+            allowHeaders: ''
         }
     };
 
@@ -125,7 +125,7 @@ export class EchoServer {
             this.httpApi.init();
 
             this.onConnect();
-            this.listen().then(() => resolve());
+            this.listen().then(() => resolve(), err => Log.error(err));
         });
     }
 
