@@ -52,7 +52,7 @@ In this example, requests will be allowed as long as the app id and key are both
 ``` http
 Request Headers
 
-Auhtorization:  Bearer skti68i...
+Authorization:  Bearer skti68i...
 
 or
 
