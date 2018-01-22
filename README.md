@@ -28,9 +28,7 @@ $   npm install -g laravel-echo-server
 Run the init command in your project directory:
 
 ``` shell
-
 $   laravel-echo-server init
-
 ```
 
 The cli tool will help you setup a **laravel-echo-server.json** file in the root directory of your project. This file will be loaded by the server during start up. You may edit this file later on to manage the configuration of your server.
@@ -40,9 +38,7 @@ The cli tool will help you setup a **laravel-echo-server.json** file in the root
 The Laravel Echo Server exposes a light http API to perform broadcasting functionality. For security purposes, access to these endpoints from http referrers must be authenticated with an API id and key. This can be generated using the cli command:
 
 ``` shell
-
 $ laravel-echo-server client:add APP_ID
-
 ```
 
 If you run `client:add` without an app id argument, one will be generated for you. After running this command, the client id and key will be displayed and stored in the **laravel-echo-server.json** file.
@@ -57,7 +53,6 @@ Auhtorization:  Bearer skti68i...
 or
 
 http://app.dev:6001/apps/APP_ID/channels?auth_key=skti68i...
-
 ```
 
 You can remove clients with `laravel-echo-server client:remove APP_ID`
@@ -67,9 +62,7 @@ You can remove clients with `laravel-echo-server client:remove APP_ID`
 in your project root directory, run
 
 ``` shell
-
 $ laravel-echo-server start
-
 ```
 
 ### Configurable Options
@@ -115,7 +108,6 @@ Using Http, you can also publish events to the Laravel Echo Server in the same f
 **Request Endpoint**
 
 ``` http
-
 POST http://app.dev:6001/apps/your-app-id/events?auth_key=skti68i...
 
 ```
@@ -234,7 +226,6 @@ For example, if you wanted to pass a custom configuration to Redis:
 With SQLite you may be interested in changing the path where the database is stored:
 
 ``` json
-
 {
   "databaseConfig" : {
     "sqlite" : {
@@ -242,7 +233,12 @@ With SQLite you may be interested in changing the path where the database is sto
     }
   }
 }
+```
 
+***Note: [node-sqlite3](https://github.com/mapbox/node-sqlite3) is required for this database. Please install before using.***
+
+```
+npm install sqlite3 -g
 ```
 
 ## Presence Channels
@@ -261,9 +257,7 @@ You can include the socket.io client library from your running server. For examp
 add a script tag to your html like so:
 
 ```
-
 <script src="//app.dev:6001/socket.io/socket.io.js"></script>
-
 ```
 
 _Note: When using the socket.io client library from your running server, remember to check that the `io` global variable is defined before subscribing to events._
@@ -272,11 +266,9 @@ _Note: When using the socket.io client library from your running server, remembe
 For extra performance, you can use the faster `uws` engine instead of `ws`, by setting the `wsEngine` option for Socket.IO in `laravel-echo-server.json`:
 
 ```js
-
 "socketio": {
     "wsEngine": "uws"
 }
-
 ```
 
 See <https://github.com/uWebSockets/uWebSockets> for more information.
