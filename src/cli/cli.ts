@@ -12,9 +12,9 @@ export class Cli {
     /**
      * Default config options.
      *
-     * @type {any}
+     * @type {object}
      */
-    defaultOptions: any;
+    defaultOptions: object;
 
     /**
      * Create new CLI instance.
@@ -26,10 +26,10 @@ export class Cli {
     /**
      * Initialize server with a configuration file.
      *
-     * @param  {Object} yargs
+     * @param  {object} yargs
      * @return {void}
      */
-    init(yargs) {
+    init(yargs): void {
         this.setupConfig().then((options) => {
             options = Object.assign({}, this.defaultOptions, options);
 
@@ -42,6 +42,13 @@ export class Cli {
 
                 console.log('appId: ' + colors.magenta(client.appId));
                 console.log('key: ' + colors.magenta(client.key));
+            }
+
+            if (options.corsAllow) {
+                options.apiOriginAllow.allowCors = true;
+                options.apiOriginAllow.allowOrigin = options.allowOrigin;
+                options.apiOriginAllow.allowMethods = options.allowMethods;
+                options.apiOriginAllow.allowHeaders = options.allowHeaders;
             }
 
             this.saveConfig(options).then(() => {
@@ -57,7 +64,7 @@ export class Cli {
     /**
      * Setup configuration with questions.
      *
-     * @return {Promise}
+     * @return {Promise<any>}
      */
     setupConfig() {
         return inquirer.prompt([
@@ -101,6 +108,32 @@ export class Cli {
                 default: false,
                 message: 'Do you want to generate a client ID/Key for HTTP API?',
                 type: 'confirm'
+            }, {
+                name: 'corsAllow',
+                default: false,
+                message: 'Do you want to setup cross domain access to the API?',
+                type: 'confirm'
+            }, {
+                name: 'allowOrigin',
+                default: 'http://localhost:80',
+                message: 'Specify the URI that may access the API:',
+                when: function(options) {
+                    return options.corsAllow == true;
+                }
+            }, {
+                name: 'allowMethods',
+                default: 'GET, POST',
+                message: 'Enter the HTTP methods that are allowed for CORS:',
+                when: function(options) {
+                    return options.corsAllow == true;
+                }
+            }, {
+                name: 'allowHeaders',
+                default: 'Origin, Content-Type, X-Auth-Token, X-Requested-With, Accept, Authorization, X-CSRF-TOKEN, X-Socket-Id',
+                message: 'Enter the HTTP headers that are allowed for CORS:',
+                when: function(options) {
+                    return options.corsAllow == true;
+                }
             }
         ]);
     }
@@ -108,7 +141,7 @@ export class Cli {
     /**
      * Save configuration file.
      *
-     * @param  {Object} options
+     * @param  {object} options
      * @return {Promise<any>}
      */
     saveConfig(options): Promise<any> {
@@ -133,7 +166,7 @@ export class Cli {
     /**
      * Start the Laravel Echo server.
      *
-     * @param  {Object} yargs
+     * @param  {object} yargs
      * @return {void}
      */
     start(yargs): void {
@@ -185,7 +218,7 @@ export class Cli {
     /**
      * Add a registered referrer.
      *
-     * @param  {Object} yargs
+     * @param  {object} yargs
      * @return {void}
      */
     clientAdd(yargs): void {
@@ -227,7 +260,7 @@ export class Cli {
     /**
      * Remove a registered referrer.
      *
-     * @param  {Object} yargs
+     * @param  {object} yargs
      * @return {void}
      */
     clientRemove(yargs): void {
