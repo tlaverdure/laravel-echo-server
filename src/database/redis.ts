@@ -37,7 +37,7 @@ export class RedisDatabase implements DatabaseDriver {
      */
     set(key: string, value: any): void {
         this._redis.set(key, JSON.stringify(value));
-        if(this.options.databaseConfig.redis.publishPresence === true && /^presence-.*:members$/.test(key)) {
+        if(this.options.databaseConfig.publishPresence === true && /^presence-.*:members$/.test(key)) {
             this._redis.publish('PresenceChannelUpdated', JSON.stringify({
                 "event": {
                     "channel": key,
