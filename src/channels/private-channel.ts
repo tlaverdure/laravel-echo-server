@@ -47,6 +47,9 @@ export class PrivateChannel {
      * @return {void}
      */
     leaveNotice(socket: any, member: any, channels: Array<string>) : void {
+        member.socket_id = member.socketId;
+        delete member.socketId;
+
         let client = this.options.clients[0];
 
         let options = {
