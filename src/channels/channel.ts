@@ -79,17 +79,29 @@ export class Channel {
     }
 
     /**
-     * Leave a channel.
+     * Leave some specified channels. Default is leaving all channels.
      *
      * @param  {object} socket
-     * @param  {string} channel
      * @param  {string} reason
+     * @param  {array} channels
      * @return {void}
      */
-    leave(socket: any, channel: string, reason: string): void {
-        if (channel) {
+    leave(socket: any, reason: string, channels?: Array<string>): void {
+        if (! channels) {
+            channels = Object.keys(socket.rooms);
+        } else if (typeof channels === "string") {
+            channels = [channels];
+        }
+
+        this.leaveNotice(socket, channels);
+
+        channels.forEach(channel => {
+            if (channel === socket.id) {
+                return;
+            }
+
             if (this.isPresence(channel)) {
-                this.presence.leave(socket, channel)
+                this.presence.leave(socket, channel);
             }
 
             socket.leave(channel);
@@ -97,6 +109,27 @@ export class Channel {
             if (this.options.devMode) {
                 Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} left channel: ${channel} (${reason})`);
             }
+        });
+    }
+
+    /**
+     * Send leave notice to application server. Only for presence channel.
+     *
+     * @param  {any} socket
+     * @param  {array} channels
+     * @return {void}
+     */
+    leaveNotice(socket: any, channels: Array<string>) : void {
+        if (! this.options.leaveEndpoint) {
+            return;
+        }
+
+        let presenceChannels = channels.filter(channel => this.isPresence(channel));
+
+        if (presenceChannels[0]) {
+            this.presence.getMember(socket, presenceChannels[0]).then(member => {
+                this.private.leaveNotice(socket, member, presenceChannels);
+            }).catch(error => Log.error(error));
         }
     }
 

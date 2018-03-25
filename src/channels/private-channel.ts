@@ -39,6 +39,30 @@ export class PrivateChannel {
     }
 
     /**
+     * Send leave notice to application server.
+     *
+     * @param  {any} socket
+     * @param  {any} member
+     * @param  {array} channels
+     * @return {void}
+     */
+    leaveNotice(socket: any, member: any, channels: Array<string>) : void {
+        let client = this.options.clients[0];
+
+        let options = {
+            url: this.authHost(socket) + this.options.leaveEndpoint,
+            form: { member: member, channel_names: channels },
+            auth: { username: client.appId, password: client.key }
+        };
+
+        this.request.post(options, (error, response) => {
+            if (error || response.statusCode !== 200) {
+                Log.error(error || response.body);
+            }
+        });
+    }
+
+    /**
      * Get the auth host based on the Socket.
      *
      * @param {any} socket

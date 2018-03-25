@@ -18,6 +18,7 @@ export class EchoServer {
     public defaultOptions: any = {
         authHost: 'http://localhost',
         authEndpoint: '/broadcasting/auth',
+        leaveEndpoint: '/broadcasting/leave',
         clients: [],
         database: 'redis',
         databaseConfig: {
@@ -253,7 +254,7 @@ export class EchoServer {
      */
     onUnsubscribe(socket: any): void {
         socket.on('unsubscribe', data => {
-            this.channel.leave(socket, data.channel, 'unsubscribed');
+            this.channel.leave(socket, 'unsubscribed', data.channel);
         });
     }
 
@@ -264,11 +265,7 @@ export class EchoServer {
      */
     onDisconnecting(socket: any): void {
         socket.on('disconnecting', (reason) => {
-            Object.keys(socket.rooms).forEach(room => {
-                if (room !== socket.id) {
-                    this.channel.leave(socket, room, reason);
-                }
-            });
+            this.channel.leave(socket, reason);
         });
     }
 
