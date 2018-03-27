@@ -194,9 +194,14 @@ export class Cli {
                 describe: 'The working directory.',
             },
 
+            force: {
+                type: 'boolean',
+                describe: 'If a server is already running, stop it.',
+            },
+
             dev: {
                 type: 'boolean',
-                describe: 'Whether to run in dev mode.',
+                describe: 'Run in dev mode.',
             }
         });
 
@@ -213,7 +218,53 @@ export class Cli {
 
             options.devMode = yargs.argv.dev || options.devMode || false;
 
-            echo.run(options);
+            let lockFile = path.join(path.dirname(configFile), path.basename(configFile, '.json') + '.lock');
+
+            if (fs.existsSync(lockFile)) {
+                try {
+                    let lockProcess = parseInt(JSON.parse(fs.readFileSync(lockFile, 'utf8')).process);
+                } catch {
+                    console.error(colors.error('Error: There was a problem reading the existing lock file.'));
+                }
+
+                if (lockProcess) {
+                    try {
+                        if (process.kill(lockProcess, 0)) {
+                            if (yargs.argv.force) {
+                                process.kill(lockProcess);
+
+                                console.log(colors.yellow('Warning: Closing process ' + lockProcess + ' because you used the \'--force\' option.'));
+                            } else {
+                                console.error(colors.error('Error: There is already a server running! Use add the option \'--force\' to stop it and start another one.'));
+
+                                return false;
+                            }
+                        }
+                    } catch {
+                        // The process in the lock file doesn't exist, so continue
+                    }
+                }
+            }
+
+            fs.writeFile(lockFile, JSON.stringify({process: process.pid}, null, '\t'), error => {
+                if (error) {
+                    console.error(colors.error('Error: Cannot write lock file.'));
+
+                    return false;
+                }
+
+                process.on('exit', () => {
+                    try {
+                        fs.unlinkSync(lockFile);
+                    } catch {}
+                });
+
+                process.on('SIGINT', process.exit);
+                process.on('SIGHUP', process.exit);
+                process.on('SIGTERM', process.exit);
+
+                echo.run(options);
+            });
         });
     }
 
@@ -236,7 +287,31 @@ export class Cli {
             }
         });
 
-        // TODO: make stopping the server actually work (duh)
+        let configFile = this.getConfigFile(yargs.argv.config, yargs.argv.dir);
+
+        let lockFile = path.join(path.dirname(configFile), path.basename(configFile, '.json') + '.lock');
+
+        if (fs.existsSync(lockFile)) {
+            try {
+                let lockProcess = parseInt(JSON.parse(fs.readFileSync(lockFile, 'utf8')).process);
+            } catch {
+                console.error(colors.error('Error: There was a problem reading the lock file.'));
+            }
+
+            if (lockProcess) {
+                try {
+                    fs.unlink(lockFile);
+
+                    process.kill(lockProcess);
+
+                    console.log(colors.green('Closed the running server.'));
+                } catch {
+                    console.log(colors.error('No running servers to close.'));
+                }
+            }
+        } else {
+            console.log(colors.error('Error: Could not find any lock file.'));
+        }
     }
 
     /**
