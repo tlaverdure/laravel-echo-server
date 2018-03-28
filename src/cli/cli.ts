@@ -221,8 +221,10 @@ export class Cli {
             let lockFile = path.join(path.dirname(configFile), path.basename(configFile, '.json') + '.lock');
 
             if (fs.existsSync(lockFile)) {
+                let lockProcess;
+
                 try {
-                    let lockProcess = parseInt(JSON.parse(fs.readFileSync(lockFile, 'utf8')).process);
+                    lockProcess = parseInt(JSON.parse(fs.readFileSync(lockFile, 'utf8')).process);
                 } catch {
                     console.error(colors.error('Error: There was a problem reading the existing lock file.'));
                 }
@@ -292,8 +294,10 @@ export class Cli {
         let lockFile = path.join(path.dirname(configFile), path.basename(configFile, '.json') + '.lock');
 
         if (fs.existsSync(lockFile)) {
+            let lockProcess;
+            
             try {
-                let lockProcess = parseInt(JSON.parse(fs.readFileSync(lockFile, 'utf8')).process);
+                lockProcess = parseInt(JSON.parse(fs.readFileSync(lockFile, 'utf8')).process);
             } catch {
                 console.error(colors.error('Error: There was a problem reading the lock file.'));
             }
