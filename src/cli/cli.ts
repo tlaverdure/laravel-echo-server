@@ -34,7 +34,7 @@ export class Cli {
             config: {
                 type: 'string',
                 default: 'laravel-echo-server.json',
-                describe: 'The name and/or path of the config file to create.',
+                describe: 'The name of the config file to create.',
             }
         });
 
@@ -186,12 +186,12 @@ export class Cli {
         yargs.option({
             config: {
                 type: 'string',
-                describe: 'The name and/or path of the config file.',
+                describe: 'The config file to use.',
             },
 
             dir: {
                 type: 'string',
-                describe: 'The working directory.',
+                describe: 'The working directory to use.',
             },
 
             force: {
@@ -280,12 +280,12 @@ export class Cli {
         yargs.option({
             config: {
                 type: 'string',
-                describe: 'The name and/or path of the config file.',
+                describe: 'The config file to use.',
             },
 
             dir: {
                 type: 'string',
-                describe: 'The working directory.',
+                describe: 'The working directory to use.',
             }
         });
 
@@ -295,7 +295,7 @@ export class Cli {
 
         if (fs.existsSync(lockFile)) {
             let lockProcess;
-            
+
             try {
                 lockProcess = parseInt(JSON.parse(fs.readFileSync(lockFile, 'utf8')).process);
             } catch {
@@ -355,12 +355,12 @@ export class Cli {
         yargs.option({
             config: {
                 type: 'string',
-                describe: 'The name and/or path of the config file.',
+                describe: 'The config file to use.',
             },
 
             dir: {
                 type: 'string',
-                describe: 'The working directory.',
+                describe: 'The working directory to use.',
             }
         });
 
@@ -409,12 +409,12 @@ export class Cli {
         yargs.option({
             config: {
                 type: 'string',
-                describe: 'The name and/or path of the config file.',
+                describe: 'The config file to use.',
             },
 
             dir: {
                 type: 'string',
-                describe: 'The working directory.',
+                describe: 'The working directory to use.',
             }
         });
 
