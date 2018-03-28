@@ -214,7 +214,7 @@ export class Cli {
                 return false;
             }
 
-            var options = JSON.parse(fs.readFileSync(configFile, 'utf8'));
+            var options = this.readConfigFile(configFile);
 
             options.devMode = yargs.argv.dev || options.devMode || false;
 
@@ -364,7 +364,7 @@ export class Cli {
             }
         });
 
-        var options = JSON.parse(fs.readFileSync(this.getConfigFile(yargs.argv.config, yargs.argv.dir), 'utf8'));
+        var options = this.readConfigFile(this.getConfigFile(yargs.argv.config, yargs.argv.dir));
         var appId = yargs.argv._[1] || this.createAppId();
         options.clients = options.clients || [];
 
@@ -418,7 +418,7 @@ export class Cli {
             }
         });
 
-        var options = JSON.parse(fs.readFileSync(this.getConfigFile(yargs.argv.config, yargs.argv.dir), 'utf8'));
+        var options = this.readConfigFile(this.getConfigFile(yargs.argv.config, yargs.argv.dir));
         var appId = yargs.argv._[1] || null;
         options.clients = options.clients || [];
 
@@ -449,5 +449,25 @@ export class Cli {
         let filePath = path.join(dir || '', file || 'laravel-echo-server.json');
 
         return path.isAbsolute(filePath) ? filePath : path.join(process.cwd(), filePath);
+    }
+
+    /**
+     * Tries to read a config file
+     *
+     * @param  {string} file
+     * @return {any}
+     */
+    readConfigFile(file): any {
+        let data = {};
+
+        try {
+            data = JSON.parse(fs.readFileSync(file, 'utf8'));
+        } catch {
+            console.error(colors.error('Error: There was a problem reading the config file.'));
+
+            process.exit();
+        }
+
+        return data;
     }
 }
