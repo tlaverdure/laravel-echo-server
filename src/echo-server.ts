@@ -3,6 +3,7 @@ import { Channel } from './channels';
 import { Server } from './server';
 import { HttpApi } from './api';
 import { Log } from './log';
+import { Plugins } from './plugins';
 
 const packageFile = require('../package.json');
 
@@ -40,7 +41,8 @@ export class EchoServer {
             allowOrigin: '',
             allowMethods: '',
             allowHeaders: ''
-        }
+        },
+        plugins: []
     };
 
     /**
@@ -86,6 +88,13 @@ export class EchoServer {
     private httpApi: HttpApi;
 
     /**
+     * Plugin manager instance.
+     *
+     * @type {Plugins}
+     */
+    private plugins: Plugins;
+
+    /**
      * Create a new instance.
      */
     constructor() { }
@@ -101,6 +110,7 @@ export class EchoServer {
             this.options = Object.assign(this.defaultOptions, options);
             this.startup();
             this.server = new Server(this.options);
+            this.plugins = new Plugins(this.options.plugins);
 
             this.server.init().then(io => {
                 this.init(io).then(() => {
