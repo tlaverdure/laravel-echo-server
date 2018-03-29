@@ -114,6 +114,7 @@ export class EchoServer {
 
             this.server.init().then(io => {
                 this.init(io).then(() => {
+                    Plugins.emit('started-server');
                     Log.info('\nServer ready!\n');
                     resolve(this);
                 }, error => Log.error(error));
@@ -192,6 +193,8 @@ export class EchoServer {
      * @return {void}
      */
     broadcast(channel: string, message: any): boolean {
+        Plugins.emit('broadcasting-event', {channel, message});
+
         if (message.socket && this.find(message.socket)) {
             return this.toOthers(this.find(message.socket), channel, message);
         } else {
