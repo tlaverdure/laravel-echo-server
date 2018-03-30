@@ -66,7 +66,7 @@ export class Plugins {
             plugin = require('./../plugins/' + path);
         }
 
-        plugin.install(this.events, this.options);
+        plugin.register(this.events, this.options);
         this.all.push(plugin)
     }
 
