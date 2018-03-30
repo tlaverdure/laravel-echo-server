@@ -38,14 +38,26 @@ export class Plugins {
             for (let i = 0; i < plugins.length; i++) {
                 Log.success('Loading plugin : ' + plugins[i] + ' ...');
                 try {
-                    let plugin = require(plugins[i]);
-                    plugin.install(this.events);
-                    this.all.push(plugin)
+                    this.load(plugins[i])
                 } catch (e) {
                     Log.error(e);
                 }
             }
         }
+    }
+
+    private load(path): void {
+        let plugin = null;
+
+        // If it is an absolute path
+        if(path.substring(0, 1) === '/') {
+            plugin = require(path);
+        } else {
+            plugin = require('./../plugins/' + path);
+        }
+
+        plugin.install(this.events);
+        this.all.push(plugin)
     }
 
     static emit(event, options?): void {
