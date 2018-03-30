@@ -193,7 +193,7 @@ export class EchoServer {
      * @return {void}
      */
     broadcast(channel: string, message: any): boolean {
-        Plugins.emit('broadcasting-event', {channel, message});
+        Plugins.emit('broadcasting-message', {channel, message});
 
         if (message.socket && this.find(message.socket)) {
             return this.toOthers(this.find(message.socket), channel, message);
