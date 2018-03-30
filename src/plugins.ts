@@ -5,7 +5,7 @@ export class Plugins {
     /**
      * The singleton instance of this object.
      *
-     * @type {EventEmitter}
+     * @type {Plugins}
      */
     private static instance: Plugins;
 
