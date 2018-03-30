@@ -114,7 +114,7 @@ export class EchoServer {
 
             this.server.init().then(io => {
                 this.init(io).then(() => {
-                    Plugins.emit('started-server');
+                    Plugins.emit('started-server', {server: this});
                     Log.info('\nServer ready!\n');
                     resolve(this);
                 }, error => Log.error(error));
