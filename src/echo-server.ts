@@ -110,7 +110,7 @@ export class EchoServer {
             this.options = Object.assign(this.defaultOptions, options);
             this.startup();
             this.server = new Server(this.options);
-            this.plugins = new Plugins(this.options.plugins);
+            this.plugins = new Plugins(this.options);
 
             this.server.init().then(io => {
                 this.init(io).then(() => {

@@ -3,7 +3,7 @@ module.exports = {
    * The main method of the plugin where you can register to internal events.
    * Below the full reference of all available events.
    */
-  install: function (events) {
+  install: function (events, options) {
     console.log('Example plugin is successfully loaded !');
 
     events.on('started-server', this.onServerStarted);

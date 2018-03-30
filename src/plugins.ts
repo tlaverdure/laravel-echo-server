@@ -17,6 +17,13 @@ export class Plugins {
     public events: EventEmitter;
 
     /**
+     * Server options.
+     *
+     * @type {Object}
+     */
+    private options: Object;
+
+    /**
      * The plugins instances.
      *
      * @type {Array}
@@ -26,11 +33,14 @@ export class Plugins {
     /**
      * Create a new instance.
      */
-    public constructor(plugins) {
+    public constructor(options) {
         Plugins.instance = this;
 
         this.events = new EventEmitter();
+        this.options = options;
         this.all = [];
+
+        let plugins = options.plugins;
 
         if(plugins.length === 0) {
             Log.success('No plugins to be loaded')
@@ -56,7 +66,7 @@ export class Plugins {
             plugin = require('./../plugins/' + path);
         }
 
-        plugin.install(this.events);
+        plugin.install(this.events, this.options);
         this.all.push(plugin)
     }
 
