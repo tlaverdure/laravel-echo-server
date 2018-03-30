@@ -2,6 +2,7 @@ let request = require('request');
 let url = require('url');
 import { Channel } from './channel';
 import { Log } from './../log';
+import { Plugins } from './../plugins'
 
 export class PrivateChannel {
     /**
@@ -96,6 +97,8 @@ export class PrivateChannel {
             let body;
 
             this.request.post(options, (error, response, body, next) => {
+                Plugins.emit('authenticating', {error, response, body});
+
                 if (error) {
                     if (this.options.devMode) {
                         Log.error(`[${new Date().toLocaleTimeString()}] - Error authenticating ${socket.id} for ${options.form.channel_name}`);
@@ -112,6 +115,8 @@ export class PrivateChannel {
 
                     reject({ reason: 'Client can not be authenticated, got HTTP status ' + response.statusCode, status: response.statusCode });
                 } else {
+                    Plugins.emit('authenticated', {channel: options.form.channel_name});
+
                     if (this.options.devMode) {
                         Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} authenticated for: ${options.form.channel_name}`);
                     }
