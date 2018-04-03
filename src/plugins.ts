@@ -71,6 +71,10 @@ export class Plugins {
     }
 
     static emit(event, options?): void {
-        this.instance.events.emit(event, options)
+        try {
+            this.instance.events.emit(event, options);
+        } catch (err) {
+            Log.error('Plugin event error on ' + event + ': ' + err)
+        }
     }
 }
