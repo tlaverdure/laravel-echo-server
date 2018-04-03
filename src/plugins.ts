@@ -43,12 +43,12 @@ export class Plugins {
         let plugins = options.plugins;
 
         if(plugins.length === 0) {
-            Log.success('No plugins to be loaded')
+            Log.success('No plugins to be loaded');
         } else {
             for (let i = 0; i < plugins.length; i++) {
                 Log.success('Loading plugin : ' + plugins[i] + ' ...');
                 try {
-                    this.load(plugins[i])
+                    this.load(plugins[i]);
                 } catch (e) {
                     Log.error(e);
                 }
@@ -67,14 +67,14 @@ export class Plugins {
         }
 
         plugin.register(this.events, this.options);
-        this.all.push(plugin)
+        this.all.push(plugin);
     }
 
     static emit(event, options?): void {
         try {
             this.instance.events.emit(event, options);
         } catch (err) {
-            Log.error('Plugin event error on ' + event + ': ' + err)
+            Log.error('Plugin event error on ' + event + ': ' + err);
         }
     }
 }
