@@ -1,6 +1,7 @@
 import { PresenceChannel } from './presence-channel';
 import { PrivateChannel } from './private-channel';
 import { Log } from './../log';
+import { Plugins } from './../plugins';
 
 export class Channel {
     /**
@@ -71,6 +72,12 @@ export class Channel {
             if (this.isClientEvent(data.event) &&
                 this.isPrivate(data.channel) &&
                 this.isInChannel(socket, data.channel)) {
+                Plugins.emit('sending-message', {
+                    data,
+                    event: data.event,
+                    channel: data.channel
+                });
+
                 this.io.sockets.connected[socket.id]
                     .broadcast.to(data.channel)
                     .emit(data.event, data.channel, data.data);
@@ -93,6 +100,8 @@ export class Channel {
             }
 
             socket.leave(channel);
+
+            Plugins.emit('left-channel', {socket, channel});
 
             if (this.options.devMode) {
                 Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} left channel: ${channel} (${reason})`);
@@ -163,6 +172,8 @@ export class Channel {
      * @param {string} channel
      */
     onJoin(socket: any, channel: string): void {
+        Plugins.emit('joined-channel', {socket, channel});
+
         if (this.options.devMode) {
             Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} joined channel: ${channel}`);
         }
