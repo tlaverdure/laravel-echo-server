@@ -115,7 +115,7 @@ export class PresenceChannel {
     }
 
     /**
-     * Remove a member from a presenece channel and broadcast they have left
+     * Remove a member from a presence channel and broadcast they have left
      * only if not other presence channel instances exist.
      *
      * @param  {any} socket
@@ -136,6 +136,22 @@ export class PresenceChannel {
                     this.onLeave(channel, member);
                 }
             });
+        }, error => Log.error(error));
+    }
+
+    /**
+     * Get a member from a presence channel.
+     *
+     * @param  {any} socket
+     * @param  {string} channel
+     * @return {Promise}
+     */
+    getMember(socket: any, channel: string): Promise<any> {
+        return this.getMembers(channel).then(members => {
+            members = members || [];
+            let member = members.find(member => member.socketId == socket.id);
+
+            return member;
         }, error => Log.error(error));
     }
 

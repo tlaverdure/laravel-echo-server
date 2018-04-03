@@ -30,12 +30,39 @@ export class PrivateChannel {
     authenticate(socket: any, data: any): Promise<any> {
         let options = {
             url: this.authHost(socket) + this.options.authEndpoint,
-            form: { channel_name: data.channel },
+            form: { channel_name: data.channel, socket_id: socket.id },
             headers: (data.auth && data.auth.headers) ? data.auth.headers : {},
             rejectUnauthorized: false
         };
 
         return this.serverRequest(socket, options);
+    }
+
+    /**
+     * Send leave notice to application server.
+     *
+     * @param  {any} socket
+     * @param  {any} member
+     * @param  {array} channels
+     * @return {void}
+     */
+    leaveNotice(socket: any, member: any, channels: Array<string>) : void {
+        member.socket_id = member.socketId;
+        delete member.socketId;
+
+        let client = this.options.clients[0];
+
+        let options = {
+            url: this.authHost(socket) + this.options.leaveEndpoint,
+            form: { member: member, channel_names: channels },
+            auth: { username: client.appId, password: client.key }
+        };
+
+        this.request.post(options, (error, response) => {
+            if (error || response.statusCode !== 200) {
+                Log.error(error || response.body);
+            }
+        });
     }
 
     /**
