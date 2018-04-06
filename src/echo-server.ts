@@ -192,6 +192,9 @@ export class EchoServer {
      * @return {boolean}
      */
     toOthers(socket: any, channel: string, message: any): boolean {
+
+        socket.flags['local'] = true;
+
         socket.broadcast.to(channel).local
             .emit(message.event, channel, message.data);
 
