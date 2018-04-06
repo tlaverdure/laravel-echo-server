@@ -7,7 +7,7 @@ NodeJs server for Laravel Echo broadcasting with Socket.io.
 The following are required to function properly.
 
 *   Laravel 5.3
-*   Node 5.0+
+*   Node 6.0+
 *   Redis 3+
 
 Additional information on broadcasting with Laravel can be found on the
@@ -28,9 +28,7 @@ $   npm install -g laravel-echo-server
 Run the init command in your project directory:
 
 ``` shell
-
 $   laravel-echo-server init
-
 ```
 
 The cli tool will help you setup a **laravel-echo-server.json** file in the root directory of your project. This file will be loaded by the server during start up. You may edit this file later on to manage the configuration of your server.
@@ -40,9 +38,7 @@ The cli tool will help you setup a **laravel-echo-server.json** file in the root
 The Laravel Echo Server exposes a light http API to perform broadcasting functionality. For security purposes, access to these endpoints from http referrers must be authenticated with an API id and key. This can be generated using the cli command:
 
 ``` shell
-
 $ laravel-echo-server client:add APP_ID
-
 ```
 
 If you run `client:add` without an app id argument, one will be generated for you. After running this command, the client id and key will be displayed and stored in the **laravel-echo-server.json** file.
@@ -52,12 +48,11 @@ In this example, requests will be allowed as long as the app id and key are both
 ``` http
 Request Headers
 
-Auhtorization:  Bearer skti68i...
+Authorization:  Bearer skti68i...
 
 or
 
 http://app.dev:6001/apps/APP_ID/channels?auth_key=skti68i...
-
 ```
 
 You can remove clients with `laravel-echo-server client:remove APP_ID`
@@ -67,9 +62,7 @@ You can remove clients with `laravel-echo-server client:remove APP_ID`
 in your project root directory, run
 
 ``` shell
-
 $ laravel-echo-server start
-
 ```
 
 ### Configurable Options
@@ -91,6 +84,7 @@ Edit the default configuration of the server by adding options to your **laravel
 | `sslCertChainPath` | `''`                 | The path to your server's ssl certificate chain |
 | `sslPassphrase`    | `''`                 | The pass phrase to use for the certificate (if applicable) |
 | `socketio`         | `{}`                 | Options to pass to the socket.io instance ([available options](https://github.com/socketio/engine.io#methods-1)) |
+| `apiOriginAllow`   | `{}`                 | Configuration to allow API be accessed over CORS. [Example](#cross-domain-access-to-api)|
 
 ### Running with SSL
 
@@ -114,7 +108,6 @@ Using Http, you can also publish events to the Laravel Echo Server in the same f
 **Request Endpoint**
 
 ``` http
-
 POST http://app.dev:6001/apps/your-app-id/events?auth_key=skti68i...
 
 ```
@@ -186,6 +179,24 @@ List of users on a channel.
 GET /apps/:APP_ID/channels/:CHANNEL_NAME/users
 ```
 
+## Cross Domain Access To API
+Cross domain access can be specified in the laravel-echo-server.json file by changing `allowCors` in `apiOriginAllow` to `true`. You can then set the CORS Access-Control-Allow-Origin, Access-Control-Allow-Methods as a comma separated string (GET and POST are enabled by default) and the Access-Control-Allow-Headers that the API can receive.
+
+Example below:
+
+``` json
+{
+  "apiOriginAllow":{
+    "allowCors" : true,
+    "allowOrigin" : "http://127.0.0.1",
+    "allowMethods" : "GET, POST",
+    "allowHeaders" : "Origin, Content-Type, X-Auth-Token, X-Requested-With, Accept, Authorization, X-CSRF-TOKEN, X-Socket-Id"
+  }
+}
+
+```
+This allows you to send requests to the API via AJAX from an app that may be running on the same domain but a different port or an entirely different domain.
+
 ## Database
 
 To persist presence channel data, there is support for use of Redis or SQLite as a key/value store. The key being the channel name, and the value being the list of presence channel members.
@@ -215,7 +226,6 @@ For example, if you wanted to pass a custom configuration to Redis:
 With SQLite you may be interested in changing the path where the database is stored:
 
 ``` json
-
 {
   "databaseConfig" : {
     "sqlite" : {
@@ -223,7 +233,12 @@ With SQLite you may be interested in changing the path where the database is sto
     }
   }
 }
+```
 
+***Note: [node-sqlite3](https://github.com/mapbox/node-sqlite3) is required for this database. Please install before using.***
+
+```
+npm install sqlite3 -g
 ```
 
 ## Presence Channels
@@ -242,9 +257,7 @@ You can include the socket.io client library from your running server. For examp
 add a script tag to your html like so:
 
 ```
-
 <script src="//app.dev:6001/socket.io/socket.io.js"></script>
-
 ```
 
 _Note: When using the socket.io client library from your running server, remember to check that the `io` global variable is defined before subscribing to events._
@@ -253,11 +266,9 @@ _Note: When using the socket.io client library from your running server, remembe
 For extra performance, you can use the faster `uws` engine instead of `ws`, by setting the `wsEngine` option for Socket.IO in `laravel-echo-server.json`:
 
 ```js
-
 "socketio": {
     "wsEngine": "uws"
 }
-
 ```
 
 See <https://github.com/uWebSockets/uWebSockets> for more information.
