@@ -22,6 +22,7 @@
     "prepublish": "npm run build"
   },
   "dependencies": {
+    "bsw": "^2.0.1",
     "colors": "^1.1.2",
     "dotenv": "^5.0.1",
     "express": "^4.14.0",
