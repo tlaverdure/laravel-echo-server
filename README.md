@@ -139,6 +139,10 @@ The Laravel Echo Server subscribes to incoming events with two methods: Redis & 
 
 Using Http, you can also publish events to the Laravel Echo Server in the same fashion you would with Redis by submitting a `channel` and `message` to the broadcast endpoint. You need to generate an API key as described in the [API Clients](#api-clients) section and provide the correct API key.
 
+### Beanstalkd
+
+Your core application can use Beanstalkd to publish events to channels, using the https://github.com/vertexportus/beanstalkd-broadcaster library.
+
 **Request Endpoint**
 
 ``` http
@@ -274,6 +278,22 @@ With SQLite you may be interested in changing the path where the database is sto
 
 ```
 npm install sqlite3 -g
+```
+
+### Beanstalkd
+You need to add the beanstalkd configuration:
+
+```
+{
+  "databaseConfig" : {
+    "beanstalk": {
+      "host": "beanstalk",
+      "port": "11300",
+      "tube": "socketIO",
+      "enable_logging": true
+    }
+  }
+}
 ```
 
 ## Presence Channels
