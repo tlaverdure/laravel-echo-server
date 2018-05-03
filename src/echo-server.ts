@@ -1,4 +1,4 @@
-import { HttpSubscriber, RedisSubscriber } from './subscribers';
+import { HttpSubscriber, RedisSubscriber, BeanstalkSubscriber } from './subscribers';
 import { Channel } from './channels';
 import { Server } from './server';
 import { HttpApi } from './api';
@@ -79,6 +79,13 @@ export class EchoServer {
     private httpSub: HttpSubscriber;
 
     /**
+     * Beanstalk subscriber instance.
+     *
+     * @type {BeanstalkSubscriber}
+     */
+    private beanstalkSub: BeanstalkSubscriber;
+
+    /**
      * Http api instance.
      *
      * @type {HttpApi}
@@ -121,6 +128,7 @@ export class EchoServer {
             this.channel = new Channel(io, this.options);
             this.redisSub = new RedisSubscriber(this.options);
             this.httpSub = new HttpSubscriber(this.server.express, this.options);
+            this.beanstalkSub = new BeanstalkSubscriber(this.options);
             this.httpApi = new HttpApi(io, this.channel, this.server.express, this.options.apiOriginAllow);
             this.httpApi.init();
 
@@ -160,7 +168,11 @@ export class EchoServer {
                 return this.broadcast(channel, message);
             });
 
-            Promise.all([http, redis]).then(() => resolve());
+            let beanstalk = this.beanstalkSub.subscribe((channel, message) => {
+                return this.broadcast(channel, message);
+            })
+
+            Promise.all([http, redis, beanstalk]).then(() => resolve());
         });
     }
 
