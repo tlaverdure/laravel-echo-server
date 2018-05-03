@@ -287,9 +287,9 @@ You need to add the beanstalkd configuration:
 {
   "databaseConfig" : {
     "beanstalk": {
-      "host": "beanstalk",
+      "host": "localhost",
       "port": "11300",
-      "tube": "socketIO",
+      "tube": "tubename",
       "enable_logging": true
     }
   }
