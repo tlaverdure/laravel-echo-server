@@ -3,6 +3,8 @@ let colors = require("colors");
 let echo = require('./../../dist');
 let inquirer = require('inquirer');
 const crypto = require('crypto');
+import ErrnoException = NodeJS.ErrnoException;
+
 const CONFIG_FILE = process.cwd() + '/laravel-echo-server.json';
 
 /**
@@ -59,6 +61,35 @@ export class Cli {
                 console.error(colors.error(error));
             });
         }, error => console.error(error));
+    }
+
+    /**
+     * Inject the .env vars into options if they exist.
+     *
+     * @param  options
+     */
+    resolveEnvFileOptions(options: any): any {
+        require('dotenv').config();
+
+        if (process.env.LARAVEL_ECHO_SERVER_AUTH_HOST ||
+            process.env.LARAVEL_ECHO_SERVER_HOST) {
+            options.authHost = process.env.LARAVEL_ECHO_SERVER_AUTH_HOST ||
+                process.env.LARAVEL_ECHO_SERVER_HOST;
+        }
+
+        if (process.env.LARAVEL_ECHO_SERVER_HOST) {
+            options.host = process.env.LARAVEL_ECHO_SERVER_HOST;
+        }
+
+        if (process.env.LARAVEL_ECHO_SERVER_PORT) {
+            options.port = process.env.LARAVEL_ECHO_SERVER_PORT;
+        }
+
+        if (process.env.LARAVEL_ECHO_SERVER_DEBUG) {
+            options.devMode = process.env.LARAVEL_ECHO_SERVER_DEBUG;
+        }
+
+        return options;
     }
 
     /**
@@ -180,8 +211,8 @@ export class Cli {
                 return false;
             }
 
-            var options = JSON.parse(fs.readFileSync(configFile, 'utf8'));
-
+            let options = JSON.parse(fs.readFileSync(configFile, 'utf8'));
+            options = this.resolveEnvFileOptions(options);
             options.devMode = yargs.argv.dev || options.devMode || false;
 
             echo.run(options);

@@ -26,10 +26,10 @@
     "dotenv": "^5.0.1",
     "express": "^4.14.0",
     "inquirer": "^1.1.3",
-    "ioredis": "^1.15.1",
-    "lodash": "^4.12.0",
-    "request": "^2.72.0",
-    "socket.io": "^2.0.1",
+    "ioredis": "^3.2.2",
+    "lodash": "^4.17.10",
+    "request": "^2.87.0",
+    "socket.io": "^2.1.1",
     "yargs": "^5.0.0"
   },
   "devDependencies": {

@@ -1,3 +1,16 @@
+# 1.3.7
+
+Allow variables in .env file to set options in the server configuration.
+
+### Updates
+-   Auth Host: `LARAVEL_ECHO_SERVER_AUTH_HOST` *Note*: This option will fall back to the `LARAVEL_ECHO_SERVER_HOST` option as the default if that is set in the .env file.
+
+-   *Host*: `LARAVEL_ECHO_SERVER_HOST`
+
+-   *Port*: `LARAVEL_ECHO_SERVER_PORT`
+
+-   *Debug*: `LARAVEL_ECHO_SERVER_DEBUG`
+
 # 1.3.3
 
 Return a better error when member data is not present when joining presence channels.
