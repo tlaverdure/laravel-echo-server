@@ -1,4 +1,4 @@
-﻿# Laravel Echo Server
+# Laravel Echo Server
 
 NodeJs server for Laravel Echo broadcasting with Socket.io.
 
@@ -76,6 +76,7 @@ Edit the default configuration of the server by adding options to your **laravel
 | `authHost`         | `http://localhost`   | The host of the server that authenticates private and presence channels  |
 | `database`         | `redis`              | Database used to store data that should persist, like presence channel members. Options are currently `redis` and `sqlite` |
 | `databaseConfig`   |  `{}`                | Configurations for the different database drivers [Example](#database)|
+| `envFilePath`      |  `false`             | Path to your Laravel `.env` file. The `authHost`, `host` and `devMode` options will be dynamically loaded from here.|
 | `host`             | `null`               | The host of the socket.io server ex.`app.dev`. `null` will accept connections on any IP-address |
 | `port`             | `6001`               | The port that the socket.io server should run on |
 | `protocol`         | `http`               | either `http` or `https` |

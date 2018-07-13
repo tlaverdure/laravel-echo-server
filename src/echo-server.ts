@@ -3,6 +3,8 @@ import { Channel } from './channels';
 import { Server } from './server';
 import { HttpApi } from './api';
 import { Log } from './log';
+import * as fs from 'fs';
+import ErrnoException = NodeJS.ErrnoException;
 
 const packageFile = require('../package.json');
 
@@ -27,6 +29,7 @@ export class EchoServer {
             }
         },
         devMode: false,
+        envFilePath: false,
         host: null,
         port: 6001,
         protocol: "http",
@@ -99,6 +102,7 @@ export class EchoServer {
     run(options: any): Promise<any> {
         return new Promise((resolve, reject) => {
             this.options = Object.assign(this.defaultOptions, options);
+            this.resolveEnv();
             this.startup();
             this.server = new Server(this.options);
 
@@ -143,6 +147,33 @@ export class EchoServer {
         } else {
             Log.info('Starting server...\n')
         }
+    }
+
+	/**
+	 * Inject the .env vars into options if they exist
+	 *
+	 * @return {void}
+	 */
+	resolveEnv(): void {
+	    let envPath = this.options.envFilePath;
+
+	    if(!envPath) {
+	        return;
+        }
+
+		fs.access(envPath, fs.constants.R_OK, (err: ErrnoException) => {
+		    if(err) {
+		        Log.error(err.message);
+		    } else {
+				require('dotenv').config({
+                    path: envPath,
+                });
+
+				this.options.authHost = process.env.APP_URL;
+				this.options.host = process.env.APP_URL;
+				this.options.devMode = process.env.APP_DEBUG;
+            }
+		});
     }
 
     /**
