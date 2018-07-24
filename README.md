@@ -86,7 +86,7 @@ Edit the default configuration of the server by adding options to your **laravel
 | `socketio`         | `{}`                 | Options to pass to the socket.io instance ([available options](https://github.com/socketio/engine.io#methods-1)) |
 | `apiOriginAllow`   | `{}`                 | Configuration to allow API be accessed over CORS. [Example](#cross-domain-access-to-api) |
 | `hookHost`         | `null`               | The host of the server that listen to client-side event  |
-| `hooks`            | `{"onJoinEndpoint": null,"onLeaveEndpoint": null,"onClientEventEndpoint": null}` | The route that listen to join, leave, client event. [Example](#hook-client-side-event)  |
+| `hooks`            | `{ "onJoinEndpoint": null, "onLeaveEndpoint": null, "onClientEventEndpoint": null }` | The route that listen to join, leave, client event. [Example](#hook-client-side-event)  |
 
 ### DotEnv
 If a .env file is found in the same directory as the laravel-echo-server.json
@@ -301,8 +301,8 @@ For example:
 ```ini
 "hookHost": "http://localhost",
 "hooks": {
-		"onJoinEndpoint": "/joinChannel"
-	}
+    "onJoinEndpoint": "/joinChannel"
+  }
 ```
 
 The request form like:
@@ -319,14 +319,16 @@ Route::post('/joinChannel', function(Request $request) {
 ```
 
 ### leave channel hook
-When users leave a channel, `laravel-echo-server` will send a post request to `onLeaveEndpoint`. Notes that there is no csrf-token in header when sending a post request for leave channel event, so you'd better not to use the route in `/routes/web.php`. Although there is no csrf-token in header, you can still use the cookie information in header to identify the leaving user.
+When users leave a channel, `laravel-echo-server` will send a post request to `onLeaveEndpoint`.
+
+> Notes that there is no csrf-token in header when sending a post request for leave channel event, so you'd better not to use the route in `/routes/web.php`. Although there is no csrf-token in header, you can still use the cookie information in header to identify the leaving user. SIt will be a good idea to put identity information of user into cookie.
 
 For example:
 ```ini
 "hookHost": "http://localhost",
 "hooks": {
-		"onLeaveEndpoint": "/api/leaveChannel"
-	}
+    "onLeaveEndpoint": "/api/leaveChannel"
+  }
 ```
 
 The request form like:
@@ -341,19 +343,22 @@ use Illuminate\Http\Request;
 Route::post('/leaveChannel', function(Request $request) {
     $channel_name = $request->input('channel_name');
     $xsrf_token = $request->cookie('XSRF-TOKEN');
+    $user_id = $request->cookie('user_id');
     // ...
 });
 ```
 
 ### client event hook
-When users use `whisper` to broadcast an event in a channel, `laravel-echo-server` will send a post request to `onClientEventEndpoint`. Notes that there is no csrf-token in header when sending a post request for client-event event, so you'd better not to use the route in `/routes/web.php`. Although there is no csrf-token in header, you can still use the cookie information in header to identify the whisper user.
+When users use `whisper` to broadcast an event in a channel, `laravel-echo-server` will send a post request to `onClientEventEndpoint`. 
+
+> Notes that there is no csrf-token in header when sending a post request for client-event event, so you'd better not to use the route in `/routes/web.php`. Although there is no csrf-token in header, you can still use the cookie information in header to identify the whisper user. It will be a good idea to put identity information of user into cookie.
 
 For example:
 ```ini
 "hookHost": "http://localhost",
 "hooks": {
-		"onClientEventEndpoint": "/api/clientEvent"
-	}
+    "onClientEventEndpoint": "/api/clientEvent"
+  }
 ```
 
 The request form like:
@@ -368,11 +373,12 @@ use Illuminate\Http\Request;
 Route::post('/clientEvent', function(Request $request) {
     $channel_name = $request->input('channel_name');
     $xsrf_token = $request->cookie('XSRF-TOKEN');
+    $user_id = $request->cookie('user_id');
     // ...
 });
 ```
 
-Then use `whisper` to broadcast an event
+It will fire the client-event after using `whisper` to broadcast an event like this:
 ```javascript
 Echo.private('chat')
     .whisper('typing', {
