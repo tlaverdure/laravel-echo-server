@@ -85,6 +85,8 @@ Edit the default configuration of the server by adding options to your **laravel
 | `sslPassphrase`    | `''`                 | The pass phrase to use for the certificate (if applicable) |
 | `socketio`         | `{}`                 | Options to pass to the socket.io instance ([available options](https://github.com/socketio/engine.io#methods-1)) |
 | `apiOriginAllow`   | `{}`                 | Configuration to allow API be accessed over CORS. [Example](#cross-domain-access-to-api) |
+| `hookHost`         | `null`               | The host of the server that listen to client-side event  |
+| `hooks`            | `{"onJoinEndpoint": null,"onLeaveEndpoint": null,"onClientEventEndpoint": null}` | The route that listen to join, leave, client event. [Example](#hook-client-side-event)  |
 
 ### DotEnv
 If a .env file is found in the same directory as the laravel-echo-server.json
@@ -285,3 +287,96 @@ For extra performance, you can use the faster `uws` engine instead of `ws`, by s
 ```
 
 See <https://github.com/uWebSockets/uWebSockets> for more information.
+
+## Hook client side event
+There are 3 types of client-side event can be listen to
+- join
+- leave
+- client event
+
+### join channel hook
+When users join to a channel, `laravel-echo-server` will send a post request to `onJoinEndpoint` 
+
+For example:
+```ini
+"hookHost": "http://localhost",
+"hooks": {
+		"onJoinEndpoint": "/joinChannel"
+	}
+```
+
+The request form like:
+```ini
+channel_name=helloworld
+```
+
+Add route to listen to this event
+```php
+Route::post('/joinChannel', function(Request $request) {
+    $channel_name = $request->input('channel_name');
+   // ... 
+});
+```
+
+### leave channel hook
+When users leave a channel, `laravel-echo-server` will send a post request to `onLeaveEndpoint`. Notes that there is no csrf-token in header when sending a post request for leave channel event, so you'd better not to use the route in `/routes/web.php`. Although there is no csrf-token in header, you can still use the cookie information in header to identify the leaving user.
+
+For example:
+```ini
+"hookHost": "http://localhost",
+"hooks": {
+		"onLeaveEndpoint": "/api/leaveChannel"
+	}
+```
+
+The request form like:
+```ini
+channel_name=helloworld
+```
+
+Add route to `/routes/api.php`
+```php
+use Illuminate\Http\Request;
+
+Route::post('/leaveChannel', function(Request $request) {
+    $channel_name = $request->input('channel_name');
+    $xsrf_token = $request->cookie('XSRF-TOKEN');
+    // ...
+});
+```
+
+### client event hook
+When users use `whisper` to broadcast an event in a channel, `laravel-echo-server` will send a post request to `onClientEventEndpoint`. Notes that there is no csrf-token in header when sending a post request for client-event event, so you'd better not to use the route in `/routes/web.php`. Although there is no csrf-token in header, you can still use the cookie information in header to identify the whisper user.
+
+For example:
+```ini
+"hookHost": "http://localhost",
+"hooks": {
+		"onClientEventEndpoint": "/api/clientEvent"
+	}
+```
+
+The request form like:
+```ini
+channel_name=helloworld
+```
+
+Add route to `/routes/api.php`
+```php
+use Illuminate\Http\Request;
+
+Route::post('/clientEvent', function(Request $request) {
+    $channel_name = $request->input('channel_name');
+    $xsrf_token = $request->cookie('XSRF-TOKEN');
+    // ...
+});
+```
+
+Then use `whisper` to broadcast an event
+```javascript
+Echo.private('chat')
+    .whisper('typing', {
+        name: 'Hello world'
+    });
+
+```
