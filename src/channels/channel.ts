@@ -38,7 +38,9 @@ export class Channel {
         this.private = new PrivateChannel(options);
         this.presence = new PresenceChannel(io, options);
 
-        Log.success('Channels are ready.');
+        if (this.options.devMode) {
+            Log.success('Channels are ready.');
+        }
     }
 
     /**
@@ -139,7 +141,9 @@ export class Channel {
 
             this.onJoin(socket, data.channel);
         }, error => {
-            Log.error(error.reason);
+            if (this.options.devMode) {
+                Log.error(error.reason);
+            }
 
             this.io.sockets.to(socket.id)
                 .emit('subscription_error', data.channel, error.status);

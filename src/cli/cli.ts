@@ -86,7 +86,7 @@ export class Cli {
         }
 
         if (process.env.LARAVEL_ECHO_SERVER_DEBUG) {
-            options.devMode = process.env.LARAVEL_ECHO_SERVER_DEBUG;
+            options.devMode = JSON.parse(process.env.LARAVEL_ECHO_SERVER_DEBUG);
         }
 
         return options;
