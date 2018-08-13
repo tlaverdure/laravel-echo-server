@@ -135,7 +135,7 @@ export class PrivateChannel {
      * @return {any}
      */
     protected prepareHeaders(socket: any, options: any): any {
-        options.headers['Cookie'] = socket.request.headers.cookie;
+        options.headers['Cookie'] = options.headers['Cookie'] || socket.request.headers.cookie;
         options.headers['X-Requested-With'] = 'XMLHttpRequest';
 
         return options.headers;
