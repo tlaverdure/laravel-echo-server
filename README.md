@@ -107,6 +107,9 @@ file, the following options can be overridden:
 
 *Note: This library currently only supports serving from either http or https, not both.*
 
+### Setting the working directory
+The working directory in which `laravel-echo-server` will look for the configuration file `laravel-echo-server.json` can be passed to the `start` command through the `--dir` parameter like so: `laravel-echo-server start --dir=/var/www/html/example.com/configuration`
+
 ## Subscribers
 The Laravel Echo Server subscribes to incoming events with two methods: Redis & Http.
 
