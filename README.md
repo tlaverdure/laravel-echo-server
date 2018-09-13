@@ -264,6 +264,28 @@ When users join a presence channel, their presence channel authentication data i
 
 While presence channels contain a list of users, there will be instances where a user joins a presence channel multiple times. For example, this would occur when opening multiple browser tabs. In this situation "joining" and "leaving" events are only emitted to the first and last instance of the user.
 
+Optionally, you can configure laravel-echo-server to publish an event on each update to a presence channel, by setting `databaseConfig.publishPresence` to `true`:
+
+```json
+{
+  "database": "redis",
+  "databaseConfig": {
+    "redis" : {
+      "port": "6379",
+      "host": "localhost"
+    },
+    "publishPresence": true
+  }
+}
+```
+You can use Laravel's Redis integration, to trigger Application code from there:
+```php
+Redis::subscribe(['PresenceChannelUpdated'], function ($message) {
+    var_dump($message);
+});
+```
+
+
 ## Client Side Configuration
 
 See the official Laravel documentation for more information. <https://laravel.com/docs/master/broadcasting#introduction>
