@@ -35,14 +35,22 @@ export class Server {
         return new Promise((resolve, reject) => {
             this.serverProtocol().then(() => {
                 let host = this.options.host || 'localhost';
-                let portRegex = /([0-9]{2,5})[\/]?$/;
-                let portToUse = this.options.port.match(portRegex); //idex 1 contains the cleaned port number only
-                portToUse = portToUse[1];
-                Log.success(`Running at ${host} on port ${portToUse}`);
+                Log.success(`Running at ${host} on port ${this.getPort()}`);
 
                 resolve(this.io);
             }, error => reject(error));
         });
+    }
+    
+    /**
+    * Sanitize the port number from any extra characters
+    *
+    * @return {any}
+    */
+    getPort() {
+        let portRegex = /([0-9]{2,5})[\/]?$/;
+        let portToUse = this.options.port.match(portRegex); //idex 1 contains the cleaned port number only
+        return portToUse[1];
     }
 
     /**
@@ -97,11 +105,8 @@ export class Server {
         } else {
             var httpServer = http.createServer(this.express);
         }
-        var portRegex = /([0-9]{2,5})[\/]?$/;
-        var portToUse = this.options.port.match(portRegex); //idex 1 contains the cleaned port number only
-        portToUse = portToUse[1];
-
-        httpServer.listen(portToUse, this.options.host);
+      
+        httpServer.listen(this.getPort(), this.options.host);
 
         this.authorizeRequests();
 
