@@ -162,6 +162,7 @@ The HTTP subscriber is compatible with the Laravel Pusher subscriber. Just confi
     'options' => [
         'host' => 'localhost',
         'port' => 6001,
+        'scheme' => 'http'
     ],
 ],
 ```
