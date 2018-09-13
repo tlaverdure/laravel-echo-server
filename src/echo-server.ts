@@ -1,4 +1,4 @@
-import { HttpSubscriber, RedisSubscriber } from './subscribers';
+import { HttpSubscriber, RedisSubscriber, Subscriber } from './subscribers';
 import { Channel } from './channels';
 import { Server } from './server';
 import { HttpApi } from './api';
@@ -35,6 +35,10 @@ export class EchoServer {
         sslKeyPath: '',
         sslCertChainPath: '',
         sslPassphrase: '',
+        subscribers: {
+            http: true,
+            redis: true
+        },
         apiOriginAllow: {
             allowCors: false,
             allowOrigin: '',
@@ -65,18 +69,11 @@ export class EchoServer {
     private channel: Channel;
 
     /**
-     * Redis subscriber instance.
+     * Subscribers
      *
-     * @type {RedisSubscriber}
+     * @type {Subscriber[]}
      */
-    private redisSub: RedisSubscriber;
-
-    /**
-     * Http subscriber instance.
-     *
-     * @type {HttpSubscriber}
-     */
-    private httpSub: HttpSubscriber;
+    private subscribers: Subscriber[];
 
     /**
      * Http api instance.
@@ -119,8 +116,13 @@ export class EchoServer {
     init(io: any): Promise<any> {
         return new Promise((resolve, reject) => {
             this.channel = new Channel(io, this.options);
-            this.redisSub = new RedisSubscriber(this.options);
-            this.httpSub = new HttpSubscriber(this.server.express, this.options);
+
+            this.subscribers = [];
+            if (this.options.subscribers.http)
+                this.subscribers.push(new HttpSubscriber(this.server.express, this.options));
+            if (this.options.subscribers.redis)
+                this.subscribers.push(new RedisSubscriber(this.options));
+
             this.httpApi = new HttpApi(io, this.channel, this.server.express, this.options.apiOriginAllow);
             this.httpApi.init();
 
@@ -152,15 +154,13 @@ export class EchoServer {
      */
     listen(): Promise<any> {
         return new Promise((resolve, reject) => {
-            let http = this.httpSub.subscribe((channel, message) => {
-                return this.broadcast(channel, message);
+            let subscribePromises = this.subscribers.map(subscriber => {
+                return subscriber.subscribe((channel, message) => {
+                    return this.broadcast(channel, message);
+                });
             });
 
-            let redis = this.redisSub.subscribe((channel, message) => {
-                return this.broadcast(channel, message);
-            });
-
-            Promise.all([http, redis]).then(() => resolve());
+            Promise.all(subscribePromises).then(() => resolve());
         });
     }
 

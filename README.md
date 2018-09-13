@@ -107,6 +107,9 @@ file, the following options can be overridden:
 
 *Note: This library currently only supports serving from either http or https, not both.*
 
+### Setting the working directory
+The working directory in which `laravel-echo-server` will look for the configuration file `laravel-echo-server.json` can be passed to the `start` command through the `--dir` parameter like so: `laravel-echo-server start --dir=/var/www/html/example.com/configuration`
+
 ## Subscribers
 The Laravel Echo Server subscribes to incoming events with two methods: Redis & Http.
 
@@ -159,6 +162,7 @@ The HTTP subscriber is compatible with the Laravel Pusher subscriber. Just confi
     'options' => [
         'host' => 'localhost',
         'port' => 6001,
+        'scheme' => 'http'
     ],
 ],
 ```
@@ -259,6 +263,28 @@ npm install sqlite3 -g
 When users join a presence channel, their presence channel authentication data is stored using Redis.
 
 While presence channels contain a list of users, there will be instances where a user joins a presence channel multiple times. For example, this would occur when opening multiple browser tabs. In this situation "joining" and "leaving" events are only emitted to the first and last instance of the user.
+
+Optionally, you can configure laravel-echo-server to publish an event on each update to a presence channel, by setting `databaseConfig.publishPresence` to `true`:
+
+```json
+{
+  "database": "redis",
+  "databaseConfig": {
+    "redis" : {
+      "port": "6379",
+      "host": "localhost"
+    },
+    "publishPresence": true
+  }
+}
+```
+You can use Laravel's Redis integration, to trigger Application code from there:
+```php
+Redis::subscribe(['PresenceChannelUpdated'], function ($message) {
+    var_dump($message);
+});
+```
+
 
 ## Client Side Configuration
 
