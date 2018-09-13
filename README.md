@@ -1,4 +1,4 @@
-﻿# Laravel Echo Server
+# Laravel Echo Server
 
 NodeJs server for Laravel Echo broadcasting with Socket.io.
 
@@ -75,7 +75,7 @@ Edit the default configuration of the server by adding options to your **laravel
 | `authEndpoint`     | `/broadcasting/auth` | The route that authenticates private channels  |
 | `authHost`         | `http://localhost`   | The host of the server that authenticates private and presence channels  |
 | `database`         | `redis`              | Database used to store data that should persist, like presence channel members. Options are currently `redis` and `sqlite` |
-| `databaseConfig`   |  `{}`                | Configurations for the different database drivers [Example](#database)|
+| `databaseConfig`   |  `{}`                | Configurations for the different database drivers [Example](#database) |
 | `host`             | `null`               | The host of the socket.io server ex.`app.dev`. `null` will accept connections on any IP-address |
 | `port`             | `6001`               | The port that the socket.io server should run on |
 | `protocol`         | `http`               | either `http` or `https` |
@@ -84,7 +84,20 @@ Edit the default configuration of the server by adding options to your **laravel
 | `sslCertChainPath` | `''`                 | The path to your server's ssl certificate chain |
 | `sslPassphrase`    | `''`                 | The pass phrase to use for the certificate (if applicable) |
 | `socketio`         | `{}`                 | Options to pass to the socket.io instance ([available options](https://github.com/socketio/engine.io#methods-1)) |
-| `apiOriginAllow`   | `{}`                 | Configuration to allow API be accessed over CORS. [Example](#cross-domain-access-to-api)|
+| `apiOriginAllow`   | `{}`                 | Configuration to allow API be accessed over CORS. [Example](#cross-domain-access-to-api) |
+
+### DotEnv
+If a .env file is found in the same directory as the laravel-echo-server.json
+file, the following options can be overridden:
+
+-   Auth Host: `LARAVEL_ECHO_SERVER_AUTH_HOST` *Note*: This option will fall back to the `LARAVEL_ECHO_SERVER_HOST` option as the default if that is set in the .env file.
+
+-   *Host*: `LARAVEL_ECHO_SERVER_HOST`
+
+-   *Port*: `LARAVEL_ECHO_SERVER_PORT`
+
+-   *Debug*: `LARAVEL_ECHO_SERVER_DEBUG`
+
 
 ### Running with SSL
 
@@ -93,6 +106,9 @@ Edit the default configuration of the server by adding options to your **laravel
 *   The server configuration should include paths to both your ssl certificate and key located on your server.
 
 *Note: This library currently only supports serving from either http or https, not both.*
+
+### Setting the working directory
+The working directory in which `laravel-echo-server` will look for the configuration file `laravel-echo-server.json` can be passed to the `start` command through the `--dir` parameter like so: `laravel-echo-server start --dir=/var/www/html/example.com/configuration`
 
 ## Subscribers
 The Laravel Echo Server subscribes to incoming events with two methods: Redis & Http.
@@ -146,6 +162,7 @@ The HTTP subscriber is compatible with the Laravel Pusher subscriber. Just confi
     'options' => [
         'host' => 'localhost',
         'port' => 6001,
+        'scheme' => 'http'
     ],
 ],
 ```
