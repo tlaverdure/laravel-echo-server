@@ -41,16 +41,16 @@ export class Server {
             }, error => reject(error));
         });
     }
-    
+
     /**
-    * Sanitize the port number from any extra characters
-    *
-    * @return {any}
-    */
+     * Sanitize the port number from any extra characters
+     *
+     * @return {number}
+     */
     getPort() {
         let portRegex = /([0-9]{2,5})[\/]?$/;
-        let portToUse = this.options.port.match(portRegex); //idex 1 contains the cleaned port number only
-        return portToUse[1];
+        let portToUse = String(this.options.port).match(portRegex); // index 1 contains the cleaned port number only
+        return Number(portToUse[1]);
     }
 
     /**
@@ -105,7 +105,7 @@ export class Server {
         } else {
             var httpServer = http.createServer(this.express);
         }
-      
+
         httpServer.listen(this.getPort(), this.options.host);
 
         this.authorizeRequests();
