@@ -35,11 +35,22 @@ export class Server {
         return new Promise((resolve, reject) => {
             this.serverProtocol().then(() => {
                 let host = this.options.host || 'localhost';
-                Log.success(`Running at ${host} on port ${this.options.port}`);
+                Log.success(`Running at ${host} on port ${this.getPort()}`);
 
                 resolve(this.io);
             }, error => reject(error));
         });
+    }
+
+    /**
+     * Sanitize the port number from any extra characters
+     *
+     * @return {number}
+     */
+    getPort() {
+        let portRegex = /([0-9]{2,5})[\/]?$/;
+        let portToUse = String(this.options.port).match(portRegex); // index 1 contains the cleaned port number only
+        return Number(portToUse[1]);
     }
 
     /**
@@ -95,7 +106,7 @@ export class Server {
             var httpServer = http.createServer(this.express);
         }
 
-        httpServer.listen(this.options.port, this.options.host);
+        httpServer.listen(this.getPort(), this.options.host);
 
         this.authorizeRequests();
 

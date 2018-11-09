@@ -45,27 +45,27 @@ export class PrivateChannel {
      * @return {string}
      */
     protected authHost(socket: any): string {
-		let authHosts = (this.options.authHost) ?
-			this.options.authHost : this.options.host;
+        let authHosts = (this.options.authHost) ?
+            this.options.authHost : this.options.host;
 
-		if (typeof authHosts === "string") {
-			authHosts = [authHosts];
-		}
+        if (typeof authHosts === "string") {
+            authHosts = [authHosts];
+        }
 
-		let authHostSelected = authHosts[0] || 'http://localhost';
+        let authHostSelected = authHosts[0] || 'http://localhost';
 
-		if(socket.request.headers.referer) {
-			let referer = url.parse(socket.request.headers.referer);
+        if (socket.request.headers.referer) {
+            let referer = url.parse(socket.request.headers.referer);
 
-			for (let authHost of authHosts) {
-				authHostSelected = authHost;
-	
-				if (this.hasMatchingHost(referer, authHost)) {
-					authHostSelected = `${referer.protocol}//${referer.host}`;
-					break;
-				}
-			};
-		}
+            for (let authHost of authHosts) {
+                authHostSelected = authHost;
+
+                if (this.hasMatchingHost(referer, authHost)) {
+                    authHostSelected = `${referer.protocol}//${referer.host}`;
+                    break;
+                }
+            };
+        }
 
         return authHostSelected;
     }
@@ -99,9 +99,8 @@ export class PrivateChannel {
                 if (error) {
                     if (this.options.devMode) {
                         Log.error(`[${new Date().toLocaleTimeString()}] - Error authenticating ${socket.id} for ${options.form.channel_name}`);
+                        Log.error(error);
                     }
-
-                    Log.error(error);
 
                     reject({ reason: 'Error sending authentication request.', status: 0 });
                 } else if (response.statusCode !== 200) {
@@ -136,7 +135,7 @@ export class PrivateChannel {
      * @return {any}
      */
     protected prepareHeaders(socket: any, options: any): any {
-        options.headers['Cookie'] = socket.request.headers.cookie;
+        options.headers['Cookie'] = options.headers['Cookie'] || socket.request.headers.cookie;
         options.headers['X-Requested-With'] = 'XMLHttpRequest';
 
         return options.headers;

@@ -17,12 +17,13 @@ export class HttpSubscriber implements Subscriber {
      */
     subscribe(callback): Promise<any> {
         return new Promise((resolve, reject) => {
-
             // Broadcast a message to a channel
             this.express.post('/apps/:appId/events', (req, res) => {
                 let body: any = [];
                 res.on('error', (error) => {
-                    Log.error(error);
+                    if (this.options.devMode) {
+                        Log.error(error);
+                    }
                 });
 
                 req.on('data', (chunk) => body.push(chunk))
