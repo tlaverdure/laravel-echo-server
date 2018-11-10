@@ -294,6 +294,33 @@ There are 3 types of client-side event can be listen to
 - leave
 - client event
 
+### Hooks configuration
+First, you need to configurate your `hookHost` and `hooks`. Here is an example:
+
+```ini
+"hookHost": "http://quickstart",
+"hooks": {
+  "onJoinEndpoint": "/api/joinChannel",
+  "onLeaveEndpoint": "/api/leaveChannel",
+  "onClientEventEndpoint": "/api/whisper"
+}
+```
+
+`laravel-echo-server` will send a post request to hook endpoint when there is a client-side event coming.
+You can get event information from `cookie` and `form`.
+
+#### Get data from cookie
+`laravel-echo-server` directly use `cookie` from page. So you can add some cookie values like `user_id` to identify user.
+
+#### Get data from post form
+There is always an attribute in post form called `channel_name`. You can get event payload of [Client Event](https://laravel.com/docs/5.7/broadcasting#client-events) of there is an client event, such as `whisper`.
+
+**Post form format**
+| Attribute          | Description             | Example            | Default              |
+| :------------------| :---------------------- | :------------------| :--------------------|
+| `channel_name`     | The channel name        | `meeting`          |                      |
+| `payload`          | Payload of client event. `joinChannel` or `leaveChannel` hook doesn't have payload | `{from: 'Alex', to: 'Bill'}` | `null`       |
+
 ### join channel hook
 When users join to a channel, `laravel-echo-server` will send a post request to `onJoinEndpoint` 
 
@@ -307,21 +334,24 @@ For example:
 
 The request form like:
 ```ini
-channel_name=helloworld
+channel_name = helloworld
 ```
 
 Add route to listen to this event
 ```php
 Route::post('/joinChannel', function(Request $request) {
     $channel_name = $request->input('channel_name');
-   // ... 
+    $xsrf_token = $request->cookie('XSRF-TOKEN');
+    // If you have user_id in your cookie to identify user, you can get it in here
+    $user_id = $request->cookie('user_id');
+    // ... 
 });
 ```
 
 ### leave channel hook
 When users leave a channel, `laravel-echo-server` will send a post request to `onLeaveEndpoint`.
 
-> Notes that there is no csrf-token in header when sending a post request for leave channel event, so you'd better not to use the route in `/routes/web.php`. Although there is no csrf-token in header, you can still use the cookie information in header to identify the leaving user. SIt will be a good idea to put identity information of user into cookie.
+> Notes that there is no csrf-token in header when sending a post request for leave channel event, so you'd better not to use the route in `/routes/web.php`. Although there is no csrf-token in header, you can still use the cookie information in header to identify the leaving user. It will be a good idea to put identity information of user into cookie.
 
 For example:
 ```ini
@@ -333,7 +363,7 @@ For example:
 
 The request form like:
 ```ini
-channel_name=helloworld
+channel_name = helloworld
 ```
 
 Add route to `/routes/api.php`
@@ -343,6 +373,7 @@ use Illuminate\Http\Request;
 Route::post('/leaveChannel', function(Request $request) {
     $channel_name = $request->input('channel_name');
     $xsrf_token = $request->cookie('XSRF-TOKEN');
+    // If you have user_id in your cookie to identify user, you can get it in here
     $user_id = $request->cookie('user_id');
     // ...
 });
@@ -357,13 +388,23 @@ For example:
 ```ini
 "hookHost": "http://localhost",
 "hooks": {
-    "onClientEventEndpoint": "/api/clientEvent"
+    "onClientEventEndpoint": "/api/whisper"
   }
 ```
 
-The request form like:
+It will fire the client-event after using `whisper` to broadcast an event like this:
+```javascript
+Echo.private('chat')
+    .whisper('whisperEvent', {
+        from: this.username,
+        to: this.whisperTo
+    });
+```
+
+The request form is like below
 ```ini
-channel_name=helloworld
+channel_name = helloworld
+payload = {from:'Alex', to:'Bill'}
 ```
 
 Add route to `/routes/api.php`
@@ -373,16 +414,14 @@ use Illuminate\Http\Request;
 Route::post('/clientEvent', function(Request $request) {
     $channel_name = $request->input('channel_name');
     $xsrf_token = $request->cookie('XSRF-TOKEN');
+    // If you have user_id in your cookie to identify user, you can get it in here
     $user_id = $request->cookie('user_id');
+    // Get payload
+    $payload = $request->input('payload');
+    $from = $payload['from'];
+    $to = $payload['to'];
     // ...
 });
 ```
 
-It will fire the client-event after using `whisper` to broadcast an event like this:
-```javascript
-Echo.private('chat')
-    .whisper('typing', {
-        name: 'Hello world'
-    });
-
-```
+> Notes that even though we use an `Object` as payload of client event, the payload will be transformed to an `Array` in PHP. So remember to get your attribute from payload by using an `Array` method like `$payload['xxxx']`

@@ -83,7 +83,7 @@ export class Channel {
                 this.io.sockets.connected[socket.id]
                     .broadcast.to(data.channel)
                     .emit(data.event, data.channel, data.data);
-                this.hook(socket, data.channel, data.auth, "onClientEvent");
+                this.hook(socket, data.channel, data.auth, "onClientEvent", data.data);
             }
         }
     }
@@ -109,7 +109,7 @@ export class Channel {
                 Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} left channel: ${channel} (${reason})`);
             }
 
-            this.hook(socket, channel, auth, "onLeave");
+            this.hook(socket, channel, auth, "onLeave", null);
         }
     }
 
@@ -181,7 +181,7 @@ export class Channel {
             Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} joined channel: ${channel}`);
         }
 
-        this.hook(socket, channel, auth, "onJoin");
+        this.hook(socket, channel, auth, "onJoin", null);
     }
 
     /**
@@ -219,8 +219,9 @@ export class Channel {
      * @param {object} auth 
      * @param {string} hookEndpoint 
      * @param {string} hookName 
+     * @param {object} payload
      */
-    hook(socket:any, channel: any, auth: any, hookName: string) {
+    hook(socket:any, channel: any, auth: any, hookName: string, payload: object) {
         if (typeof this.options.hookHost == 'undefined' ||
             !this.options.hookHost ||
             typeof this.options.hooks == 'undefined' ||
@@ -234,7 +235,7 @@ export class Channel {
             return;
         }
 
-        let options = this.prepareHookHeaders(socket, auth, channel, hookEndpoint)
+        let options = this.prepareHookHeaders(socket, auth, channel, hookEndpoint, payload)
 
         this.request.post(options, (error, response, body, next) => {
             if (error) {
@@ -301,12 +302,13 @@ export class Channel {
      * @param {any} auth
      * @param {string} channel
      * @param {string} hookEndpoint
+     * @param {any} payload
      * @returns {any}
      */
-    prepareHookHeaders(socket: any, auth: any, channel: string, hookEndpoint: string): any {
+    prepareHookHeaders(socket: any, auth: any, channel: string, hookEndpoint: string, payload: any): any {
         let options = {
             url: this.options.hookHost + hookEndpoint,
-            form: { channel_name: channel },
+            form: { channel_name: channel, payload: payload },
             headers: (auth && auth.headers) ? auth.headers : {}
         };
         options.headers['Cookie'] = socket.request.headers.cookie;
