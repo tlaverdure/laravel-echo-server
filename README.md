@@ -355,6 +355,7 @@ You can get event information from `cookie` and `form`.
 There is always an attribute in post form called `channel_name`. You can get event payload of [Client Event](https://laravel.com/docs/5.7/broadcasting#client-events) of there is an client event, such as `whisper`.
 
 **Post form format**
+
 | Attribute          | Description             | Example            | Default              |
 | :------------------| :---------------------- | :------------------| :--------------------|
 | `channel_name`     | The channel name        | `meeting`          |                      |
