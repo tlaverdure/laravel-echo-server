@@ -5,6 +5,8 @@ let echo = require('./../../dist');
 let inquirer = require('inquirer');
 const crypto = require('crypto');
 
+import ErrnoException = NodeJS.ErrnoException;
+
 /**
  * Laravel Echo Server CLI
  */
@@ -67,6 +69,35 @@ export class Cli {
                 console.error(colors.error(error));
             });
         }, error => console.error(error));
+    }
+
+    /**
+     * Inject the .env vars into options if they exist.
+     *
+     * @param  options
+     */
+    resolveEnvFileOptions(options: any): any {
+        require('dotenv').config();
+
+        if (process.env.LARAVEL_ECHO_SERVER_AUTH_HOST ||
+            process.env.LARAVEL_ECHO_SERVER_HOST) {
+            options.authHost = process.env.LARAVEL_ECHO_SERVER_AUTH_HOST ||
+                process.env.LARAVEL_ECHO_SERVER_HOST;
+        }
+
+        if (process.env.LARAVEL_ECHO_SERVER_HOST) {
+            options.host = process.env.LARAVEL_ECHO_SERVER_HOST;
+        }
+
+        if (process.env.LARAVEL_ECHO_SERVER_PORT) {
+            options.port = process.env.LARAVEL_ECHO_SERVER_PORT;
+        }
+
+        if (process.env.LARAVEL_ECHO_SERVER_DEBUG) {
+            options.devMode = JSON.parse(process.env.LARAVEL_ECHO_SERVER_DEBUG);
+        }
+
+        return options;
     }
 
     /**
@@ -214,7 +245,7 @@ export class Cli {
                 return false;
             }
 
-            var options = this.readConfigFile(configFile);
+            let options = this.readConfigFile(configFile);
 
             options.devMode = yargs.argv.dev || options.devMode || false;
 
@@ -468,6 +499,6 @@ export class Cli {
             process.exit();
         }
 
-        return data;
+        return this.resolveEnvFileOptions(data);
     }
 }

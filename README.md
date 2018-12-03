@@ -1,4 +1,4 @@
-﻿# Laravel Echo Server
+# Laravel Echo Server
 
 NodeJs server for Laravel Echo broadcasting with Socket.io.
 
@@ -72,19 +72,31 @@ Edit the default configuration of the server by adding options to your **laravel
 
 | Title              | Default              | Description                 |
 | :------------------| :------------------- | :---------------------------|
+| `apiOriginAllow`   | `{}`                 | Configuration to allow API be accessed over CORS. [Example](#cross-domain-access-to-api) |
 | `authEndpoint`     | `/broadcasting/auth` | The route that authenticates private channels  |
 | `authHost`         | `http://localhost`   | The host of the server that authenticates private and presence channels  |
 | `database`         | `redis`              | Database used to store data that should persist, like presence channel members. Options are currently `redis` and `sqlite` |
-| `databaseConfig`   |  `{}`                | Configurations for the different database drivers [Example](#database)|
+| `databaseConfig`   |  `{}`                | Configurations for the different database drivers [Example](#database) |
+| `devMode`          | `false`              | Adds additional logging for development purposes |
 | `host`             | `null`               | The host of the socket.io server ex.`app.dev`. `null` will accept connections on any IP-address |
 | `port`             | `6001`               | The port that the socket.io server should run on |
-| `protocol`         | `http`               | either `http` or `https` |
+| `protocol`         | `http`               | Must be either `http` or `https` |
 | `sslCertPath`      | `''`                 | The path to your server's ssl certificate |
 | `sslKeyPath`       | `''`                 | The path to your server's ssl key |
 | `sslCertChainPath` | `''`                 | The path to your server's ssl certificate chain |
 | `sslPassphrase`    | `''`                 | The pass phrase to use for the certificate (if applicable) |
 | `socketio`         | `{}`                 | Options to pass to the socket.io instance ([available options](https://github.com/socketio/engine.io#methods-1)) |
-| `apiOriginAllow`   | `{}`                 | Configuration to allow API be accessed over CORS. [Example](#cross-domain-access-to-api)|
+| `subscribers`      | `{"http": true, "redis": true}` | Allows to disable subscribers individually. Available subscribers: `http` and `redis` |
+
+### DotEnv
+If a .env file is found in the same directory as the laravel-echo-server.json
+file, the following options can be overridden:
+
+- `authHost`: `LARAVEL_ECHO_SERVER_AUTH_HOST` *Note*: This option will fall back to the `LARAVEL_ECHO_SERVER_HOST` option as the default if that is set in the .env file.
+- `host`: `LARAVEL_ECHO_SERVER_HOST`
+- `port`: `LARAVEL_ECHO_SERVER_PORT`
+- `devMode`: `LARAVEL_ECHO_SERVER_DEBUG`
+
 
 ### Running with SSL
 
@@ -93,6 +105,22 @@ Edit the default configuration of the server by adding options to your **laravel
 *   The server configuration should include paths to both your ssl certificate and key located on your server.
 
 *Note: This library currently only supports serving from either http or https, not both.*
+
+#### Alternative SSL implementation
+If you are struggling to get SSL implemented with this package, you could look at using a proxy module within Apache or NginX. Essentially, instead of connecting your websocket traffic to https://yourserver.dev:6001/socket.io?..... and trying to secure it, you can connect your websocket traffic to https://yourserver.dev/socket.io. Behind the scenes, the proxy module of Apache or NginX will be configured to intercept requests for /socket.io, and internally redirect those to your echo server over non-ssl on port 6001. This keeps all of the traffic encrypted between browser and web server, as your web server will still do the SSL encryption/decryption. The only thing that is left unsecured is the traffic between your webserver and your Echo server, which might be acceptable in many cases. 
+##### Sample NginX proxy config
+```
+#the following would go within the server{} block of your web server config
+location /socket.io {
+	    proxy_pass http://laravel-echo-server:6001; #could be localhost if Echo and NginX are on the same box
+	    proxy_http_version 1.1;
+	    proxy_set_header Upgrade $http_upgrade;
+	    proxy_set_header Connection "Upgrade";
+	}
+```
+
+### Setting the working directory
+The working directory in which `laravel-echo-server` will look for the configuration file `laravel-echo-server.json` can be passed to the `start` command through the `--dir` parameter like so: `laravel-echo-server start --dir=/var/www/html/example.com/configuration`
 
 ## Subscribers
 The Laravel Echo Server subscribes to incoming events with two methods: Redis & Http.
@@ -146,6 +174,7 @@ The HTTP subscriber is compatible with the Laravel Pusher subscriber. Just confi
     'options' => [
         'host' => 'localhost',
         'port' => 6001,
+        'scheme' => 'http'
     ],
 ],
 ```
@@ -246,6 +275,28 @@ npm install sqlite3 -g
 When users join a presence channel, their presence channel authentication data is stored using Redis.
 
 While presence channels contain a list of users, there will be instances where a user joins a presence channel multiple times. For example, this would occur when opening multiple browser tabs. In this situation "joining" and "leaving" events are only emitted to the first and last instance of the user.
+
+Optionally, you can configure laravel-echo-server to publish an event on each update to a presence channel, by setting `databaseConfig.publishPresence` to `true`:
+
+```json
+{
+  "database": "redis",
+  "databaseConfig": {
+    "redis" : {
+      "port": "6379",
+      "host": "localhost"
+    },
+    "publishPresence": true
+  }
+}
+```
+You can use Laravel's Redis integration, to trigger Application code from there:
+```php
+Redis::subscribe(['PresenceChannelUpdated'], function ($message) {
+    var_dump($message);
+});
+```
+
 
 ## Client Side Configuration
 
