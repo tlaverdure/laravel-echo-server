@@ -1,3 +1,7 @@
+#1.5.0
+
+Add `stop` command
+
 # 1.3.7
 
 Allow variables in .env file to set options in the server configuration.
