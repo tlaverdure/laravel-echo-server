@@ -35,6 +35,10 @@ export class PrivateChannel {
             rejectUnauthorized: false
         };
 
+        if (this.options.devMode) {
+            Log.info(`[${new Date().toLocaleTimeString()}] - Sending auth request to: ${options.url}\n`);
+        }
+
         return this.serverRequest(socket, options);
     }
 
