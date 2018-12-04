@@ -1,8 +1,8 @@
-let fs = require('fs');
-let path = require('path');
-let colors = require("colors");
-let echo = require('./../../dist');
-let inquirer = require('inquirer');
+const fs = require('fs');
+const path = require('path');
+const colors = require("colors");
+const echo = require('./../../dist');
+const inquirer = require('inquirer');
 const crypto = require('crypto');
 
 import ErrnoException = NodeJS.ErrnoException;
@@ -44,7 +44,7 @@ export class Cli {
             options = Object.assign({}, this.defaultOptions, options);
 
             if (options.addClient) {
-                let client = {
+                const client = {
                     appId: this.createAppId(),
                     key: this.createApiKey()
                 };
@@ -189,7 +189,7 @@ export class Cli {
      * @return {Promise<any>}
      */
     saveConfig(options): Promise<any> {
-        let opts = {};
+        const opts = {};
 
         Object.keys(options).filter(k => {
             return Object.keys(this.defaultOptions).indexOf(k) >= 0;
@@ -236,7 +236,7 @@ export class Cli {
             }
         });
 
-        let configFile = this.getConfigFile(yargs.argv.config, yargs.argv.dir);
+        const configFile = this.getConfigFile(yargs.argv.config, yargs.argv.dir);
 
         fs.access(configFile, fs.F_OK, error => {
             if (error) {
@@ -245,11 +245,11 @@ export class Cli {
                 return false;
             }
 
-            let options = this.readConfigFile(configFile);
+            const options = this.readConfigFile(configFile);
 
             options.devMode = yargs.argv.dev || options.devMode || false;
 
-            let lockFile = path.join(path.dirname(configFile), path.basename(configFile, '.json') + '.lock');
+            const lockFile = path.join(path.dirname(configFile), path.basename(configFile, '.json') + '.lock');
 
             if (fs.existsSync(lockFile)) {
                 let lockProcess;
@@ -279,7 +279,7 @@ export class Cli {
                 }
             }
 
-            fs.writeFile(lockFile, JSON.stringify({process: process.pid}, null, '\t'), error => {
+            fs.writeFile(lockFile, JSON.stringify({ process: process.pid }, null, '\t'), error => {
                 if (error) {
                     console.error(colors.error('Error: Cannot write lock file.'));
 
@@ -289,7 +289,7 @@ export class Cli {
                 process.on('exit', () => {
                     try {
                         fs.unlinkSync(lockFile);
-                    } catch {}
+                    } catch { }
                 });
 
                 process.on('SIGINT', process.exit);
@@ -320,9 +320,8 @@ export class Cli {
             }
         });
 
-        let configFile = this.getConfigFile(yargs.argv.config, yargs.argv.dir);
-
-        let lockFile = path.join(path.dirname(configFile), path.basename(configFile, '.json') + '.lock');
+        const configFile = this.getConfigFile(yargs.argv.config, yargs.argv.dir);
+        const lockFile = path.join(path.dirname(configFile), path.basename(configFile, '.json') + '.lock');
 
         if (fs.existsSync(lockFile)) {
             let lockProcess;
@@ -395,13 +394,13 @@ export class Cli {
             }
         });
 
-        var options = this.readConfigFile(this.getConfigFile(yargs.argv.config, yargs.argv.dir));
-        var appId = yargs.argv._[1] || this.createAppId();
+        const options = this.readConfigFile(this.getConfigFile(yargs.argv.config, yargs.argv.dir));
+        const appId = yargs.argv._[1] || this.createAppId();
         options.clients = options.clients || [];
 
         if (appId) {
-            var index = null;
-            var client = options.clients.find((client, i) => {
+            let index = null;
+            let client = options.clients.find((client, i) => {
                 index = i;
                 return client.appId == appId;
             });
@@ -449,13 +448,13 @@ export class Cli {
             }
         });
 
-        var options = this.readConfigFile(this.getConfigFile(yargs.argv.config, yargs.argv.dir));
-        var appId = yargs.argv._[1] || null;
+        const options = this.readConfigFile(this.getConfigFile(yargs.argv.config, yargs.argv.dir));
+        const appId = yargs.argv._[1] || null;
         options.clients = options.clients || [];
 
-        var index = null;
+        let index = null;
 
-        var client = options.clients.find((client, i) => {
+        const client = options.clients.find((client, i) => {
             index = i;
             return client.appId == appId;
         });
@@ -477,7 +476,7 @@ export class Cli {
      * @return {string}
      */
     getConfigFile(file = null, dir = null): string {
-        let filePath = path.join(dir || '', file || 'laravel-echo-server.json');
+        const filePath = path.join(dir || '', file || 'laravel-echo-server.json');
 
         return path.isAbsolute(filePath) ? filePath : path.join(process.cwd(), filePath);
     }
@@ -495,7 +494,6 @@ export class Cli {
             data = JSON.parse(fs.readFileSync(file, 'utf8'));
         } catch {
             console.error(colors.error('Error: There was a problem reading the config file.'));
-
             process.exit();
         }
 
