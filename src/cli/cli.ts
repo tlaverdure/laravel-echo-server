@@ -334,12 +334,13 @@ export class Cli {
 
             if (lockProcess) {
                 try {
-                    fs.unlink(lockFile);
+                    fs.unlinkSync(lockFile);
 
                     process.kill(lockProcess);
 
                     console.log(colors.green('Closed the running server.'));
-                } catch {
+                } catch (e) {
+                    console.error(e);
                     console.log(colors.error('No running servers to close.'));
                 }
             }
