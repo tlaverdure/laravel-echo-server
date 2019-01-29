@@ -65,6 +65,14 @@ in your project root directory, run
 $ laravel-echo-server start
 ```
 
+#### Stop The Server
+
+in your project root directory, run
+
+``` shell
+$ laravel-echo-server stop
+```
+
 ### Configurable Options
 
 Edit the default configuration of the server by adding options to your **laravel-echo-server.json** file.
@@ -109,7 +117,7 @@ file, the following options can be overridden:
 *Note: This library currently only supports serving from either http or https, not both.*
 
 #### Alternative SSL implementation
-If you are struggling to get SSL implemented with this package, you could look at using a proxy module within Apache or NginX. Essentially, instead of connecting your websocket traffic to https://yourserver.dev:6001/socket.io?..... and trying to secure it, you can connect your websocket traffic to https://yourserver.dev/socket.io. Behind the scenes, the proxy module of Apache or NginX will be configured to intercept requests for /socket.io, and internally redirect those to your echo server over non-ssl on port 6001. This keeps all of the traffic encrypted between browser and web server, as your web server will still do the SSL encryption/decryption. The only thing that is left unsecured is the traffic between your webserver and your Echo server, which might be acceptable in many cases. 
+If you are struggling to get SSL implemented with this package, you could look at using a proxy module within Apache or NginX. Essentially, instead of connecting your websocket traffic to https://yourserver.dev:6001/socket.io?..... and trying to secure it, you can connect your websocket traffic to https://yourserver.dev/socket.io. Behind the scenes, the proxy module of Apache or NginX will be configured to intercept requests for /socket.io, and internally redirect those to your echo server over non-ssl on port 6001. This keeps all of the traffic encrypted between browser and web server, as your web server will still do the SSL encryption/decryption. The only thing that is left unsecured is the traffic between your webserver and your Echo server, which might be acceptable in many cases.
 ##### Sample NginX proxy config
 ```
 #the following would go within the server{} block of your web server config
