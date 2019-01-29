@@ -85,7 +85,7 @@ export class Channel {
                 this.io.sockets.connected[socket.id]
                     .broadcast.to(data.channel)
                     .emit(data.event, data.channel, data.data);
-                this.hook(socket, data.channel, data.auth, "onClientEvent", data.data);
+                this.hook(socket, data.channel, data.auth, "client_event", data.data);
             }
         }
     }
@@ -111,7 +111,7 @@ export class Channel {
                 Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} left channel: ${channel} (${reason})`);
             }
 
-            this.hook(socket, channel, auth, "onLeave", null);
+            this.hook(socket, channel, auth, "leave", null);
         }
     }
 
@@ -185,7 +185,7 @@ export class Channel {
             Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} joined channel: ${channel}`);
         }
 
-        this.hook(socket, channel, auth, "onJoin", null);
+        this.hook(socket, channel, auth, "join", null);
     }
 
     /**
@@ -221,82 +221,37 @@ export class Channel {
      * @param {any} socket 
      * @param {string} channel
      * @param {object} auth 
-     * @param {string} hookEndpoint 
-     * @param {string} hookName 
+     * @param {string} event 
      * @param {object} payload
      */
-    hook(socket:any, channel: any, auth: any, hookName: string, payload: object) {
-        if (typeof this.options.hookHost == 'undefined' ||
-            !this.options.hookHost ||
-            typeof this.options.hooks == 'undefined' ||
-            !this.options.hooks) {
+    hook(socket:any, channel: any, auth: any, event: string, payload: object) {
+        if (typeof this.options.hookEndpoint == 'undefined' ||
+            !this.options.hookEndpoint) {
             return;
         }
 
-        let hookEndpoint = this.getHookEndpoint(hookName);
+        let hookEndpoint = this.options.hookEndpoint;
 
-        if (hookEndpoint == null) {
-            return;
-        }
-
-        let options = this.prepareHookHeaders(socket, auth, channel, hookEndpoint, payload)
+        let options = this.prepareHookHeaders(socket, auth, channel, hookEndpoint, event, payload)
 
         this.request.post(options, (error, response, body, next) => {
             if (error) {
                 if (this.options.devMode) {
-                    Log.error(`[${new Date().toLocaleTimeString()}] - Error call ${hookName} hook ${socket.id} for ${options.form.channel_name}`);
+                    Log.error(`[${new Date().toLocaleTimeString()}] - Error call ${event} hook ${socket.id} for ${options.form.channel_name}`);
                 }
 
                 Log.error(error);
             } else if (response.statusCode !== 200) {
                 if (this.options.devMode) {
-                    Log.warning(`[${new Date().toLocaleTimeString()}] - Error call ${hookName} hook ${socket.id} for ${options.form.channel_name}`);
+                    Log.warning(`[${new Date().toLocaleTimeString()}] - Error call ${event} hook ${socket.id} for ${options.form.channel_name}`);
                     Log.error(response.body);
                 }
             } else {
                 if (this.options.devMode) {
-                    Log.info(`[${new Date().toLocaleTimeString()}] - Call ${hookName} hook for ${socket.id} for ${options.form.channel_name}: ${response.body}`);
+                    Log.info(`[${new Date().toLocaleTimeString()}] - Call ${event} hook for ${socket.id} for ${options.form.channel_name}: ${response.body}`);
                 }
             }
         });
-    }
-
-    /**
-     * Get hook endpoint for request to app server.
-     * 
-     * @param {string} hookName 
-     * @returns {string}
-     */
-    getHookEndpoint(hookName: string): string {
-        let hookEndpoint = null;
-        switch(hookName) { 
-            case "onJoin": {
-                if (!this.options.hooks.onJoinEndpoint) {
-                    break;
-                }
-                hookEndpoint = this.options.hooks.onJoinEndpoint;
-                break; 
-            } 
-            case "onLeave": {
-                if (!this.options.hooks.onLeaveEndpoint) {
-                    break;
-                }
-                hookEndpoint = this.options.hooks.onLeaveEndpoint;
-                break;
-            } 
-            case "onClientEvent": {
-                if (!this.options.hooks.onClientEventEndpoint) {
-                    break;
-                }
-                hookEndpoint = this.options.hooks.onClientEventEndpoint;
-                break;
-            } 
-            default: {
-                Log.error('cannot find hookEndpoint for hookName: ' + hookName);
-                break;          
-            } 
-        }
-        return hookEndpoint;
     }
 
     /**
@@ -306,15 +261,22 @@ export class Channel {
      * @param {any} auth
      * @param {string} channel
      * @param {string} hookEndpoint
+     * @param {string} event
      * @param {any} payload
      * @returns {any}
      */
-    prepareHookHeaders(socket: any, auth: any, channel: string, hookEndpoint: string, payload: any): any {
+    prepareHookHeaders(socket: any, auth: any, channel: string, hookEndpoint: string, event: string, payload: any): any {
+        let hookHost = this.options.hookHost ? this.options.hookHost : this.options.authHost
         let options = {
-            url: this.options.hookHost + hookEndpoint,
-            form: { channel_name: channel, payload: payload },
+            url: hookHost + hookEndpoint,
+            form: { 
+                event: event,
+                channel: channel, 
+                payload: payload 
+            },
             headers: (auth && auth.headers) ? auth.headers : {}
         };
+        
         options.headers['Cookie'] = socket.request.headers.cookie;
         options.headers['X-Requested-With'] = 'XMLHttpRequest';
         return options;

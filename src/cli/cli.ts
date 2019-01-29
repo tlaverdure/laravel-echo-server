@@ -89,6 +89,12 @@ export class Cli {
             options.devMode = JSON.parse(process.env.LARAVEL_ECHO_SERVER_DEBUG);
         }
 
+        if (process.env.LARAVEL_ECHO_SERVER_AUTH_HOST ||
+            process.env.LARAVEL_ECHO_SERVER_HOST) {
+                options.hookHost = process.env.LARAVEL_ECHO_SERVER_AUTH_HOST ||
+                process.env.LARAVEL_ECHO_SERVER_HOST;
+        }
+
         return options;
     }
 
