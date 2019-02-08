@@ -1,11 +1,11 @@
-let fs = require('fs');
-let colors = require("colors");
-let echo = require('./../../dist');
-let inquirer = require('inquirer');
+const fs = require('fs');
+const path = require('path');
+const colors = require("colors");
+const echo = require('./../../dist');
+const inquirer = require('inquirer');
 const crypto = require('crypto');
-import ErrnoException = NodeJS.ErrnoException;
 
-const CONFIG_FILE = process.cwd() + '/laravel-echo-server.json';
+import ErrnoException = NodeJS.ErrnoException;
 
 /**
  * Laravel Echo Server CLI
@@ -26,17 +26,25 @@ export class Cli {
     }
 
     /**
-     * Initialize server with a configuration file.
+     * Create a configuration file.
      *
      * @param  {object} yargs
      * @return {void}
      */
-    init(yargs): void {
-        this.setupConfig().then((options) => {
+    configure(yargs): void {
+        yargs.option({
+            config: {
+                type: 'string',
+                default: 'laravel-echo-server.json',
+                describe: 'The name of the config file to create.',
+            }
+        });
+
+        this.setupConfig(yargs.argv.config).then(options => {
             options = Object.assign({}, this.defaultOptions, options);
 
             if (options.addClient) {
-                let client = {
+                const client = {
                     appId: this.createAppId(),
                     key: this.createApiKey()
                 };
@@ -53,11 +61,11 @@ export class Cli {
                 options.apiOriginAllow.allowHeaders = options.allowHeaders;
             }
 
-            this.saveConfig(options).then(() => {
-                console.log('Configuration file saved. Run ' + colors.magenta.bold('laravel-echo-server start') + ' to run server.');
+            this.saveConfig(options).then(file => {
+                console.log('Configuration file saved. Run ' + colors.magenta.bold('laravel-echo-server start' + (file != 'laravel-echo-server.json' ? ' --config="' + file + '"' : '')) + ' to run server.');
 
                 process.exit();
-            }, (error) => {
+            }, error => {
                 console.error(colors.error(error));
             });
         }, error => console.error(error));
@@ -95,9 +103,10 @@ export class Cli {
     /**
      * Setup configuration with questions.
      *
+     * @param  {string} defaultFile
      * @return {Promise<any>}
      */
-    setupConfig() {
+    setupConfig(defaultFile) {
         return inquirer.prompt([
             {
                 name: 'devMode',
@@ -165,6 +174,10 @@ export class Cli {
                 when: function(options) {
                     return options.corsAllow == true;
                 }
+            }, {
+                name: 'file',
+                default: defaultFile,
+                message: 'What do you want this config to be saved as?'
             }
         ]);
     }
@@ -176,7 +189,7 @@ export class Cli {
      * @return {Promise<any>}
      */
     saveConfig(options): Promise<any> {
-        let opts = {};
+        const opts = {};
 
         Object.keys(options).filter(k => {
             return Object.keys(this.defaultOptions).indexOf(k) >= 0;
@@ -185,9 +198,9 @@ export class Cli {
         return new Promise((resolve, reject) => {
             if (opts) {
                 fs.writeFile(
-                    CONFIG_FILE,
+                    this.getConfigFile(options.file),
                     JSON.stringify(opts, null, '\t'),
-                    (error) => (error) ? reject(error) : resolve());
+                    error => (error) ? reject(error) : resolve(options.file));
             } else {
                 reject('No options provided.')
             }
@@ -201,22 +214,139 @@ export class Cli {
      * @return {void}
      */
     start(yargs): void {
-        let dir = yargs.argv.dir ? yargs.argv.dir.replace(/\/?$/, '/') : null;
-        let configFile = dir ? dir + 'laravel-echo-server.json' : CONFIG_FILE;
+        yargs.option({
+            config: {
+                type: 'string',
+                describe: 'The config file to use.',
+            },
 
-        fs.access(configFile, fs.F_OK, (error) => {
+            dir: {
+                type: 'string',
+                describe: 'The working directory to use.',
+            },
+
+            force: {
+                type: 'boolean',
+                describe: 'If a server is already running, stop it.',
+            },
+
+            dev: {
+                type: 'boolean',
+                describe: 'Run in dev mode.',
+            }
+        });
+
+        const configFile = this.getConfigFile(yargs.argv.config, yargs.argv.dir);
+
+        fs.access(configFile, fs.F_OK, error => {
             if (error) {
-                console.error(colors.error('Error: laravel-echo-server.json file not found.'));
+                console.error(colors.error('Error: The config file cound not be found.'));
 
                 return false;
             }
 
-            let options = JSON.parse(fs.readFileSync(configFile, 'utf8'));
-            options = this.resolveEnvFileOptions(options);
+            const options = this.readConfigFile(configFile);
+
             options.devMode = yargs.argv.dev || options.devMode || false;
 
-            echo.run(options);
+            const lockFile = path.join(path.dirname(configFile), path.basename(configFile, '.json') + '.lock');
+
+            if (fs.existsSync(lockFile)) {
+                let lockProcess;
+
+                try {
+                    lockProcess = parseInt(JSON.parse(fs.readFileSync(lockFile, 'utf8')).process);
+                } catch {
+                    console.error(colors.error('Error: There was a problem reading the existing lock file.'));
+                }
+
+                if (lockProcess) {
+                    try {
+                        if (process.kill(lockProcess, 0)) {
+                            if (yargs.argv.force) {
+                                process.kill(lockProcess);
+
+                                console.log(colors.yellow('Warning: Closing process ' + lockProcess + ' because you used the \'--force\' option.'));
+                            } else {
+                                console.error(colors.error('Error: There is already a server running! Use add the option \'--force\' to stop it and start another one.'));
+
+                                return false;
+                            }
+                        }
+                    } catch {
+                        // The process in the lock file doesn't exist, so continue
+                    }
+                }
+            }
+
+            fs.writeFile(lockFile, JSON.stringify({ process: process.pid }, null, '\t'), error => {
+                if (error) {
+                    console.error(colors.error('Error: Cannot write lock file.'));
+
+                    return false;
+                }
+
+                process.on('exit', () => {
+                    try {
+                        fs.unlinkSync(lockFile);
+                    } catch { }
+                });
+
+                process.on('SIGINT', process.exit);
+                process.on('SIGHUP', process.exit);
+                process.on('SIGTERM', process.exit);
+
+                echo.run(options);
+            });
         });
+    }
+
+    /**
+     * Stop the Laravel Echo server.
+     *
+     * @param  {object} yargs
+     * @return {void}
+     */
+    stop(yargs): void {
+        yargs.option({
+            config: {
+                type: 'string',
+                describe: 'The config file to use.',
+            },
+
+            dir: {
+                type: 'string',
+                describe: 'The working directory to use.',
+            }
+        });
+
+        const configFile = this.getConfigFile(yargs.argv.config, yargs.argv.dir);
+        const lockFile = path.join(path.dirname(configFile), path.basename(configFile, '.json') + '.lock');
+
+        if (fs.existsSync(lockFile)) {
+            let lockProcess;
+
+            try {
+                lockProcess = parseInt(JSON.parse(fs.readFileSync(lockFile, 'utf8')).process);
+            } catch {
+                console.error(colors.error('Error: There was a problem reading the lock file.'));
+            }
+
+            if (lockProcess) {
+                try {
+                    fs.unlinkSync(lockFile);
+
+                    process.kill(lockProcess);
+
+                    console.log(colors.green('Closed the running server.'));
+                } catch (e) {
+                    console.error(e);
+                    console.log(colors.error('No running servers to close.'));
+                }
+            }
+        } else {
+            console.log(colors.error('Error: Could not find any lock file.'));
+        }
     }
 
     /**
@@ -253,13 +383,25 @@ export class Cli {
      * @return {void}
      */
     clientAdd(yargs): void {
-        var options = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
-        var appId = yargs.argv._[1] || this.createAppId();
+        yargs.option({
+            config: {
+                type: 'string',
+                describe: 'The config file to use.',
+            },
+
+            dir: {
+                type: 'string',
+                describe: 'The working directory to use.',
+            }
+        });
+
+        const options = this.readConfigFile(this.getConfigFile(yargs.argv.config, yargs.argv.dir));
+        const appId = yargs.argv._[1] || this.createAppId();
         options.clients = options.clients || [];
 
         if (appId) {
-            var index = null;
-            var client = options.clients.find((client, i) => {
+            let index = null;
+            let client = options.clients.find((client, i) => {
                 index = i;
                 return client.appId == appId;
             });
@@ -295,13 +437,25 @@ export class Cli {
      * @return {void}
      */
     clientRemove(yargs): void {
-        var options = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
-        var appId = yargs.argv._[1] || null;
+        yargs.option({
+            config: {
+                type: 'string',
+                describe: 'The config file to use.',
+            },
+
+            dir: {
+                type: 'string',
+                describe: 'The working directory to use.',
+            }
+        });
+
+        const options = this.readConfigFile(this.getConfigFile(yargs.argv.config, yargs.argv.dir));
+        const appId = yargs.argv._[1] || null;
         options.clients = options.clients || [];
 
-        var index = null;
+        let index = null;
 
-        var client = options.clients.find((client, i) => {
+        const client = options.clients.find((client, i) => {
             index = i;
             return client.appId == appId;
         });
@@ -313,5 +467,37 @@ export class Cli {
         console.log(colors.green('Client removed: ' + appId));
 
         this.saveConfig(options);
+    }
+
+    /**
+     * Gets the config file with the provided args
+     *
+     * @param  {string} file
+     * @param  {string} dir
+     * @return {string}
+     */
+    getConfigFile(file = null, dir = null): string {
+        const filePath = path.join(dir || '', file || 'laravel-echo-server.json');
+
+        return path.isAbsolute(filePath) ? filePath : path.join(process.cwd(), filePath);
+    }
+
+    /**
+     * Tries to read a config file
+     *
+     * @param  {string} file
+     * @return {any}
+     */
+    readConfigFile(file): any {
+        let data = {};
+
+        try {
+            data = JSON.parse(fs.readFileSync(file, 'utf8'));
+        } catch {
+            console.error(colors.error('Error: There was a problem reading the config file.'));
+            process.exit();
+        }
+
+        return this.resolveEnvFileOptions(data);
     }
 }
