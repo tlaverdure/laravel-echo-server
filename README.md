@@ -18,9 +18,7 @@ official docs: <https://laravel.com/docs/master/broadcasting>
 Install npm package globally with the following command:
 
 ``` shell
-
 $   npm install -g laravel-echo-server
-
 ```
 
 ### Initialize with CLI Tool
@@ -321,12 +319,15 @@ add a script tag to your html like so:
 
 _Note: When using the socket.io client library from your running server, remember to check that the `io` global variable is defined before subscribing to events._
 
-#### Better performance with [µWebSockets](https://github.com/uWebSockets/uWebSockets)
-For extra performance, you can use the faster `uws` engine instead of `ws`, by setting the `wsEngine` option for Socket.IO in `laravel-echo-server.json`:
+#### µWebSockets deprecation
+
+µWebSockets has been [officially deprecated](https://www.npmjs.com/package/uws). Currently there is no support for µWebSockets in Socket.IO, but it may have the new [ClusterWS](https://www.npmjs.com/package/@clusterws/cws) support incoming.
+
+Meanwhile, you can use the [`ws` engine](https://www.npmjs.com/package/ws), by setting the `wsEngine` option for Socket.IO in `laravel-echo-server.json`:
 
 ```js
 "socketio": {
-    "wsEngine": "uws"
+    "wsEngine": "ws"
 }
 ```
 
