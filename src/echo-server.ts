@@ -76,13 +76,6 @@ export class EchoServer {
     private subscribers: Subscriber[];
 
     /**
-     * Beanstalk subscriber instance.
-     *
-     * @type {BeanstalkSubscriber}
-     */
-    private beanstalkSub: BeanstalkSubscriber;
-
-    /**
      * Http api instance.
      *
      * @type {HttpApi}
