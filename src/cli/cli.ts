@@ -97,6 +97,27 @@ export class Cli {
             options.devMode = JSON.parse(process.env.LARAVEL_ECHO_SERVER_DEBUG);
         }
 
+        if (process.env.LARAVEL_ECHO_SERVER_PROTOCOL) {
+            options.protocol = process.env.LARAVEL_ECHO_SERVER_PROTOCOL;
+        }
+
+        if (options.protocol == 'https') {
+            if (process.env.LARAVEL_ECHO_SERVER_SSL_CERT_PATH) {
+                options.sslCertPath = process.env.LARAVEL_ECHO_SERVER_SSL_CERT_PATH;
+            }
+
+            if (process.env.LARAVEL_ECHO_SERVER_SSL_KEY_PATH) {
+                options.sslKeyPath = process.env.LARAVEL_ECHO_SERVER_SSL_KEY_PATH;
+            }
+
+            if (process.env.LARAVEL_ECHO_SERVER_SSL_CERT_CHAIN_PATH) {
+                options.sslCertChainPath = process.env.LARAVEL_ECHO_SERVER_SSL_CERT_CHAIN_PATH;
+            }
+
+            if (process.env.LARAVEL_ECHO_SERVER_SSL_PASSPHRASE) {
+                options.sslPassphrase = process.env.LARAVEL_ECHO_SERVER_SSL_PASSPHRASE;
+            }
+        }
         return options;
     }
 
