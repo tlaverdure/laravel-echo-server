@@ -97,6 +97,14 @@ export class Cli {
             options.devMode = JSON.parse(process.env.LARAVEL_ECHO_SERVER_DEBUG);
         }
 
+        if (process.env.LARAVEL_ECHO_SERVER_REDIS_HOST) {
+            options.databaseConfig.redis.host = process.env.LARAVEL_ECHO_SERVER_REDIS_HOST.toString();
+        }
+
+        if (process.env.LARAVEL_ECHO_SERVER_REDIS_PORT) {
+            options.databaseConfig.redis.port = process.env.LARAVEL_ECHO_SERVER_REDIS_PORT.toString();
+        }
+
         return options;
     }
 

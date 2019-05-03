@@ -104,6 +104,8 @@ file, the following options can be overridden:
 - `host`: `LARAVEL_ECHO_SERVER_HOST`
 - `port`: `LARAVEL_ECHO_SERVER_PORT`
 - `devMode`: `LARAVEL_ECHO_SERVER_DEBUG`
+- `databaseConfig.redis.host`: `LARAVEL_ECHO_SERVER_REDIS_HOST`
+- `databaseConfig.redis.port`: `LARAVEL_ECHO_SERVER_REDIS_PORT`
 
 
 ### Running with SSL
