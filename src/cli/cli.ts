@@ -12,13 +12,6 @@ import ErrnoException = NodeJS.ErrnoException;
  */
 export class Cli {
     /**
-     * Default config options.
-     *
-     * @type {object}
-     */
-    defaultOptions: object;
-
-    /**
      * Create new CLI instance.
      */
     constructor() {
@@ -26,12 +19,26 @@ export class Cli {
     }
 
     /**
-     * Create a configuration file.
-     *
-     * @param  {object} yargs
-     * @return {void}
+     * Default configuration options.
      */
-    configure(yargs): void {
+    defaultOptions: any;
+
+    /**
+     * Allowed environment variables.
+     */
+    envVariables: any = {
+        'LARAVEL_ECHO_SERVER_AUTH_HOST': 'authHost',
+        'LARAVEL_ECHO_SERVER_DEBUG': 'devMode',
+        'LARAVEL_ECHO_SERVER_HOST': 'host',
+        'LARAVEL_ECHO_SERVER_PORT': 'port',
+        'LARAVEL_ECHO_SERVER_REDIS_HOST': 'databaseConfig.redis.host',
+        'LARAVEL_ECHO_SERVER_REDIS_PORT': 'databaseConfig.redis.port',
+    };
+
+    /**
+     * Create a configuration file.
+     */
+    configure(yargs: any): void {
         yargs.option({
             config: {
                 type: 'string',
@@ -73,36 +80,28 @@ export class Cli {
 
     /**
      * Inject the .env vars into options if they exist.
-     *
-     * @param  options
      */
     resolveEnvFileOptions(options: any): any {
         require('dotenv').config();
 
-        if (process.env.LARAVEL_ECHO_SERVER_AUTH_HOST ||
-            process.env.LARAVEL_ECHO_SERVER_HOST) {
-            options.authHost = process.env.LARAVEL_ECHO_SERVER_AUTH_HOST ||
-                process.env.LARAVEL_ECHO_SERVER_HOST;
-        }
+        for (let key in this.envVariables) {
+            let value = (process.env[key] || '').toString();
+            let replacementVar;
 
-        if (process.env.LARAVEL_ECHO_SERVER_HOST) {
-            options.host = process.env.LARAVEL_ECHO_SERVER_HOST;
-        }
+            if (value) {
+                const path = this.envVariables[key].split(".");
+                let modifier = options;
 
-        if (process.env.LARAVEL_ECHO_SERVER_PORT) {
-            options.port = process.env.LARAVEL_ECHO_SERVER_PORT;
-        }
+                while (path.length > 1) {
+                    modifier = modifier[path.shift()];
+                }
 
-        if (process.env.LARAVEL_ECHO_SERVER_DEBUG) {
-            options.devMode = JSON.parse(process.env.LARAVEL_ECHO_SERVER_DEBUG);
-        }
+                if (replacementVar = value.match(/\${(.*?)}/)) {
+                    value = (process.env[replacementVar[1]] || '').toString();
+                }
 
-        if (process.env.LARAVEL_ECHO_SERVER_REDIS_HOST) {
-            options.databaseConfig.redis.host = process.env.LARAVEL_ECHO_SERVER_REDIS_HOST.toString();
-        }
-
-        if (process.env.LARAVEL_ECHO_SERVER_REDIS_PORT) {
-            options.databaseConfig.redis.port = process.env.LARAVEL_ECHO_SERVER_REDIS_PORT.toString();
+                modifier[path.shift()] = value;
+            }
         }
 
         return options;
@@ -110,9 +109,6 @@ export class Cli {
 
     /**
      * Setup configuration with questions.
-     *
-     * @param  {string} defaultFile
-     * @return {Promise<any>}
      */
     setupConfig(defaultFile) {
         return inquirer.prompt([
@@ -192,9 +188,6 @@ export class Cli {
 
     /**
      * Save configuration file.
-     *
-     * @param  {object} options
-     * @return {Promise<any>}
      */
     saveConfig(options): Promise<any> {
         const opts = {};
@@ -217,11 +210,8 @@ export class Cli {
 
     /**
      * Start the Laravel Echo server.
-     *
-     * @param  {object} yargs
-     * @return {void}
      */
-    start(yargs): void {
+    start(yargs: any): void {
         yargs.option({
             config: {
                 type: 'string',
@@ -311,11 +301,8 @@ export class Cli {
 
     /**
      * Stop the Laravel Echo server.
-     *
-     * @param  {object} yargs
-     * @return {void}
      */
-    stop(yargs): void {
+    stop(yargs: any): void {
         yargs.option({
             config: {
                 type: 'string',
@@ -359,8 +346,6 @@ export class Cli {
 
     /**
      * Create an app key for server.
-     *
-     * @return {string}
      */
     getRandomString(bytes: number): string {
         return crypto.randomBytes(bytes).toString('hex');
@@ -368,8 +353,6 @@ export class Cli {
 
     /**
      * Create an api key for the HTTP API.
-     *
-     * @return {string}
      */
     createApiKey(): string {
         return this.getRandomString(16);
@@ -377,8 +360,6 @@ export class Cli {
 
     /**
      * Create an api key for the HTTP API.
-     *
-     * @return {string}
      */
     createAppId(): string {
         return this.getRandomString(8);
@@ -386,11 +367,8 @@ export class Cli {
 
     /**
      * Add a registered referrer.
-     *
-     * @param  {object} yargs
-     * @return {void}
      */
-    clientAdd(yargs): void {
+    clientAdd(yargs: any): void {
         yargs.option({
             config: {
                 type: 'string',
@@ -440,11 +418,8 @@ export class Cli {
 
     /**
      * Remove a registered referrer.
-     *
-     * @param  {object} yargs
-     * @return {void}
      */
-    clientRemove(yargs): void {
+    clientRemove(yargs: any): void {
         yargs.option({
             config: {
                 type: 'string',
@@ -479,12 +454,8 @@ export class Cli {
 
     /**
      * Gets the config file with the provided args
-     *
-     * @param  {string} file
-     * @param  {string} dir
-     * @return {string}
      */
-    getConfigFile(file = null, dir = null): string {
+    getConfigFile(file: string = null, dir: string = null): string {
         const filePath = path.join(dir || '', file || 'laravel-echo-server.json');
 
         return path.isAbsolute(filePath) ? filePath : path.join(process.cwd(), filePath);
@@ -492,11 +463,8 @@ export class Cli {
 
     /**
      * Tries to read a config file
-     *
-     * @param  {string} file
-     * @return {any}
      */
-    readConfigFile(file): any {
+    readConfigFile(file: string): any {
         let data = {};
 
         try {
