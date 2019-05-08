@@ -266,7 +266,7 @@ export class Cli {
 
                                 console.log(colors.yellow('Warning: Closing process ' + lockProcess + ' because you used the \'--force\' option.'));
                             } else {
-                                console.error(colors.error('Error: There is already a server running! Use add the option \'--force\' to stop it and start another one.'));
+                                console.error(colors.error('Error: There is already a server running! Use the option \'--force\' to stop it and start another one.'));
 
                                 return false;
                             }
