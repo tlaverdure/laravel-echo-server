@@ -5,29 +5,21 @@ import { Log } from './../log';
 export class Channel {
     /**
      * Channels and patters for private channels.
-     *
-     * @type {array}
      */
     protected _privateChannels: string[] = ['private-*', 'presence-*'];
 
     /**
      * Allowed client events
-     *
-     * @type {array}
      */
     protected _clientEvents: string[] = ['client-*'];
 
     /**
      * Private channel instance.
-     *
-     * @type {PrivateChannel}
      */
     private: PrivateChannel;
 
     /**
      * Presence channel instance.
-     *
-     * @type {PresenceChannel}
      */
     presence: PresenceChannel;
 
@@ -45,10 +37,6 @@ export class Channel {
 
     /**
      * Join a channel.
-     *
-     * @param  {object} socket
-     * @param  {object} data
-     * @return {void}
      */
     join(socket, data): void {
         if (data.channel) {
@@ -63,10 +51,6 @@ export class Channel {
 
     /**
      * Trigger a client message
-     *
-     * @param  {object} socket
-     * @param  {object} data
-     * @return {void}
      */
     clientEvent(socket, data): void {
         if (data.event && data.channel) {
@@ -82,11 +66,6 @@ export class Channel {
 
     /**
      * Leave a channel.
-     *
-     * @param  {object} socket
-     * @param  {string} channel
-     * @param  {string} reason
-     * @return {void}
      */
     leave(socket: any, channel: string, reason: string): void {
         if (channel) {
@@ -104,9 +83,6 @@ export class Channel {
 
     /**
      * Check if the incoming socket connection is a private channel.
-     *
-     * @param  {string} channel
-     * @return {boolean}
      */
     isPrivate(channel: string): boolean {
         let isPrivate = false;
@@ -121,10 +97,6 @@ export class Channel {
 
     /**
      * Join private channel, emit data to presence channels.
-     *
-     * @param  {object} socket
-     * @param  {object} data
-     * @return {void}
      */
     joinPrivate(socket: any, data: any): void {
         this.private.authenticate(socket, data).then(res => {
@@ -152,9 +124,6 @@ export class Channel {
 
     /**
      * Check if a channel is a presence channel.
-     *
-     * @param  {string} channel
-     * @return {boolean}
      */
     isPresence(channel: string): boolean {
         return channel.lastIndexOf('presence-', 0) === 0;
@@ -162,9 +131,6 @@ export class Channel {
 
     /**
      * On join a channel log success.
-     *
-     * @param {any} socket
-     * @param {string} channel
      */
     onJoin(socket: any, channel: string): void {
         if (this.options.devMode) {
@@ -174,9 +140,6 @@ export class Channel {
 
     /**
      * Check if client is a client event
-     *
-     * @param  {string} event
-     * @return {boolean}
      */
     isClientEvent(event: string): boolean {
         let isClientEvent = false;
@@ -191,10 +154,6 @@ export class Channel {
 
     /**
      * Check if a socket has joined a channel.
-     *
-     * @param socket
-     * @param channel
-     * @returns {boolean}
      */
     isInChannel(socket: any, channel: string): boolean {
         return !!socket.rooms[channel];
