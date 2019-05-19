@@ -245,7 +245,7 @@ export class Cli {
 
             const options = this.readConfigFile(configFile);
 
-            options.devMode = (yargs.argv.dev || options.devMode || false) === 'true';
+            options.devMode = `${(yargs.argv.dev || options.devMode || false)}` === 'true';
 
             const lockFile = path.join(path.dirname(configFile), path.basename(configFile, '.json') + '.lock');
 
