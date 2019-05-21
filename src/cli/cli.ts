@@ -33,6 +33,7 @@ export class Cli {
         'LARAVEL_ECHO_SERVER_PORT': 'port',
         'LARAVEL_ECHO_SERVER_REDIS_HOST': 'databaseConfig.redis.host',
         'LARAVEL_ECHO_SERVER_REDIS_PORT': 'databaseConfig.redis.port',
+        'LARAVEL_ECHO_SERVER_REDIS_PASSWORD': 'databaseConfig.redis.password',
     };
 
     /**
