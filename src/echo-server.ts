@@ -5,6 +5,7 @@ import { HttpApi } from './api';
 import { Log } from './log';
 import * as fs from 'fs';
 const packageFile = require('../package.json');
+const { constants } = require('crypto');
 
 /**
  * Echo server class.
@@ -29,6 +30,7 @@ export class EchoServer {
         port: 6001,
         protocol: "http",
         socketio: {},
+        secureOptions: constants.SSL_OP_NO_TLSv1,
         sslCertPath: '',
         sslKeyPath: '',
         sslCertChainPath: '',
