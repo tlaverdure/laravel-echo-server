@@ -10,8 +10,9 @@ export class HttpApi {
      * @param  {any} channel
      * @param  {any} express
      * @param  {object} options object
+     * @param  {any} log
      */
-    constructor(private io, private channel, private express, private options) { }
+    constructor(private io, private channel, private express, private options, protected log: any) { }
 
     /**
      * Initialize the API.

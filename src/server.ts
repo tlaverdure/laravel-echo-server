@@ -24,7 +24,9 @@ export class Server {
     /**
      * Create a new server instance.
      */
-    constructor(private options) { }
+    constructor(private options, protected log) {
+
+    }
 
     /**
      * Start the Socket.io server.
@@ -36,6 +38,7 @@ export class Server {
             this.serverProtocol().then(() => {
                 let host = this.options.host || 'localhost';
                 Log.success(`Running at ${host} on port ${this.getPort()}`);
+                this.log.info(`Running at ${host} on port ${this.getPort()}`);
 
                 resolve(this.io);
             }, error => reject(error));
@@ -99,8 +102,10 @@ export class Server {
      */
     httpServer(secure: boolean) {
         this.express = express();
-        this.express.use((req, res, next) => {
-            for (var header in this.options.headers) {
+        this.express.use((req, res, next) => { //CHANGE
+            console.log(this.options)
+            for(var header in this.options.headers) {
+                console.log('..................HEADERS............................')
                 res.setHeader(header, this.options.headers[header]);
             }
             next();
@@ -124,6 +129,9 @@ export class Server {
      */
     authorizeRequests(): void {
         this.express.param('appId', (req, res, next) => {
+            Log.info('authorizeRequests...\n')
+            //Log.info('Inside appId param ' + req.param)
+            //Log.info('Inside appId param ' + req.headers)
             if (!this.canAccess(req)) {
                 return this.unauthorizedResponse(req, res);
             }
@@ -141,6 +149,8 @@ export class Server {
     canAccess(req: any): boolean {
         let appId = this.getAppId(req);
         let key = this.getAuthKey(req);
+
+        Log.info('APP ID: ' + appId + ', APP KEY: ' + key)
 
         if (key && appId) {
             let client = this.options.clients.find((client) => {
@@ -176,6 +186,7 @@ export class Server {
      * @return {string|boolean}
      */
     getAuthKey(req: any): (string | boolean) {
+        Log.info('GET AUTH KEY....\n')
         if (req.headers.authorization) {
             return req.headers.authorization.replace('Bearer ', '');
         }

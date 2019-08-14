@@ -12,7 +12,7 @@ export class PresenceChannel {
     /**
      * Create a new Presence channel instance.
      */
-    constructor(private io, private options: any) {
+    constructor(private io, private options: any, protected log: any) {
         this.db = new Database(options);
     }
 

@@ -1,3 +1,5 @@
+import {Log} from "../log";
+
 let sqlite3;
 import { DatabaseDriver } from './database-driver';
 try {

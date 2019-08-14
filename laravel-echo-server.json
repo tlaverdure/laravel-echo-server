@@ -1,0 +1,49 @@
+{
+	"app_name": "myApp",
+    "authHost": "http://localhost:8000",
+    "authEndpoint": "/broadcasting/auth",
+    "clients": [
+        {
+            "appId": "7c7779cb46dc0b03",
+            "key": "61ec53be69c3841f451c0d3d7df81edb"
+        }
+    ],
+    "database": "sqlite",
+    "databaseConfig": {
+        "redis": {
+            "port": "6379",
+            "host": "redis.local"
+        },
+        "sqlite": {
+            "databasePath": "/dist/database/laravel-echo-server.sqlite"
+        }
+    },
+    "devMode": true,
+    "host": null,
+    "port": "4000",
+    "protocol": "http",
+    "socketio": {},
+    "sslCertPath": "",
+    "sslKeyPath": "",
+    "sslCertChainPath": "",
+    "sslPassphrase": "",
+    "subscribers": {
+        "http": true,
+        "redis": true
+    },
+    "apiOriginAllow": {
+        "allowCors": true,
+        "allowOrigin": "http://localhost:9528",
+        "allowMethods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+        "allowHeaders": "Origin, Content-Type, X-Auth-Token, X-Requested-With, Accept, Authorization, X-CSRF-TOKEN, X-Socket-Id"
+    },
+	"command_channel": "private-echo.server.commands",
+	"log": "file",
+    "log_folder": "../../logs/",
+    "syslog": {
+        "host": "127.0.0.1",
+        "port": "514",
+        "facility": "local0",
+        "type": "sys"
+    }
+}

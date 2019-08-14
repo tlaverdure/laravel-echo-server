@@ -1,4 +1,86 @@
-# Laravel Echo Server
+# Laravel Echo Server Fork 
+
+#### Laravel Echo 1.5.7 Fork:
+
+* Auth user on connect event (closing socket if fails to)
+* JWT Cookie Auth
+* JWT query ?token= Auth 
+* only allow one socket per user
+* syslog | file logging
+* close user's sockets from Laravel
+
+### new Options Added
+```json
+{
+    "command_channel": "private-echo.server.commands",
+    "log": "file",
+    "log_folder": "../../logs/",
+    "syslog": {
+        "host": "127.0.0.1",
+        "port": "514",
+        "facility": "local0",
+        "type": "sys"
+    }
+}
+```
+
+#### routes/channels.php
+```php
+Broadcast::channel('root', AuthSocket::class);
+```
+#### Broadcasting/AuthSocket.php
+```php
+public function join(User $user)
+    {
+        if((int) $user->id !== (int) Auth::user()->id)
+            return false;
+
+        $socket_id = request()->header('x-socket-id');
+
+        if(! $socket_id) return false;
+
+        $user->set_socket($socket_id); //if you only allow one socket per user
+
+        return true;
+    }
+```
+### If only allow one socket per user
+You have to create new Event on Laravel
+
+#### Events/EchoServerCommand.php
+```php
+class EchoServerCommand implements ShouldBroadcast
+{
+    use Dispatchable, InteractsWithSockets, SerializesModels;
+
+    public $command;
+
+    protected $channel = 'echo.server.commands';
+
+    /**
+     * Create a new event instance.
+     *
+     * @return void
+     */
+    public function __construct($command)
+    {
+        $this->command = $command;
+    }
+
+    /**
+     * Get the channels the event should broadcast on.
+     *
+     * @return \Illuminate\Broadcasting\Channel|array
+     */
+    public function broadcastOn()
+    {
+        return new PrivateChannel($this->channel);
+    }
+}
+```
+
+# Official Laravel Echo Server Doc 1.5.7
+
 
 NodeJs server for Laravel Echo broadcasting with Socket.io.
 

@@ -114,6 +114,10 @@ export class Cli {
     setupConfig(defaultFile) {
         return inquirer.prompt([
             {
+                name: 'app_name',
+                default: 'myApp',
+                message: 'Which Name would you like to use?'
+            }, {
                 name: 'devMode',
                 default: false,
                 message: 'Do you want to run this server in development mode?',
@@ -179,6 +183,15 @@ export class Cli {
                 when: function(options) {
                     return options.corsAllow == true;
                 }
+            }, {
+                name: 'log',
+                message: 'Which Log type would you like to use?',
+                type: 'list',
+                choices: ['file', 'syslog']
+            }, {
+                name: 'command_channel',
+                message: 'Which channel name, for internal commands laravel-to-Echo would you like to use?',
+                default:"private-echo.server.commands"
             }, {
                 name: 'file',
                 default: defaultFile,

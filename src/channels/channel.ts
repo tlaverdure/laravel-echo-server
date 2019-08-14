@@ -1,6 +1,7 @@
 import { PresenceChannel } from './presence-channel';
 import { PrivateChannel } from './private-channel';
 import { Log } from './../log';
+import {RootChannel} from "./rootChannel";
 
 export class Channel {
     /**
@@ -24,11 +25,19 @@ export class Channel {
     presence: PresenceChannel;
 
     /**
+     * Root NSP /
+     */
+    rootChannel: RootChannel;
+
+    /**
      * Create a new channel instance.
      */
-    constructor(private io, private options) {
-        this.private = new PrivateChannel(options);
-        this.presence = new PresenceChannel(io, options);
+    constructor(private io, private options, protected log) {
+
+        this.private = new PrivateChannel(options, this.log);
+        this.rootChannel = new RootChannel(options, this.log);
+        this.presence = new PresenceChannel(io, options, this.log);
+
 
         if (this.options.devMode) {
             Log.success('Channels are ready.');
@@ -96,29 +105,50 @@ export class Channel {
     }
 
     /**
+     * Join Root channel
+     */
+    joinRoot(socket: any): Promise<any> {
+        return this
+            .rootChannel
+            .authenticate(socket)
+
+    }
+
+
+    /**
      * Join private channel, emit data to presence channels.
      */
     joinPrivate(socket: any, data: any): void {
         this.private.authenticate(socket, data).then(res => {
+
+            Log.success('Auth User From Laravel: ' + res)
+
             socket.join(data.channel);
 
             if (this.isPresence(data.channel)) {
-                var member = res.channel_data;
-                try {
+
+                Log.success('Join Private Is Presence Channel: ' + data.channel)
+
+
+                let member = res.channel_data;
+
+                Log.success(member)
+
+                /*try {
                     member = JSON.parse(res.channel_data);
-                } catch (e) { }
+                } catch (e) {
+                    Log.error('Join Private Is Presence Channel Error : ' + e)
+                }*/
 
                 this.presence.join(socket, data.channel, member);
             }
 
             this.onJoin(socket, data.channel);
-        }, error => {
-            if (this.options.devMode) {
-                Log.error(error.reason);
-            }
 
-            this.io.sockets.to(socket.id)
-                .emit('subscription_error', data.channel, error.status);
+            }, error => {
+                Log.error(error.reason);
+                this.io.sockets.to(socket.id)
+                    .emit('subscription_error', data.channel, error.status);
         });
     }
 

@@ -37,9 +37,11 @@ export class RedisSubscriber implements Subscriber {
                     }
 
                     callback(channel, message);
+
                 } catch (e) {
                     if (this.options.devMode) {
-                        Log.info("No JSON message");
+                        Log.warning(e)
+                        Log.warning("No JSON message " + JSON.stringify(message));
                     }
                 }
             });

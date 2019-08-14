@@ -1,7 +1,7 @@
 {
   "name": "laravel-echo-server",
   "version": "1.5.7",
-  "description": "Laravel Echo Node JS Server for Socket.io",
+  "description": "Fork Laravel Echo Node JS Server for Socket.io",
   "repository": {
     "type": "git",
     "url": "https://github.com/tlaverdure/Laravel-Echo-Server.git"
@@ -22,14 +22,18 @@
     "prepublish": "npm run build"
   },
   "dependencies": {
+    "bunyan": "^1.8.12",
+    "bunyan-syslog": "^0.3.2",
     "colors": "^1.1.2",
+    "cookie": "^0.4.0",
     "dotenv": "^5.0.1",
     "express": "^4.14.0",
     "inquirer": "^1.1.3",
     "ioredis": "^3.2.2",
-    "lodash": "^4.17.10",
+    "lodash": "^4.17.15",
     "request": "^2.87.0",
     "socket.io": "^2.1.1",
+    "sqlite3": "^4.0.9",
     "yargs": "^11.0.0"
   },
   "devDependencies": {
