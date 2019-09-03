@@ -469,7 +469,13 @@ export class Cli {
         let data = {};
 
         try {
-            data = JSON.parse(fs.readFileSync(file, 'utf8'));
+            data = JSON.parse(fs.readFileSync(file, 'utf8'), function (key, value) {
+             if (key == "allowRequest") {
+                 return new Function("return " + value)();;
+             } else {
+               return value;
+             }
+         });
         } catch {
             console.error(colors.error('Error: There was a problem reading the config file.'));
             process.exit();
