@@ -44,7 +44,8 @@ export class EchoServer {
             allowOrigin: '',
             allowMethods: '',
             allowHeaders: ''
-        }
+        },
+        redisChannelPrefix: ''
     };
 
     /**

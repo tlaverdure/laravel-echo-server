@@ -165,6 +165,10 @@ export class Cli {
                 when: function(options) {
                     return options.corsAllow == true;
                 }
+            }, {
+                name: 'redisChannelPrefix',
+                default: '',
+                message: 'Enter the redis database prefix. if laravel 5.8, use `laravel_database_`, else leave it empty.',
             }
         ]);
     }

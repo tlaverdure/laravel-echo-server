@@ -36,7 +36,9 @@ export class RedisSubscriber implements Subscriber {
                         Log.info("Event: " + message.event);
                     }
 
-                    callback(channel, message);
+                    const internalChannel = this.options.redisChannelPrefix ? channel.replace(new RegExp(`^${this.options.redisChannelPrefix}`), '') : channel;
+
+                    callback(internalChannel, message);
                 } catch (e) {
                     if (this.options.devMode) {
                         Log.info("No JSON message");
