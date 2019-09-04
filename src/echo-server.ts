@@ -5,6 +5,7 @@ import { HttpApi } from './api';
 import { Log } from './log';
 import * as fs from 'fs';
 const packageFile = require('../package.json');
+const { constants } = require('crypto');
 
 /**
  * Echo server class.
@@ -12,8 +13,6 @@ const packageFile = require('../package.json');
 export class EchoServer {
     /**
      * Default server options.
-     *
-     * @type {object}
      */
     public defaultOptions: any = {
         authHost: 'http://localhost',
@@ -31,6 +30,7 @@ export class EchoServer {
         port: 6001,
         protocol: "http",
         socketio: {},
+        secureOptions: constants.SSL_OP_NO_TLSv1,
         sslCertPath: '',
         sslKeyPath: '',
         sslCertChainPath: '',
@@ -50,36 +50,26 @@ export class EchoServer {
 
     /**
      * Configurable server options.
-     *
-     * @type {object}
      */
     public options: any;
 
     /**
      * Socket.io server instance.
-     *
-     * @type {Server}
      */
     private server: Server;
 
     /**
      * Channel instance.
-     *
-     * @type {Channel}
      */
     private channel: Channel;
 
     /**
      * Subscribers
-     *
-     * @type {Subscriber[]}
      */
     private subscribers: Subscriber[];
 
     /**
      * Http api instance.
-     *
-     * @type {HttpApi}
      */
     private httpApi: HttpApi;
 
@@ -90,9 +80,6 @@ export class EchoServer {
 
     /**
      * Start the Echo Server.
-     *
-     * @param  {Object} config
-     * @return {Promise}
      */
     run(options: any): Promise<any> {
         return new Promise((resolve, reject) => {
@@ -111,8 +98,6 @@ export class EchoServer {
 
     /**
      * Initialize the class
-     *
-     * @param {any} io
      */
     init(io: any): Promise<any> {
         return new Promise((resolve, reject) => {
@@ -134,8 +119,6 @@ export class EchoServer {
 
     /**
      * Text shown at startup.
-     *
-     * @return {void}
      */
     startup(): void {
         Log.title(`\nL A R A V E L  E C H O  S E R V E R\n`);
@@ -150,8 +133,6 @@ export class EchoServer {
 
     /**
      * Listen for incoming event from subscibers.
-     *
-     * @return {void}
      */
     listen(): Promise<any> {
         return new Promise((resolve, reject) => {
@@ -167,9 +148,6 @@ export class EchoServer {
 
     /**
      * Return a channel by its socket id.
-     *
-     * @param  {string} socket_id
-     * @return {any}
      */
     find(socket_id: string): any {
         return this.server.io.sockets.connected[socket_id];
@@ -177,10 +155,6 @@ export class EchoServer {
 
     /**
      * Broadcast events to channels from subscribers.
-     *
-     * @param  {string} channel
-     * @param  {any} message
-     * @return {void}
      */
     broadcast(channel: string, message: any): boolean {
         if (message.socket && this.find(message.socket)) {
@@ -192,11 +166,6 @@ export class EchoServer {
 
     /**
      * Broadcast to others on channel.
-     *
-     * @param  {any} socket
-     * @param  {string} channel
-     * @param  {any} message
-     * @return {boolean}
      */
     toOthers(socket: any, channel: string, message: any): boolean {
         socket.broadcast.to(channel)
@@ -207,11 +176,6 @@ export class EchoServer {
 
     /**
      * Broadcast to all members on channel.
-     *
-     * @param  {any} socket
-     * @param  {string} channel
-     * @param  {any} message
-     * @return {boolean}
      */
     toAll(channel: string, message: any): boolean {
         this.server.io.to(channel)
@@ -222,8 +186,6 @@ export class EchoServer {
 
     /**
      * On server connection.
-     *
-     * @return {void}
      */
     onConnect(): void {
         this.server.io.on('connection', socket => {
@@ -236,9 +198,6 @@ export class EchoServer {
 
     /**
      * On subscribe to a channel.
-     *
-     * @param  {object} socket
-     * @return {void}
      */
     onSubscribe(socket: any): void {
         socket.on('subscribe', data => {
@@ -248,9 +207,6 @@ export class EchoServer {
 
     /**
      * On unsubscribe from a channel.
-     *
-     * @param  {object} socket
-     * @return {void}
      */
     onUnsubscribe(socket: any): void {
         socket.on('unsubscribe', data => {
@@ -260,8 +216,6 @@ export class EchoServer {
 
     /**
      * On socket disconnecting.
-     *
-     * @return {void}
      */
     onDisconnecting(socket: any): void {
         socket.on('disconnecting', (reason) => {
@@ -275,9 +229,6 @@ export class EchoServer {
 
     /**
      * On client events.
-     *
-     * @param  {object} socket
-     * @return {void}
      */
     onClientEvent(socket: any): void {
         socket.on('client event', data => {

@@ -18,9 +18,7 @@ official docs: <https://laravel.com/docs/master/broadcasting>
 Install npm package globally with the following command:
 
 ``` shell
-
 $   npm install -g laravel-echo-server
-
 ```
 
 ### Initialize with CLI Tool
@@ -65,6 +63,14 @@ in your project root directory, run
 $ laravel-echo-server start
 ```
 
+#### Stop The Server
+
+in your project root directory, run
+
+``` shell
+$ laravel-echo-server stop
+```
+
 ### Configurable Options
 
 Edit the default configuration of the server by adding options to your **laravel-echo-server.json** file.
@@ -96,6 +102,9 @@ file, the following options can be overridden:
 - `host`: `LARAVEL_ECHO_SERVER_HOST`
 - `port`: `LARAVEL_ECHO_SERVER_PORT`
 - `devMode`: `LARAVEL_ECHO_SERVER_DEBUG`
+- `databaseConfig.redis.host`: `LARAVEL_ECHO_SERVER_REDIS_HOST`
+- `databaseConfig.redis.port`: `LARAVEL_ECHO_SERVER_REDIS_PORT`
+- `databaseConfig.redis.password`: `LARAVEL_ECHO_SERVER_REDIS_PASSWORD`
 
 
 ### Running with SSL
@@ -107,7 +116,7 @@ file, the following options can be overridden:
 *Note: This library currently only supports serving from either http or https, not both.*
 
 #### Alternative SSL implementation
-If you are struggling to get SSL implemented with this package, you could look at using a proxy module within Apache or NginX. Essentially, instead of connecting your websocket traffic to https://yourserver.dev:6001/socket.io?..... and trying to secure it, you can connect your websocket traffic to https://yourserver.dev/socket.io. Behind the scenes, the proxy module of Apache or NginX will be configured to intercept requests for /socket.io, and internally redirect those to your echo server over non-ssl on port 6001. This keeps all of the traffic encrypted between browser and web server, as your web server will still do the SSL encryption/decryption. The only thing that is left unsecured is the traffic between your webserver and your Echo server, which might be acceptable in many cases. 
+If you are struggling to get SSL implemented with this package, you could look at using a proxy module within Apache or NginX. Essentially, instead of connecting your websocket traffic to https://yourserver.dev:6001/socket.io?..... and trying to secure it, you can connect your websocket traffic to https://yourserver.dev/socket.io. Behind the scenes, the proxy module of Apache or NginX will be configured to intercept requests for /socket.io, and internally redirect those to your echo server over non-ssl on port 6001. This keeps all of the traffic encrypted between browser and web server, as your web server will still do the SSL encryption/decryption. The only thing that is left unsecured is the traffic between your webserver and your Echo server, which might be acceptable in many cases.
 ##### Sample NginX proxy config
 ```
 #the following would go within the server{} block of your web server config
@@ -252,7 +261,8 @@ For example, if you wanted to pass a custom configuration to Redis:
 *A full list of Redis options can be found [here](https://github.com/luin/ioredis/blob/master/API.md#new-redisport-host-options).*
 
 ### SQLite
-With SQLite you may be interested in changing the path where the database is stored:
+
+With SQLite you may be interested in changing the path where the database is stored.
 
 ``` json
 {
@@ -264,7 +274,9 @@ With SQLite you may be interested in changing the path where the database is sto
 }
 ```
 
-***Note: [node-sqlite3](https://github.com/mapbox/node-sqlite3) is required for this database. Please install before using.***
+***Note 1:*** The path is relative to the root of your application, not your system.
+
+***Note 2:*** [node-sqlite3](https://github.com/mapbox/node-sqlite3) is required for this database. Please install before using.
 
 ```
 npm install sqlite3 -g
@@ -313,13 +325,6 @@ add a script tag to your html like so:
 
 _Note: When using the socket.io client library from your running server, remember to check that the `io` global variable is defined before subscribing to events._
 
-#### Better performance with [µWebSockets](https://github.com/uWebSockets/uWebSockets)
-For extra performance, you can use the faster `uws` engine instead of `ws`, by setting the `wsEngine` option for Socket.IO in `laravel-echo-server.json`:
+#### µWebSockets deprecation
 
-```js
-"socketio": {
-    "wsEngine": "uws"
-}
-```
-
-See <https://github.com/uWebSockets/uWebSockets> for more information.
+µWebSockets has been [officially deprecated](https://www.npmjs.com/package/uws). Currently there is no support for µWebSockets in Socket.IO, but it may have the new [ClusterWS](https://www.npmjs.com/package/@clusterws/cws) support incoming. Meanwhile Laravel Echo Server will use [`ws` engine](https://www.npmjs.com/package/ws) by default until there is another option.

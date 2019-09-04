@@ -99,6 +99,12 @@ export class Server {
      */
     httpServer(secure: boolean) {
         this.express = express();
+        this.express.use((req, res, next) => {
+            for (var header in this.options.headers) {
+                res.setHeader(header, this.options.headers[header]);
+            }
+            next();
+        });
 
         if (secure) {
             var httpServer = https.createServer(this.options, this.express);

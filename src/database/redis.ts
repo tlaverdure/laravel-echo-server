@@ -4,8 +4,6 @@ var Redis = require('ioredis');
 export class RedisDatabase implements DatabaseDriver {
     /**
      * Redis client.
-     *
-     * @type {object}
      */
     private _redis: any;
 
@@ -18,9 +16,6 @@ export class RedisDatabase implements DatabaseDriver {
 
     /**
      * Retrieve data from redis.
-     *
-     * @param  {string}  key
-     * @return {Promise<any>}
      */
     get(key: string): Promise<any> {
         return new Promise<any>((resolve, reject) => {
@@ -30,14 +25,10 @@ export class RedisDatabase implements DatabaseDriver {
 
     /**
      * Store data to cache.
-     *
-     * @param  {string} key
-     * @param  {any}  value
-     * @return {void}
      */
     set(key: string, value: any): void {
         this._redis.set(key, JSON.stringify(value));
-        if(this.options.databaseConfig.publishPresence === true && /^presence-.*:members$/.test(key)) {
+        if (this.options.databaseConfig.publishPresence === true && /^presence-.*:members$/.test(key)) {
             this._redis.publish('PresenceChannelUpdated', JSON.stringify({
                 "event": {
                     "channel": key,

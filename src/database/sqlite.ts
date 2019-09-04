@@ -7,8 +7,6 @@ try {
 export class SQLiteDatabase implements DatabaseDriver {
     /**
      * SQLite client.
-     *
-     * @type {object}
      */
     private _sqlite: any;
 
@@ -28,9 +26,6 @@ export class SQLiteDatabase implements DatabaseDriver {
 
     /**
      * Retrieve data from redis.
-     *
-     * @param  {string}  key
-     * @return {Promise<any>}
      */
     get(key: string): Promise<any> {
         return new Promise<any>((resolve, reject) => {
@@ -50,10 +45,6 @@ export class SQLiteDatabase implements DatabaseDriver {
 
     /**
      * Store data to cache.
-     *
-     * @param  {string} key
-     * @param  {any}  value
-     * @return {void}
      */
     set(key: string, value: any): void {
         this._sqlite.run("INSERT OR REPLACE INTO key_value (key, value) VALUES ($key, $value)", {

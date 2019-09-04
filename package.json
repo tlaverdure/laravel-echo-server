@@ -1,6 +1,6 @@
 {
   "name": "laravel-echo-server",
-  "version": "1.4.2",
+  "version": "1.5.8",
   "description": "Laravel Echo Node JS Server for Socket.io",
   "repository": {
     "type": "git",
@@ -30,7 +30,7 @@
     "lodash": "^4.17.10",
     "request": "^2.87.0",
     "socket.io": "^2.1.1",
-    "yargs": "^5.0.0"
+    "yargs": "^11.0.0"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.93",

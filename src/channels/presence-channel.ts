@@ -6,17 +6,11 @@ import { Log } from './../log';
 export class PresenceChannel {
     /**
      * Database instance.
-     *
-     * @type {Database}
      */
     db: Database;
 
     /**
      * Create a new Presence channel instance.
-     *
-     * @param  {any} options
-     * @param  {string} channel
-     * @param  {string} member
      */
     constructor(private io, private options: any) {
         this.db = new Database(options);
@@ -24,9 +18,6 @@ export class PresenceChannel {
 
     /**
      * Get the members of a presence channel.
-     *
-     * @param  {string}  channel
-     * @return {Promise}
      */
     getMembers(channel: string): Promise<any> {
         return this.db.get(channel + ':members');
@@ -34,10 +25,6 @@ export class PresenceChannel {
 
     /**
      * Check if a user is on a presence channel.
-     *
-     * @param  {string}  channel
-     * @param  {any} member
-     * @return {boolean}
      */
     isMember(channel: string, member: any): Promise<boolean> {
         return new Promise((resolve, reject) => {
@@ -57,11 +44,6 @@ export class PresenceChannel {
 
     /**
      * Remove inactive channel members from the presence channel.
-     *
-     * @param  {string} channel
-     * @param  {any[]} members
-     * @param  {any[]} member
-     * @return {Promise<any>}
      */
     removeInactive(channel: string, members: any[], member: any): Promise<any> {
         return new Promise((resolve, reject) => {
@@ -81,10 +63,6 @@ export class PresenceChannel {
     /**
      * Join a presence channel and emit that they have joined only if it is the
      * first instance of their presence.
-     *
-     * @param  {any} socket
-     * @param  {string} channel
-     * @param  {object}  member
      */
     join(socket: any, channel: string, member: any) {
         if (!member) {
@@ -119,10 +97,6 @@ export class PresenceChannel {
     /**
      * Remove a member from a presenece channel and broadcast they have left
      * only if not other presence channel instances exist.
-     *
-     * @param  {any} socket
-     * @param  {string} channel
-     * @return {void}
      */
     leave(socket: any, channel: string): void {
         this.getMembers(channel).then(members => {
@@ -143,11 +117,6 @@ export class PresenceChannel {
 
     /**
      * On join event handler.
-     *
-     * @param  {any} socket
-     * @param  {string} channel
-     * @param  {any} member
-     * @return {void}
      */
     onJoin(socket: any, channel: string, member: any): void {
         this.io
@@ -160,10 +129,6 @@ export class PresenceChannel {
 
     /**
      * On leave emitter.
-     *
-     * @param  {string} channel
-     * @param  {member} member
-     * @return {void}
      */
     onLeave(channel: string, member: any): void {
         this.io
@@ -173,11 +138,6 @@ export class PresenceChannel {
 
     /**
      * On subscribed event emitter.
-     *
-     * @param  {any} socket
-     * @param  {string} channel
-     * @param  {any[]} members
-     * @return {void}
      */
     onSubscribed(socket: any, channel: string, members: any[]) {
         this.io
