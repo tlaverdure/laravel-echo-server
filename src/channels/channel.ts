@@ -53,12 +53,12 @@ export class Channel {
      * Trigger a client message
      */
     clientEvent(socket, data): void {
-		try {
-			data = JSON.parse(data);
-		} catch(e) {
-			data = data;
-		};
-		
+        try {
+            data = JSON.parse(data);
+        } catch (e) {
+            data = data;
+        }
+
         if (data.event && data.channel) {
             if (this.isClientEvent(data.event) &&
                 this.isPrivate(data.channel) &&
