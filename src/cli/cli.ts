@@ -244,7 +244,7 @@ export class Cli {
 
         fs.access(configFile, fs.F_OK, error => {
             if (error) {
-                console.error(colors.error('Error: The config file cound not be found.'));
+                console.error(colors.error('Error: The config file could not be found.'));
 
                 return false;
             }
