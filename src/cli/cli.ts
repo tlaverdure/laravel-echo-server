@@ -192,7 +192,6 @@ export class Cli {
                 name: 'file',
                 default: defaultFile,
                 message: 'What do you want this config to be saved as?'
-
             }
         ]);
     }
