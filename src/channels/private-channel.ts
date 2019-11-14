@@ -20,6 +20,8 @@ export class PrivateChannel {
      * Send authentication request to application server.
      */
     authenticate(socket: any, data: any): Promise<any> {
+        data.channel = this.prefixChannelName(data.channel);
+
         let options = {
             url: this.authHost(socket) + this.options.authEndpoint,
             form: { channel_name: data.channel },
@@ -74,6 +76,18 @@ export class PrivateChannel {
         return referer.hostname.substr(referer.hostname.indexOf('.')) === host ||
             `${referer.protocol}//${referer.host}` === host ||
             referer.host === host;
+    }
+
+    /**
+     * Prefix the channel name being authorized if a redis key prefix is expected.
+     */
+    protected prefixChannelName(channel: string): string {
+        if (this.options.database !== 'redis') {
+            return channel;
+        }
+
+        return this.options.databaseConfig.redis.keyPrefix ?
+            this.options.databaseConfig.redis.keyPrefix + channel : channel
     }
 
     /**

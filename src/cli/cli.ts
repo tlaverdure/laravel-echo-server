@@ -27,7 +27,6 @@ export class Cli {
      * Allowed environment variables.
      */
     envVariables: any = {
-        'APP_NAME': 'appName',
         'LARAVEL_ECHO_SERVER_AUTH_HOST': 'authHost',
         'LARAVEL_ECHO_SERVER_DEBUG': 'devMode',
         'LARAVEL_ECHO_SERVER_HOST': 'host',

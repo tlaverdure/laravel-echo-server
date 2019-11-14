@@ -17,23 +17,11 @@ export class RedisSubscriber implements Subscriber {
     }
 
     /**
-     * Remove redis prefix from the channel name for messages.
-     */
-    formatMessageChannel(channel: string): string {
-        channel = channel.replace(`${this.options.appName.toLowerCase()}_database_`, '');
-        channel = channel.replace(`laravel_database_`, '');
-
-        return channel;
-    }
-
-    /**
      * Subscribe to events to broadcast.
      */
     subscribe(callback): Promise<any> {
         return new Promise((resolve, reject) => {
             this._redis.on('pmessage', (subscribed, channel, message) => {
-                channel = this.formatMessageChannel(channel);
-
                 try {
                     message = JSON.parse(message);
 
