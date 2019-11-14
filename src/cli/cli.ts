@@ -27,6 +27,7 @@ export class Cli {
      * Allowed environment variables.
      */
     envVariables: any = {
+        'APP_NAME': 'appName',
         'LARAVEL_ECHO_SERVER_AUTH_HOST': 'authHost',
         'LARAVEL_ECHO_SERVER_DEBUG': 'devMode',
         'LARAVEL_ECHO_SERVER_HOST': 'host',
@@ -144,13 +145,13 @@ export class Cli {
             }, {
                 name: 'sslCertPath',
                 message: 'Enter the path to your SSL cert file.',
-                when: function(options) {
+                when: function (options) {
                     return options.protocol == 'https';
                 }
             }, {
                 name: 'sslKeyPath',
                 message: 'Enter the path to your SSL key file.',
-                when: function(options) {
+                when: function (options) {
                     return options.protocol == 'https';
                 }
             }, {
@@ -167,21 +168,21 @@ export class Cli {
                 name: 'allowOrigin',
                 default: 'http://localhost:80',
                 message: 'Specify the URI that may access the API:',
-                when: function(options) {
+                when: function (options) {
                     return options.corsAllow == true;
                 }
             }, {
                 name: 'allowMethods',
                 default: 'GET, POST',
                 message: 'Enter the HTTP methods that are allowed for CORS:',
-                when: function(options) {
+                when: function (options) {
                     return options.corsAllow == true;
                 }
             }, {
                 name: 'allowHeaders',
                 default: 'Origin, Content-Type, X-Auth-Token, X-Requested-With, Accept, Authorization, X-CSRF-TOKEN, X-Socket-Id',
                 message: 'Enter the HTTP headers that are allowed for CORS:',
-                when: function(options) {
+                when: function (options) {
                     return options.corsAllow == true;
                 }
             }, {
