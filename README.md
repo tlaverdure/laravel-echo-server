@@ -251,6 +251,7 @@ For example, if you wanted to pass a custom configuration to Redis:
     "redis" : {
       "port": "3001",
       "host": "redis.app.dev"
+      "keyPrefix": "my-redis-prefix"
     }
   }
 }

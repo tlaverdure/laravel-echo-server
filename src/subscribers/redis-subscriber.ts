@@ -11,11 +11,20 @@ export class RedisSubscriber implements Subscriber {
     private _redis: any;
 
     /**
+     *
+     * KeyPrefix for used in the redis Connection
+     *
+     * @type {String}
+     */
+    private keyPrefix: string;
+
+    /**
      * Create a new instance of subscriber.
      *
      * @param {any} options
      */
     constructor(private options) {
+	this._keyPrefix = options.databaseConfig.redis.keyPrefix || '';
         this._redis = new Redis(options.databaseConfig.redis);
     }
 
@@ -44,7 +53,7 @@ export class RedisSubscriber implements Subscriber {
                 }
             });
 
-            this._redis.psubscribe('*', (err, count) => {
+            this._redis.psubscribe(`${this.keyPrefix}*`, (err, count) => {
                 if (err) {
                     reject('Redis could not subscribe.')
                 }
