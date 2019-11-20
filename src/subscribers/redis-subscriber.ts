@@ -24,7 +24,7 @@ export class RedisSubscriber implements Subscriber {
      * @param {any} options
      */
     constructor(private options) {
-	this._keyPrefix = options.databaseConfig.redis.keyPrefix || '';
+        this._keyPrefix = options.databaseConfig.redis.keyPrefix || '';
         this._redis = new Redis(options.databaseConfig.redis);
     }
 

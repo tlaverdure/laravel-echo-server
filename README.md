@@ -250,7 +250,7 @@ For example, if you wanted to pass a custom configuration to Redis:
   "databaseConfig" : {
     "redis" : {
       "port": "3001",
-      "host": "redis.app.dev"
+      "host": "redis.app.dev",
       "keyPrefix": "my-redis-prefix"
     }
   }
