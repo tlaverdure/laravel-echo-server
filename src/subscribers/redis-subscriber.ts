@@ -16,7 +16,7 @@ export class RedisSubscriber implements Subscriber {
      *
      * @type {String}
      */
-    private keyPrefix: string;
+    private _keyPrefix: string;
 
     /**
      * Create a new instance of subscriber.
@@ -45,7 +45,7 @@ export class RedisSubscriber implements Subscriber {
                         Log.info("Event: " + message.event);
                     }
 
-                    callback(channel.substring(this.keyPrefix.length), message);
+                    callback(channel.substring(this._keyPrefix.length), message);
                 } catch (e) {
                     if (this.options.devMode) {
                         Log.info("No JSON message");
@@ -53,7 +53,7 @@ export class RedisSubscriber implements Subscriber {
                 }
             });
 
-            this._redis.psubscribe(`${this.keyPrefix}*`, (err, count) => {
+            this._redis.psubscribe(`${this._keyPrefix}*`, (err, count) => {
                 if (err) {
                     reject('Redis could not subscribe.')
                 }
