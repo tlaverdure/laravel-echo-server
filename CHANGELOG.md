@@ -1,4 +1,7 @@
-#1.5.0
+# 1.6.0
+Add support for Redis prefixing.
+
+# 1.5.0
 
 Add `stop` command
 
