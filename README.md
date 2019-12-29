@@ -1,6 +1,9 @@
-# Laravel Echo Server
+# Laravel Echo Server (With whisper subscribe)
 
 NodeJs server for Laravel Echo broadcasting with Socket.io.
+
+### Edited:
+I added the `PresenceChannelWhisper` just to listed to all whispers broadcast client events. This hasn't been implemented so I decided to fork this project for my own.
 
 ## System Requirements
 
