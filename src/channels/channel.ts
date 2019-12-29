@@ -71,13 +71,15 @@ export class Channel {
                 /**
                  * Publish whisper data as PresenceChannelWhiser channel
                  */
-                this._redis.publish('PresenceChannelWhisper', JSON.stringify({
-                    "event": {
-                        "event": data.event,
-                        "channel": data.channel,
-                        "data": data.data
-                    }
-                }));
+                if ( this.options.databaseConfig.publishWhisper === true ) {
+                    this._redis.publish('PresenceChannelWhisper', JSON.stringify({
+                        "event": {
+                            "event": data.event,
+                            "channel": data.channel,
+                            "data": data.data
+                        }
+                    }));
+                }
             }
         }
     }
