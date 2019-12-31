@@ -3,7 +3,7 @@
 NodeJs server for Laravel Echo broadcasting with Socket.io.
 
 ### Edited:
-I added the `PresenceChannelWhisper` just to listed to all whispers broadcast client events. This hasn't been implemented so I decided to fork this project for my own.
+I added the `PresenceChannelWhisper` just to listen to all whispers broadcast client events. This hasn't been implemented so I decided to fork this project for my own.
 
 Optionally, you can configure laravel-echo-server to publish an event on each update to a presence channel, by setting `databaseConfig.publishWhisper` to `true`:
 
