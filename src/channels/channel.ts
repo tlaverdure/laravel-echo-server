@@ -76,7 +76,8 @@ export class Channel {
                         "event": {
                             "event": data.event,
                             "channel": data.channel,
-                            "data": data.data
+                            "data": data.data,
+                            "socket": socket.id,
                         }
                     }));
                 }
