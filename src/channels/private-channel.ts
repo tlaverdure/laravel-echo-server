@@ -71,9 +71,30 @@ export class PrivateChannel {
      * Check if there is a matching auth host.
      */
     protected hasMatchingHost(referer: any, host: any): boolean {
+        if (this.hostIsWildcard(host)) {
+            return this.wildcardHostMatches(referer, host);
+        }
+
         return referer.hostname.substr(referer.hostname.indexOf('.')) === host ||
             `${referer.protocol}//${referer.host}` === host ||
             referer.host === host;
+    }
+
+    /**
+     * Check if given host is wildcard host
+     */
+    protected hostIsWildcard(host: any): boolean {
+        return host.indexOf('*');
+    }
+
+    /**
+     * Check if there is a matching auth host.
+     */
+    protected wildcardHostMatches(referer: any, host: any): boolean {
+        let mainRefererHost = referer.host.substr(referer.host.indexOf('.'));
+        let mainHost = host.substr(host.indexOf('//'));
+        mainHost = mainHost.substr(mainHost.indexOf('.'));
+        return mainRefererHost === mainHost;
     }
 
     /**
