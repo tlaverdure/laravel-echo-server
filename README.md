@@ -80,7 +80,7 @@ Edit the default configuration of the server by adding options to your **laravel
 | :------------------| :------------------- | :---------------------------|
 | `apiOriginAllow`   | `{}`                 | Configuration to allow API be accessed over CORS. [Example](#cross-domain-access-to-api) |
 | `authEndpoint`     | `/broadcasting/auth` | The route that authenticates private channels  |
-| `authHost`         | `http://localhost`   | The host of the server that authenticates private and presence channels  |
+| `authHost`         | `http://localhost`   | The host of the server that authenticates private and presence channels (can be string or array). Wildcards supported (e.g. *.example.com)  |
 | `database`         | `redis`              | Database used to store data that should persist, like presence channel members. Options are currently `redis` and `sqlite` |
 | `databaseConfig`   |  `{}`                | Configurations for the different database drivers [Example](#database) |
 | `devMode`          | `false`              | Adds additional logging for development purposes |
