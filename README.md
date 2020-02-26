@@ -105,6 +105,7 @@ file, the following options can be overridden:
 - `databaseConfig.redis.host`: `LARAVEL_ECHO_SERVER_REDIS_HOST`
 - `databaseConfig.redis.port`: `LARAVEL_ECHO_SERVER_REDIS_PORT`
 - `databaseConfig.redis.password`: `LARAVEL_ECHO_SERVER_REDIS_PASSWORD`
+- `databaseConfig.redis.keyPrefix`: `LARAVEL_ECHO_SERVER_REDIS_PREFIX`
 - `protocol`: `LARAVEL_ECHO_SERVER_PROTO`
 - `sslKeyPath`: `LARAVEL_ECHO_SERVER_SSL_KEY`
 - `sslCertPath`: `LARAVEL_ECHO_SERVER_SSL_CERT`
