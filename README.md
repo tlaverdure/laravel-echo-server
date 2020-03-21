@@ -79,7 +79,7 @@ Edit the default configuration of the server by adding options to your **laravel
 | Title              | Default              | Description                 |
 | :------------------| :------------------- | :---------------------------|
 | `apiOriginAllow`   | `{}`                 | Configuration to allow API be accessed over CORS. [Example](#cross-domain-access-to-api) |
-| `authEndpoint`     | `/broadcasting/auth` | The route that authenticates private channels  |
+| `authEndpoint`     | `/broadcasting/auth` | The route that authenticates private channels (your Laravel server-side controller must return the authenticated user object with the key name 'channel_data' in case of using presence channels. ```e.g)  return response()->json(['channel_data' => $request->user()], 200)```)  |
 | `authHost`         | `http://localhost`   | The host of the server that authenticates private and presence channels  |
 | `database`         | `redis`              | Database used to store data that should persist, like presence channel members. Options are currently `redis` and `sqlite` |
 | `databaseConfig`   |  `{}`                | Configurations for the different database drivers [Example](#database) |
