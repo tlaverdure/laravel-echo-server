@@ -71,7 +71,7 @@ export class PrivateChannel {
      * Prefer the auth endpoint given by the client, fallback to the default options
      */
     protected authEndpoint(data: any) {
-        let authEndpoint = data.authEndpoint || this.options.authEndpoint;
+        let authEndpoint = (data.auth && data.auth.endpoint) ? data.auth.endpoint : this.options.authEndpoint;
 
         if (this.options.devMode) {
             Log.info(`[${new Date().toLocaleTimeString()}] - Using authentication endpoint: ${authEndpoint}`);
