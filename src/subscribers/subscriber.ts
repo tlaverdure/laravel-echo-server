@@ -6,4 +6,11 @@ export interface Subscriber {
      * @return {void}
      */
     subscribe(callback: Function): Promise<any>;
+
+    /**
+     * Unsubscribe from incoming events
+     *
+     * @return {Promise}
+     */
+    unsubscribe(): Promise<any>;
 }
