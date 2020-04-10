@@ -141,6 +141,7 @@ export class EchoServer {
         });
         promises.push(this.server.io.close());
         return Promise.all(promises).then(() => {
+            this.subscribers = [];
             console.log('The LARAVEL ECHO SERVER server has been stopped.');
         });
     }
