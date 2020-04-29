@@ -275,7 +275,7 @@ To use cluster you must prepare config for redis to looks like above:
             {
                "port": "3001",
                "host": "redis.app.dev"
-            ,
+            },
             {
                "port": "3001",
                "host": "redis.app.dev"
