@@ -161,7 +161,7 @@ export class HttpApi {
             let users = [];
 
             _.uniqBy(members, 'user_id').forEach((member: any) => {
-                users.push({ id: member.user_id });
+                users.push({ id: member.user_id, user_info: member.user_info });
             });
 
             res.json({ users: users });
