@@ -71,7 +71,7 @@ export class PrivateChannel {
      * Check if there is a matching auth host.
      */
     protected hasMatchingHost(referer: any, host: any): boolean {
-        return referer.hostname.substr(referer.hostname.indexOf('.')) === host ||
+        return (referer.hostname && referer.hostname.substr(referer.hostname.indexOf('.')) === host) ||
             `${referer.protocol}//${referer.host}` === host ||
             referer.host === host;
     }
