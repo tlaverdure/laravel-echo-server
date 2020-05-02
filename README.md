@@ -133,6 +133,17 @@ location /socket.io {
 	}
 ```
 
+#### Sample Apache proxy config
+
+```
+RewriteCond %{REQUEST_URI}  ^/socket.io            [NC]
+RewriteCond %{QUERY_STRING} transport=websocket    [NC]
+RewriteRule /(.*)           ws://localhost:6001/$1 [P,L]
+
+ProxyPass        /socket.io http://localhost:6001/socket.io
+ProxyPassReverse /socket.io http://localhost:6001/socket.io
+```
+
 ### Setting the working directory
 The working directory in which `laravel-echo-server` will look for the configuration file `laravel-echo-server.json` can be passed to the `start` command through the `--dir` parameter like so: `laravel-echo-server start --dir=/var/www/html/example.com/configuration`
 
