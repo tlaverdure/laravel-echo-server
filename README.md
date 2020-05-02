@@ -277,6 +277,32 @@ For example, if you wanted to pass a custom configuration to Redis:
 
 *A full list of Redis options can be found [here](https://github.com/luin/ioredis/blob/master/API.md#new-redisport-host-options).*
 
+### Redis sentinel
+For example, if you wanted to use redis-sentinel, you need to pass a custom configuration : 
+
+``` json
+ "databaseConfig": {
+     "redis": {
+       "sentinels": [
+         {
+           "host": "redis-sentinel-0",
+           "port": 26379
+         },
+         {
+            "host": "redis-sentinel-1",
+            "port": 26379
+         }
+         {
+           "host": "redis-sentinel-2",
+           "port": 26379
+         }
+       ],
+       "name": "mymaster",
+       "sentinelPassword": "redis-password"
+     },
+   },
+ ``` 
+*For more information about redis sentinel configuration you can check [this](https://github.com/luin/ioredis#sentinel)*
 ### SQLite
 
 With SQLite you may be interested in changing the path where the database is stored.
