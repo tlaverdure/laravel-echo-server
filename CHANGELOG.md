@@ -1,3 +1,16 @@
+# 1.6.2
+
+## Added
+
+-   Add method to stop the server (#502)[https://github.com/tlaverdure/laravel-echo-server/pull/502]
+-   Document how to use Redis Sentinel (#437)[https://github.com/tlaverdure/laravel-echo-server/pull/437]
+-   Add Apache proxt example tp docs (#361)[https://github.com/tlaverdure/laravel-echo-server/pull/361]
+-   Expose user member user info in API. (#356)[https://github.com/tlaverdure/laravel-echo-server/pull/356]
+
+## Fixed
+
+-   Fix crash when invalid referer is sent (#513)[https://github.com/tlaverdure/laravel-echo-server/pull/513]
+
 # 1.6.1
 
 -   Update dependencies for security reasons.
