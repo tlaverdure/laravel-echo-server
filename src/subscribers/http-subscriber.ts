@@ -37,6 +37,24 @@ export class HttpSubscriber implements Subscriber {
     }
 
     /**
+     * Unsubscribe from events to broadcast.
+     *
+     * @return {Promise}
+     */
+    unsubscribe(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            try {
+                this.express.post('/apps/:appId/events', (req, res) => {
+                    res.status(404).send();
+                });
+                resolve();
+            } catch(e) {
+                reject('Could not overwrite the event endpoint -> ' + e);
+            }
+        });
+    }
+
+    /**
      * Handle incoming event data.
      *
      * @param  {any} req

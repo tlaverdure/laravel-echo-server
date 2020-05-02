@@ -131,6 +131,22 @@ export class EchoServer {
     }
 
     /**
+     * Stop the echo server.
+     */
+    stop(): Promise<any> {
+        console.log('Stopping the LARAVEL ECHO SERVER')
+        let promises = [];
+        this.subscribers.forEach(subscriber => {
+            promises.push(subscriber.unsubscribe());
+        });
+        promises.push(this.server.io.close());
+        return Promise.all(promises).then(() => {
+            this.subscribers = [];
+            console.log('The LARAVEL ECHO SERVER server has been stopped.');
+        });
+    }
+
+    /**
      * Listen for incoming event from subscibers.
      */
     listen(): Promise<any> {

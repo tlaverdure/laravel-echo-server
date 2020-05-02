@@ -64,4 +64,20 @@ export class RedisSubscriber implements Subscriber {
             });
         });
     }
+
+    /**
+     * Unsubscribe from events to broadcast.
+     *
+     * @return {Promise}
+     */
+    unsubscribe(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            try {
+                this._redis.disconnect();
+                resolve();
+            } catch(e) {
+                reject('Could not disconnect from redis -> ' + e);
+            }
+        });
+    }
 }
