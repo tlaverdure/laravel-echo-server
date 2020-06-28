@@ -1,6 +1,6 @@
 {
-  "name": "laravel-echo-server",
-  "version": "1.5.6",
+  "name": "laravel-echo-server-whisper-subscribe",
+  "version": "1.5.7",
   "description": "Laravel Echo Node JS Server for Socket.io",
   "repository": {
     "type": "git",
