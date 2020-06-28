@@ -27,13 +27,18 @@ export class Cli {
      * Allowed environment variables.
      */
     envVariables: any = {
-        'LARAVEL_ECHO_SERVER_AUTH_HOST': 'authHost',
-        'LARAVEL_ECHO_SERVER_DEBUG': 'devMode',
-        'LARAVEL_ECHO_SERVER_HOST': 'host',
-        'LARAVEL_ECHO_SERVER_PORT': 'port',
-        'LARAVEL_ECHO_SERVER_REDIS_HOST': 'databaseConfig.redis.host',
-        'LARAVEL_ECHO_SERVER_REDIS_PORT': 'databaseConfig.redis.port',
-        'LARAVEL_ECHO_SERVER_REDIS_PASSWORD': 'databaseConfig.redis.password',
+        LARAVEL_ECHO_SERVER_AUTH_HOST: "authHost",
+        LARAVEL_ECHO_SERVER_DEBUG: "devMode",
+        LARAVEL_ECHO_SERVER_HOST: "host",
+        LARAVEL_ECHO_SERVER_PORT: "port",
+        LARAVEL_ECHO_SERVER_REDIS_HOST: "databaseConfig.redis.host",
+        LARAVEL_ECHO_SERVER_REDIS_PORT: "databaseConfig.redis.port",
+        LARAVEL_ECHO_SERVER_REDIS_PASSWORD: "databaseConfig.redis.password",
+        LARAVEL_ECHO_SERVER_PROTO: "protocol",
+        LARAVEL_ECHO_SERVER_SSL_CERT: "sslCertPath",
+        LARAVEL_ECHO_SERVER_SSL_KEY: "sslKeyPath",
+        LARAVEL_ECHO_SERVER_SSL_CHAIN: "sslCertChainPath",
+        LARAVEL_ECHO_SERVER_SSL_PASS: "sslPassphrase"
     };
 
     /**
