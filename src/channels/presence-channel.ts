@@ -94,9 +94,9 @@ export class PresenceChannel {
                         this.db.set(channel + ":members", members);
 
                         members = [
-                            ...members.reduce((map, m) => {
-                                return map.set(m.user_id, m)
-                            }, new Map()).values()
+                            ...members.reduce(
+                                (map, member) => map.set(member.user_id, member), new Map()
+                            ).values()
                         ]
 
                         this.onSubscribed(socket, channel, members);
