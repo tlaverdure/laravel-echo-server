@@ -1,6 +1,5 @@
 import { Database } from './../database';
 import { Log } from './../log';
-var _ = require("lodash");
 
 export class PresenceChannel {
     /**
@@ -94,7 +93,9 @@ export class PresenceChannel {
 
                         this.db.set(channel + ":members", members);
 
-                        members = _.uniqBy(members.reverse(), "user_id");
+                        members = members.filter((m) => {
+                            return m.user_id !== member.user_id || m.socketId === member.socketId
+                        });
 
                         this.onSubscribed(socket, channel, members);
 
