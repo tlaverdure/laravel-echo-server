@@ -33,7 +33,7 @@ The cli tool will help you setup a **laravel-echo-server.json** file in the root
 
 #### API Clients
 
-The Laravel Echo Server exposes a light http API to perform broadcasting functionality. For security purposes, access to these endpoints from http referrers must be authenticated with an API id and key. This can be generated using the cli command:
+The Laravel Echo Server exposes a light http API to perform broadcasting functionality. For security purposes, access to these endpoints from http referrers must be authenticated with an APP id and key. This can be generated using the cli command:
 
 ``` shell
 $ laravel-echo-server client:add APP_ID
