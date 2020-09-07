@@ -43,6 +43,11 @@ export class HttpApi {
             '/apps/:appId/channels/:channelName/users',
             (req, res) => this.getChannelUsers(req, res)
         );
+
+        this.express.get(
+            'apps/:appId/channels/:channelName/online_users',
+            (req, res) => this.getChannelOnlineUsers(req, res)
+        );
     }
 
     /**
@@ -148,6 +153,31 @@ export class HttpApi {
      */
     getChannelUsers(req: any, res: any): boolean {
         let channelName = req.params.channelName;
+
+        if (!this.channel.isPresence(channelName)) {
+            return this.badResponse(
+                req,
+                res,
+                'User list is only possible for Presence Channels'
+            );
+        }
+
+        this.channel.presence.getMembers(channelName).then(members => {
+            let users = [];
+
+            _.uniqBy(members, 'user_id').forEach((member: any) => {
+                users.push({ id: member.user_id, user_info: member.user_info });
+            });
+
+            res.json({ users: users });
+        }, error => Log.error(error));
+    }
+
+    getChannelOnlineUsers(req: any, res: any) {
+        let channelName = req.params.channelName;
+        let userIds = req.params.userIds;
+
+        console.log(userIds);
 
         if (!this.channel.isPresence(channelName)) {
             return this.badResponse(
