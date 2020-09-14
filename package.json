@@ -27,13 +27,11 @@
     "express": "^4.17.1",
     "inquirer": "^7.1.0",
     "ioredis": "^4.16.0",
-    "lodash": "^4.17.15",
     "request": "^2.88.2",
     "socket.io": "^2.3.0",
     "yargs": "^15.3.1"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.149",
     "@types/node": "^13.9.1",
     "typescript": "^3.8.3"
   },
