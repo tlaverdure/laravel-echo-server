@@ -28,7 +28,7 @@ export class PrivateChannel {
         };
 
         if (this.options.devMode) {
-            Log.info(`[${new Date().toLocaleTimeString()}] - Sending auth request to: ${options.url}\n`);
+            Log.info(`[${new Date().toISOString()}] - Sending auth request to: ${options.url}\n`);
         }
 
         return this.serverRequest(socket, options);
@@ -61,7 +61,7 @@ export class PrivateChannel {
         }
 
         if (this.options.devMode) {
-            Log.error(`[${new Date().toLocaleTimeString()}] - Preparing authentication request to: ${authHostSelected}`);
+            Log.error(`[${new Date().toISOString()}] - Preparing authentication request to: ${authHostSelected}`);
         }
 
         return authHostSelected;
@@ -87,21 +87,21 @@ export class PrivateChannel {
             this.request.post(options, (error, response, body, next) => {
                 if (error) {
                     if (this.options.devMode) {
-                        Log.error(`[${new Date().toLocaleTimeString()}] - Error authenticating ${socket.id} for ${options.form.channel_name}`);
+                        Log.error(`[${new Date().toISOString()}] - Error authenticating ${socket.id} for ${options.form.channel_name}`);
                         Log.error(error);
                     }
 
                     reject({ reason: 'Error sending authentication request.', status: 0 });
                 } else if (response.statusCode !== 200) {
                     if (this.options.devMode) {
-                        Log.warning(`[${new Date().toLocaleTimeString()}] - ${socket.id} could not be authenticated to ${options.form.channel_name}`);
+                        Log.warning(`[${new Date().toISOString()}] - ${socket.id} could not be authenticated to ${options.form.channel_name}`);
                         Log.error(response.body);
                     }
 
                     reject({ reason: 'Client can not be authenticated, got HTTP status ' + response.statusCode, status: response.statusCode });
                 } else {
                     if (this.options.devMode) {
-                        Log.info(`[${new Date().toLocaleTimeString()}] - ${socket.id} authenticated for: ${options.form.channel_name}`);
+                        Log.info(`[${new Date().toISOString()}] - ${socket.id} authenticated for: ${options.form.channel_name}`);
                     }
 
                     try {
