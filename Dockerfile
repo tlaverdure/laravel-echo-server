@@ -1,6 +1,8 @@
-FROM node:12-alpine
+FROM node:lts-alpine
 
 WORKDIR /app
+
+RUN apk add --update --no-cache curl
 
 COPY . /app
 
