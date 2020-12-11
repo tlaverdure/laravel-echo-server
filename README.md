@@ -111,6 +111,7 @@ file, the following options can be overridden:
 - `sslCertPath`: `LARAVEL_ECHO_SERVER_SSL_CERT`
 - `sslPassphrase`: `LARAVEL_ECHO_SERVER_SSL_PASS`
 - `sslCertChainPath`: `LARAVEL_ECHO_SERVER_SSL_CHAIN`
+- `rejectUnautorized`: `NODE_TLS_REJECT_UNAUTHORIZED`
 
 
 ### Running with SSL

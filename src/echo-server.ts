@@ -50,7 +50,8 @@ export class EchoServer {
             "onJoinEndpoint": null,
             "onLeaveEndpoint": null,
             "onClientEventEndpoint": null
-        }
+        },
+        rejectUnautorized: ''
     };
 
     /**
