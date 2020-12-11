@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+/usr/sbin/update-ca-certificates
+
 # laravel-echo-server init
 if [[ "$1" == 'init' ]]; then
     set -- laravel-echo-server "$@"
