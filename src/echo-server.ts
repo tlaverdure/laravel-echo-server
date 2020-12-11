@@ -135,6 +135,8 @@ export class EchoServer {
         } else {
             Log.info('Starting server...\n')
         }
+        
+        Log.info(`Searching hooks...\n`);
     }
 
     /**
