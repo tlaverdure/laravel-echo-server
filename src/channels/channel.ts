@@ -196,7 +196,7 @@ export class Channel {
             return;
         }
 
-        let hookEndpoint = this.getHookEndpoint(hookName);
+        let hookEndpoint = this.getHookEndpoint(hookName, channel);
 
         if (hookEndpoint == null) {
             return;
@@ -230,11 +230,14 @@ export class Channel {
      * @param {string} hookName 
      * @returns {string}
      */
-    getHookEndpoint(hookName: string): string {
+    getHookEndpoint(hookName: string, channel: any): string {
         let hookEndpoint = null;
         switch(hookName) { 
             case "onJoin": {
                 if (!this.options.hooks.onJoinEndpoint) {
+                    break;
+                }
+                if (this.options.hooks.onJoinRegexp && !(new RegExp(this.options.hooks.onJoinRegexp)).test(channel)) {
                     break;
                 }
                 hookEndpoint = this.options.hooks.onJoinEndpoint;
@@ -242,6 +245,9 @@ export class Channel {
             } 
             case "onLeave": {
                 if (!this.options.hooks.onLeaveEndpoint) {
+                    break;
+                }
+                if (this.options.hooks.onLeaveRegexp && !(new RegExp(this.options.hooks.onLeaveRegexp)).test(channel)) {
                     break;
                 }
                 hookEndpoint = this.options.hooks.onLeaveEndpoint;
