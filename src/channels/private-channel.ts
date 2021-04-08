@@ -2,7 +2,7 @@ let request = require('request');
 let url = require('url');
 import { Channel } from './channel';
 import { Log } from './../log';
-let rateLimit = require('function-rate-limit');
+let Bottleneck = require('bottleneck');
 
 export class PrivateChannel {
     /**
@@ -10,12 +10,20 @@ export class PrivateChannel {
      */
     constructor(private options: any) {
         this.request = request;
+        this.limiter = new Bottleneck({
+            maxConcurrent: options.maxConcurrentAuthRequests
+        });
     }
 
     /**
      * Request client.
      */
     private request: any;
+
+    /**
+     * Limiter.
+     */
+    private limiter: any;
 
     /**
      * Send authentication request to application server.
@@ -32,17 +40,7 @@ export class PrivateChannel {
             Log.info(`[${new Date().toISOString()}] - Sending auth request to: ${options.url}\n`);
         }
 
-        if(this.options.maxConcurrentAuthRequests !== null) {
-            return new Promise<any>((resolve, reject) => {
-                rateLimit(this.options.maxConcurrentAuthRequests, 1000, () => {
-                    this.serverRequest(socket, options)
-                        .then(resolve)
-                        .catch(reject);
-                });
-            })
-        }else {
-            return this.serverRequest(socket, options);
-        }
+        return this.limiter.schedule(() => this.serverRequest(socket, options));
     }
 
     /**
