@@ -81,6 +81,7 @@ Edit the default configuration of the server by adding options to your **laravel
 | `apiOriginAllow`   | `{}`                 | Configuration to allow API be accessed over CORS. [Example](#cross-domain-access-to-api) |
 | `authEndpoint`     | `/broadcasting/auth` | The route that authenticates private channels  |
 | `authHost`         | `http://localhost`   | The host of the server that authenticates private and presence channels  |
+| `maxConcurrentAuthRequests`         | `null`   | Max number of concurrent auth requests, null -> unlimited   |
 | `database`         | `redis`              | Database used to store data that should persist, like presence channel members. Options are currently `redis` and `sqlite` |
 | `databaseConfig`   |  `{}`                | Configurations for the different database drivers [Example](#database) |
 | `devMode`          | `false`              | Adds additional logging for development purposes |
@@ -101,6 +102,7 @@ file, the following options can be overridden:
 - `authHost`: `LARAVEL_ECHO_SERVER_AUTH_HOST` *Note*: This option will fall back to the `LARAVEL_ECHO_SERVER_HOST` option as the default if that is set in the .env file.
 - `host`: `LARAVEL_ECHO_SERVER_HOST`
 - `port`: `LARAVEL_ECHO_SERVER_PORT`
+- `maxConcurrentAuthRequests`: `LARAVEL_ECHO_MAX_CONCURRENT_AUTH_REQUESTS`
 - `devMode`: `LARAVEL_ECHO_SERVER_DEBUG`
 - `databaseConfig.redis.host`: `LARAVEL_ECHO_SERVER_REDIS_HOST`
 - `databaseConfig.redis.port`: `LARAVEL_ECHO_SERVER_REDIS_PORT`

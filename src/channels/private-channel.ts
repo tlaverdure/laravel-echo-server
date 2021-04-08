@@ -2,6 +2,7 @@ let request = require('request');
 let url = require('url');
 import { Channel } from './channel';
 import { Log } from './../log';
+let rateLimit = require('function-rate-limit');
 
 export class PrivateChannel {
     /**
@@ -31,7 +32,17 @@ export class PrivateChannel {
             Log.info(`[${new Date().toISOString()}] - Sending auth request to: ${options.url}\n`);
         }
 
-        return this.serverRequest(socket, options);
+        if(this.options.maxConcurrentAuthRequests !== null) {
+            return new Promise<any>((resolve, reject) => {
+                rateLimit(this.options.maxConcurrentAuthRequests, 1000, () => {
+                    this.serverRequest(socket, options)
+                        .then(resolve)
+                        .catch(reject);
+                });
+            })
+        }else {
+            return this.serverRequest(socket, options);
+        }
     }
 
     /**
