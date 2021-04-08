@@ -17,6 +17,7 @@ export class EchoServer {
     public defaultOptions: any = {
         authHost: 'http://localhost',
         authEndpoint: '/broadcasting/auth',
+        maxConcurrentAuthRequests: null,
         clients: [],
         database: 'redis',
         databaseConfig: {
