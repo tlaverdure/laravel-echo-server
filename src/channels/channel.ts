@@ -2,6 +2,9 @@ import { PresenceChannel } from './presence-channel';
 import { PrivateChannel } from './private-channel';
 import { Log } from './../log';
 
+let request = require('request');
+var fs = require('fs');
+
 export class Channel {
     /**
      * Channels and patters for private channels.
@@ -24,11 +27,19 @@ export class Channel {
     presence: PresenceChannel;
 
     /**
+     * Request client.
+     *
+     * @type {any}
+     */
+    private request: any;
+
+    /**
      * Create a new channel instance.
      */
     constructor(private io, private options) {
         this.private = new PrivateChannel(options);
         this.presence = new PresenceChannel(io, options);
+        this.request = request;
 
         if (this.options.devMode) {
             Log.success('Channels are ready.');
@@ -44,7 +55,7 @@ export class Channel {
                 this.joinPrivate(socket, data);
             } else {
                 socket.join(data.channel);
-                this.onJoin(socket, data.channel);
+                this.onJoin(socket, data);
             }
         }
     }
@@ -73,10 +84,18 @@ export class Channel {
     /**
      * Leave a channel.
      */
-    leave(socket: any, channel: string, reason: string): void {
+    async leave(socket: any, data: any , reason: string): Promise<void> {
+        const channel: string = data?.channel
+
         if (channel) {
+            let user: any
+
             if (this.isPresence(channel)) {
-                this.presence.leave(socket, channel)
+                const member = await this.presence.leave(socket, channel)
+
+                if (member !== undefined) {
+                    user = member
+                }
             }
 
             socket.leave(channel);
@@ -84,6 +103,13 @@ export class Channel {
             if (this.options.devMode) {
                 Log.info(`[${new Date().toISOString()}] - ${socket.id} left channel: ${channel} (${reason})`);
             }
+
+
+            let payload: object = {
+                user_id: user?.user_id,
+                socket_id: socket.id
+            }
+            this.hook(socket, channel, data.auth, 'leave', payload)
         }
     }
 
@@ -117,7 +143,7 @@ export class Channel {
                 this.presence.join(socket, data.channel, member);
             }
 
-            this.onJoin(socket, data.channel);
+            this.onJoin(socket, data, member);
         }, error => {
             if (this.options.devMode) {
                 Log.error(error.reason);
@@ -138,10 +164,16 @@ export class Channel {
     /**
      * On join a channel log success.
      */
-    onJoin(socket: any, channel: string): void {
+    onJoin(socket: any, data: any, user: any = null): void {
         if (this.options.devMode) {
-            Log.info(`[${new Date().toISOString()}] - ${socket.id} joined channel: ${channel}`);
+            Log.info(`[${new Date().toISOString()}] - ${socket.id} joined channel: ${data.channel}`);
         }
+
+        let payload: object = {
+            user_id: user?.user_id,
+            socket_id: socket.id
+        }
+        this.hook(socket, data.channel, data.auth, 'join', payload)
     }
 
     /**
@@ -163,5 +195,75 @@ export class Channel {
      */
     isInChannel(socket: any, channel: string): boolean {
         return !!socket.rooms[channel];
+    }
+
+    /**
+     *
+     * @param {any} socket
+     * @param {string} channel
+     * @param {object} auth
+     * @param {string} event
+     * @param {object} payload
+     */
+    hook(socket:any, channel: any, auth: object, event: string, payload: object) {
+        if (typeof this.options.hookEndpoint == 'undefined' ||
+            !this.options.hookEndpoint) {
+            return;
+        }
+
+        let options = this.prepareHookHeaders(socket, auth, channel, event, payload);
+
+        this.request.post(options, (error, response, body, next) => {
+            if (error) {
+                if (this.options.devMode) {
+                    Log.error(`[${new Date().toLocaleTimeString()}] - Error call ${event} hook ${socket.id} for ${options.form.channel}`);
+                }
+                Log.error(error);
+            } else if (response.statusCode !== 200) {
+                if (this.options.devMode) {
+                    Log.warning(`[${new Date().toLocaleTimeString()}] - Error call ${event} hook ${socket.id} for ${options.form.channel}`);
+                    Log.error(response.body);
+                }
+            } else {
+                if (this.options.devMode) {
+                    Log.info(`[${new Date().toLocaleTimeString()}] - Call ${event} hook for ${socket.id} for ${options.form.channel}: ${response.body}`);
+                }
+            }
+        });
+    }
+
+    /**
+     * Prepare headers for request to app server.
+     *
+     * @param {any} socket
+     * @param {any} auth
+     * @param {string} channel
+     * @param {string} event
+     * @param {any} payload
+     * @returns {any}
+     */
+    prepareHookHeaders(socket: any, auth: any, channel: string, event: string, payload: any): any {
+        let options = {
+            url: this.options.authHost + this.options.hookEndpoint,
+            form: {
+                event: event,
+                channel: channel,
+                payload: payload
+            },
+            headers: (auth && auth.headers) ? auth.headers : {}
+        };
+
+        if (this.options.authHost.indexOf('https')>-1 && this.options.sslCertPath && this.options.sslKeyPath) {
+            options['agentOptions']= {
+                cert: fs.readFileSync(this.options.sslCertPath),
+                key: fs.readFileSync(this.options.sslKeyPath),
+                passphrase: this.options.sslPassphrase
+            };
+            options['strictSSL']=false;
+        }
+
+        options.headers['Cookie'] = socket.request.headers.cookie;
+        options.headers['X-Requested-With'] = 'XMLHttpRequest';
+        return options;
     }
 }
