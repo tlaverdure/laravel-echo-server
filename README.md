@@ -81,6 +81,7 @@ Edit the default configuration of the server by adding options to your **laravel
 | `apiOriginAllow`   | `{}`                 | Configuration to allow API be accessed over CORS. [Example](#cross-domain-access-to-api) |
 | `authEndpoint`     | `/broadcasting/auth` | The route that authenticates private channels  |
 | `authHost`         | `http://localhost`   | The host of the server that authenticates private and presence channels  |
+| `clients`          | `[]`                 | Multi tenancy API clients this server handles |
 | `database`         | `redis`              | Database used to store data that should persist, like presence channel members. Options are currently `redis` and `sqlite` |
 | `databaseConfig`   |  `{}`                | Configurations for the different database drivers [Example](#database) |
 | `devMode`          | `false`              | Adds additional logging for development purposes |
@@ -356,6 +357,45 @@ Redis::subscribe(['PresenceChannelUpdated'], function ($message) {
 ## Client Side Configuration
 
 See the official Laravel documentation for more information. <https://laravel.com/docs/master/broadcasting#introduction>
+
+### Multi Tenancy support
+
+If you would like your server to handle multi tenancy app clients, just add them in your **laravel-echo-server.json** like:
+
+```json
+"clients": [
+    {
+      "appId": "app-id-1",
+      "key": "app-key-1",
+      "host": "http://app1.domain.dev",
+      "authEndpoint": "/broadcasting/auth"
+    },
+    {
+      "appId": "app-id-2",
+      "key": "app-key-2",
+      "host": "http://app2.domain.dev",
+      "authEndpoint": "/broadcasting/auth"
+    }
+  ],
+```
+
+and set a **auth.app** value in your socket instance. For example:
+
+```javascript
+const echo = new Echo({
+    broadcaster: 'socket.io',
+    host: 'http://localhost:6001',
+    auth: {
+        app: 'app-id-2',
+        headers: {
+            Authorization: token,
+        },
+    },
+    
+});
+```
+
+Laravel Echo Server will get the first client that matches the app id and will use **host + authEndpoint** to create the auth URI.
 
 ### Tips
 #### Socket.io client library

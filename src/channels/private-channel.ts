@@ -21,7 +21,7 @@ export class PrivateChannel {
      */
     authenticate(socket: any, data: any): Promise<any> {
         let options = {
-            url: this.authHost(socket) + this.options.authEndpoint,
+            url: this.clientAuthUri(data) || (this.authHost(socket) + this.options.authEndpoint),
             form: { channel_name: data.channel },
             headers: (data.auth && data.auth.headers) ? data.auth.headers : {},
             rejectUnauthorized: false
@@ -32,6 +32,33 @@ export class PrivateChannel {
         }
 
         return this.serverRequest(socket, options);
+    }
+
+    /**
+     * Get the client auth URI of the first client.
+     */
+    protected clientAuthUri(data: any): string {
+        let client = this.appClients(data)[0];
+
+        return (client?.host || '') + (client?.authEndpoint || '');
+    }
+
+    /**
+     * Get the clients based on data.auth.app.
+     */
+    protected appClients(data: any): any[] {
+        let clients = [];
+        let app = data?.auth?.app;
+
+        if (app === undefined) return clients;
+
+        for (let client of this.options.clients) {
+            if (client?.appId === app) {
+                clients.push(client);
+            }
+        };
+
+        return clients;
     }
 
     /**
