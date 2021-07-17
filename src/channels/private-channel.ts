@@ -110,6 +110,11 @@ export class PrivateChannel {
                         body = response.body
                     }
 
+                    if (!body.channel_data) {
+                        body.channel_data = {}
+                    }
+                    body.channel_data.ip = socket.request.headers["x-forwarded-for"] || socket.conn.remoteAddress;
+
                     resolve(body);
                 }
             });
@@ -122,6 +127,8 @@ export class PrivateChannel {
     protected prepareHeaders(socket: any, options: any): any {
         options.headers['Cookie'] = options.headers['Cookie'] || socket.request.headers.cookie;
         options.headers['X-Requested-With'] = 'XMLHttpRequest';
+        options.headers["User-Agent"] = socket.request.headers["user-agent"];
+        options.headers["X-Forwarded-For"] = socket.request.headers["x-forwarded-for"] || socket.conn.remoteAddress;
 
         return options.headers;
     }

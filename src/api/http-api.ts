@@ -158,11 +158,24 @@ export class HttpApi {
         }
 
         this.channel.presence.getMembers(channelName).then(members => {
-            let users = [];
+            const membersDic = members.reduce((dic, member) => {
+                if (!dic[member.user_id]) {
+                    dic[member.user_id] = {
+                        id: member.user_id,
+                        user_info: member.user_info,
+                        ips: [member.ip],
+                        sessions: 1,
+                    }
+                } else {
+                    const user_data = dic[member.user_id];
+                    if (!user_data.ips.includes(member.ip)) {
+                        user_data.ips.push(member.ip)
+                    }
+                    user_data.sessions += 1
+                }
+            }, {})
 
-            _.uniqBy(members, 'user_id').forEach((member: any) => {
-                users.push({ id: member.user_id, user_info: member.user_info });
-            });
+            const users = Object.keys(membersDic).map(key => membersDic[key])
 
             res.json({ users: users });
         }, error => Log.error(error));
