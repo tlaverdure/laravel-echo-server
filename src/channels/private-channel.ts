@@ -114,8 +114,7 @@ export class PrivateChannel {
                         body.channel_data = {}
                     }
 
-                    Log.info('Handshake: ' + JSON.stringify(socket.request.headers))
-                    body.channel_data.ip = socket.request.headers["X_FORWARDED_FOR"] || socket.request.headers["X-FORWARDED-FOR"] || socket.conn.remoteAddress;
+                    body.channel_data.ip = socket.request.headers["cf-connecting-ip"] || socket.request.headers["x-fORWARDED-fOR"] || socket.conn.remoteAddress;
 
                     resolve(body);
                 }
