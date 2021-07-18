@@ -173,6 +173,7 @@ export class HttpApi {
                     }
                     user_data.sessions += 1
                 }
+                return dic
             }, {})
 
             const users = Object.keys(membersDic).map(key => membersDic[key])
