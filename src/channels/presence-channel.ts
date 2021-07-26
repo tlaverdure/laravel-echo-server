@@ -13,12 +13,15 @@ export class PresenceChannel {
 
     _redis: Publisher;
 
+    _keyPrefix: string;
+
     /**
      * Create a new Presence channel instance.
      */
     constructor(private io, private options: any) {
         this.db = new Database(options);
         this._redis = new RedisPublisher(options);
+        this._keyPrefix = options.databaseConfig.redis.keyPrefix || '';
     }
 
     /**
@@ -148,7 +151,7 @@ export class PresenceChannel {
      */
     onJoin(socket: any, channel: string, member: any): void {
         this._redis.publish(channel, {
-            event: "presence:joining",
+            event: `${this._keyPrefix}presence:joining`,
             data: {member}
         });
     }
@@ -158,7 +161,7 @@ export class PresenceChannel {
      */
     onLeave(channel: string, member: any): void {
         this._redis.publish(channel, {
-            event: "presence:leaving",
+            event: `${this._keyPrefix}presence:leaving`,
             data: {member}
         });
     }
@@ -168,7 +171,7 @@ export class PresenceChannel {
      */
     onSubscribed(socket: any, channel: string, members: any[]) {
         this._redis.publish(channel, {
-            event: "presence:subscribed",
+            event: `${this._keyPrefix}presence:subscribed`,
             data: {members}
         });
     }
