@@ -1,5 +1,8 @@
-import { Database } from './../database';
-import { Log } from './../log';
+import {Database} from './../database';
+import {Log} from './../log';
+import {RedisPublisher} from "../publishers/redis-publisher";
+import {Publisher} from "../publishers";
+
 var _ = require("lodash");
 
 export class PresenceChannel {
@@ -8,11 +11,14 @@ export class PresenceChannel {
      */
     db: Database;
 
+    _redis: Publisher;
+
     /**
      * Create a new Presence channel instance.
      */
     constructor(private io, private options: any) {
         this.db = new Database(options);
+        this._redis = new RedisPublisher(options);
     }
 
     /**
@@ -141,22 +147,33 @@ export class PresenceChannel {
      * On join event handler.
      */
     onJoin(socket: any, channel: string, member: any): void {
-        this.io.sockets.connected[socket.id].broadcast
-            .to(channel)
-            .emit("presence:joining", channel, member);
+        this._redis.publish(channel, {
+            event: "presence:joining",
+            data: {member}
+        });
     }
 
     /**
      * On leave emitter.
      */
     onLeave(channel: string, member: any): void {
-        this.io.to(channel).emit("presence:leaving", channel, member);
+        this._redis.publish(channel, {
+            event: "presence:leaving",
+            data: {member}
+        });
     }
 
     /**
      * On subscribed event emitter.
      */
     onSubscribed(socket: any, channel: string, members: any[]) {
-        this.io.to(socket.id).emit("presence:subscribed", channel, members);
+        this._redis.publish(channel, {
+            event: "presence:subscribed",
+            data: {members}
+        });
+    }
+
+    clientEvent(data) {
+        this._redis.publish(data.channel, data);
     }
 }
