@@ -1,3 +1,3 @@
 export interface Publisher {
-    publish(channel: string, data: any): Promise<any>;
+    publish(channel: string, event: string, data: any): Promise<any>;
 }

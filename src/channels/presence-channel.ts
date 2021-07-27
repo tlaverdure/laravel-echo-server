@@ -1,7 +1,7 @@
 import {Database} from './../database';
 import {Log} from './../log';
-import {RedisPublisher} from "../publishers/redis-publisher";
 import {Publisher} from "../publishers";
+import {PublisherFactory} from "../publishers/publisher-factory";
 
 var _ = require("lodash");
 
@@ -11,17 +11,14 @@ export class PresenceChannel {
      */
     db: Database;
 
-    _redis: Publisher;
-
-    _keyPrefix: string;
+    publisher: Publisher;
 
     /**
      * Create a new Presence channel instance.
      */
     constructor(private io, private options: any) {
         this.db = new Database(options);
-        this._redis = new RedisPublisher(options);
-        this._keyPrefix = options.databaseConfig.redis.keyPrefix || '';
+        this.publisher = new PublisherFactory(io).create(options);
     }
 
     /**
@@ -150,8 +147,7 @@ export class PresenceChannel {
      * On join event handler.
      */
     onJoin(socket: any, channel: string, member: any): void {
-        this._redis.publish(channel, {
-            event: `${this._keyPrefix}presence:joining`,
+        this.publisher.publish(channel, "presence:joining",{
             data: {member}
         });
     }
@@ -160,8 +156,7 @@ export class PresenceChannel {
      * On leave emitter.
      */
     onLeave(channel: string, member: any): void {
-        this._redis.publish(channel, {
-            event: `${this._keyPrefix}presence:leaving`,
+        this.publisher.publish(channel, "presence:leaving", {
             data: {member}
         });
     }
@@ -170,13 +165,10 @@ export class PresenceChannel {
      * On subscribed event emitter.
      */
     onSubscribed(socket: any, channel: string, members: any[]) {
-        this._redis.publish(channel, {
-            event: `${this._keyPrefix}presence:subscribed`,
-            data: {members}
-        });
+        this.io.to(socket.id).emit("presence:subscribed", channel, members);
     }
 
     clientEvent(data) {
-        this._redis.publish(data.channel, data);
+        this.publisher.publish(data.channel, data.event, data);
     }
 }

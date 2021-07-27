@@ -1,6 +1,6 @@
-import { PresenceChannel } from './presence-channel';
-import { PrivateChannel } from './private-channel';
-import { Log } from './../log';
+import {PresenceChannel} from './presence-channel';
+import {PrivateChannel} from './private-channel';
+import {Log} from './../log';
 
 export class Channel {
     /**
@@ -63,7 +63,7 @@ export class Channel {
             if (this.isClientEvent(data.event) &&
                 this.isPrivate(data.channel) &&
                 this.isInChannel(socket, data.channel)) {
-                this.presence.clientEvent(data);
+                this.presence.clientEvent({socket, ...data});
             }
         }
     }

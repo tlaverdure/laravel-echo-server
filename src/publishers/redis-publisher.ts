@@ -15,7 +15,7 @@ export class RedisPublisher implements Publisher {
      *
      * @type {String}
      */
-    private _keyPrefix: string;
+    private readonly _keyPrefix: string;
 
     /**
      * Create a new instance of subscriber.
@@ -32,10 +32,10 @@ export class RedisPublisher implements Publisher {
      *
      * @return {Promise<any>}
      */
-    publish(channel: string, data: any): Promise<any> {
+    publish(channel: string, event: string, data: any): Promise<any> {
         return new Promise((resolve, reject) => {
             try {
-                this._redis.publish(channel, data);
+                this._redis.publish(this._keyPrefix + channel, JSON.stringify({event, ...data}));
                 resolve();
             } catch (e) {
                 reject(e);
