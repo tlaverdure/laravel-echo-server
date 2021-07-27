@@ -7,7 +7,7 @@ export class PublisherFactory {
     }
 
     public create(options: any): Publisher {
-        if (options.subscribers.redis === 'redis') {
+        if (options.subscribers.redis) {
             return new RedisPublisher(options);
         }
         return new IoPublisher(this.io);
