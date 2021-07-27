@@ -1,6 +1,8 @@
 var Redis = require('ioredis');
 import {Publisher} from './publisher';
 
+var _ = require("lodash");
+
 export class RedisPublisher implements Publisher {
     /**
      * Redis pub/sub client.
@@ -35,7 +37,7 @@ export class RedisPublisher implements Publisher {
     publish(channel: string, event: string, data: any): Promise<any> {
         return new Promise((resolve, reject) => {
             try {
-                this._redis.publish(this._keyPrefix + channel, JSON.stringify({event, ...data}));
+                this._redis.publish(this._keyPrefix + channel, JSON.stringify({event, ..._.omit(data, ['socket'])}));
                 resolve();
             } catch (e) {
                 reject(e);
