@@ -20,6 +20,7 @@ export class IoPublisher implements Publisher {
                 .broadcast
                 .to(channel)
                 .emit(event, data.data.member);
+
             return Promise.resolve(undefined);
         }
 
