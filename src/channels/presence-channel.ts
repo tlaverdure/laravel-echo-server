@@ -1,5 +1,8 @@
-import { Database } from './../database';
-import { Log } from './../log';
+import {Database} from './../database';
+import {Log} from './../log';
+import {Publisher} from "../publishers";
+import {PublisherFactory} from "../publishers/publisher-factory";
+
 var _ = require("lodash");
 
 export class PresenceChannel {
@@ -8,11 +11,14 @@ export class PresenceChannel {
      */
     db: Database;
 
+    publisher: Publisher;
+
     /**
      * Create a new Presence channel instance.
      */
     constructor(private io, private options: any) {
         this.db = new Database(options);
+        this.publisher = new PublisherFactory(io).create(options);
     }
 
     /**
@@ -141,16 +147,18 @@ export class PresenceChannel {
      * On join event handler.
      */
     onJoin(socket: any, channel: string, member: any): void {
-        this.io.sockets.connected[socket.id].broadcast
-            .to(channel)
-            .emit("presence:joining", channel, member);
+        this.publisher.publish(channel, "presence:joining",{
+            data: {member}
+        });
     }
 
     /**
      * On leave emitter.
      */
     onLeave(channel: string, member: any): void {
-        this.io.to(channel).emit("presence:leaving", channel, member);
+        this.publisher.publish(channel, "presence:leaving", {
+            data: {member}
+        });
     }
 
     /**
@@ -158,5 +166,9 @@ export class PresenceChannel {
      */
     onSubscribed(socket: any, channel: string, members: any[]) {
         this.io.to(socket.id).emit("presence:subscribed", channel, members);
+    }
+
+    clientEvent(data) {
+        this.publisher.publish(data.channel, data.event, data);
     }
 }
