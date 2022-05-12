@@ -28,6 +28,7 @@
     "inquirer": "^7.1.0",
     "ioredis": "^4.16.0",
     "lodash": "^4.17.15",
+    "randexp": "^0.5.3",
     "request": "^2.88.2",
     "socket.io": "^2.3.0",
     "yargs": "^15.3.1"
