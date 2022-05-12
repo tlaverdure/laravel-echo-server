@@ -4,6 +4,8 @@ var https = require('https');
 var express = require('express');
 var url = require('url');
 var io = require('socket.io');
+var RandExp = require('randexp').randexp;
+
 import { Log } from './log';
 
 export class Server {
@@ -34,10 +36,14 @@ export class Server {
     init(): Promise<any> {
         return new Promise((resolve, reject) => {
             this.serverProtocol().then(() => {
-                let host = this.options.host || 'localhost';
+                let options = this.options
+                let host = options.host || 'localhost';
                 Log.success(`Running at ${host} on port ${this.getPort()}`);
-
                 resolve(this.io);
+                this.io.eio.generateId = function () {
+                    var socketIdSpec = options.socketIdSpec || '([a-zA-Z0-9]{15})';
+                    return RandExp(socketIdSpec);
+                };
             }, error => reject(error));
         });
     }
