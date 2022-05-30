@@ -55,6 +55,7 @@ export class RedisSubscriber implements Subscriber {
 
             this._redis.psubscribe(`${this._keyPrefix}*`, (err, count) => {
                 if (err) {
+                    Log.info(err);
                     reject('Redis could not subscribe.')
                 }
 
