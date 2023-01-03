@@ -30,7 +30,7 @@ export class EchoServer {
         port: 6001,
         protocol: "http",
         socketio: {},
-        secureOptions: constants.SSL_OP_NO_TLSv1,
+        secureOptions: constants.SSL_OP_NO_TLSv1 | constants.SSL_OP_NO_TLSv1_1,
         sslCertPath: '',
         sslKeyPath: '',
         sslCertChainPath: '',
