@@ -26,7 +26,7 @@ export class EchoServer {
             }
         },
         devMode: false,
-        logLevel: LogLevel.Title,
+        logLevel: LogLevel.Info,
         host: null,
         port: 6001,
         protocol: "http",
