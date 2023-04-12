@@ -2,7 +2,7 @@ import { HttpSubscriber, RedisSubscriber, Subscriber } from './subscribers';
 import { Channel } from './channels';
 import { Server } from './server';
 import { HttpApi } from './api';
-import { Log } from './log';
+import { Log, LogLevel } from './log';
 import * as fs from 'fs';
 const packageFile = require('../package.json');
 const { constants } = require('crypto');
@@ -26,6 +26,7 @@ export class EchoServer {
             }
         },
         devMode: false,
+        logLevel: LogLevel.Title,
         host: null,
         port: 6001,
         protocol: "http",
@@ -100,6 +101,7 @@ export class EchoServer {
      */
     init(io: any): Promise<any> {
         return new Promise((resolve, reject) => {
+            Log.setLogLevel(this.options.logLevel);
             this.channel = new Channel(io, this.options);
 
             this.subscribers = [];
