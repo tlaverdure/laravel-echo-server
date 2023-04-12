@@ -1,6 +1,6 @@
 {
   "name": "laravel-echo-server",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "description": "Laravel Echo Node JS Server for Socket.io",
   "repository": {
     "type": "git",
@@ -22,7 +22,7 @@
     "prepublish": "npm run build"
   },
   "dependencies": {
-    "colors": "^1.4.0",
+    "colors": "1.4.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "inquirer": "^7.1.0",
