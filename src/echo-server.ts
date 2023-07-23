@@ -165,7 +165,7 @@ export class EchoServer {
      * Return a channel by its socket id.
      */
     find(socket_id: string): any {
-        return this.server.io.sockets.connected[socket_id];
+        return this.server.io.sockets.sockets.get(socket_id);
     }
 
     /**
@@ -234,7 +234,7 @@ export class EchoServer {
      */
     onDisconnecting(socket: any): void {
         socket.on('disconnecting', (reason) => {
-            Object.keys(socket.rooms).forEach(room => {
+            socket.rooms.forEach(room => {
                 if (room !== socket.id) {
                     this.channel.leave(socket, room, reason);
                 }

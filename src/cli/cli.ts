@@ -34,6 +34,8 @@ export class Cli {
         LARAVEL_ECHO_SERVER_REDIS_HOST: "databaseConfig.redis.host",
         LARAVEL_ECHO_SERVER_REDIS_PORT: "databaseConfig.redis.port",
         LARAVEL_ECHO_SERVER_REDIS_PASSWORD: "databaseConfig.redis.password",
+        LARAVEL_ECHO_SERVER_REDIS_DB: "databaseConfig.redis.db",
+        LARAVEL_ECHO_SERVER_REDIS_PREFIX: "databaseConfig.redis.keyPrefix",
         LARAVEL_ECHO_SERVER_PROTO: "protocol",
         LARAVEL_ECHO_SERVER_SSL_CERT: "sslCertPath",
         LARAVEL_ECHO_SERVER_SSL_KEY: "sslKeyPath",

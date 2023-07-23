@@ -63,7 +63,7 @@ export class Channel {
             if (this.isClientEvent(data.event) &&
                 this.isPrivate(data.channel) &&
                 this.isInChannel(socket, data.channel)) {
-                this.io.sockets.connected[socket.id]
+                this.io.sockets.sockets.get(socket.id)
                     .broadcast.to(data.channel)
                     .emit(data.event, data.channel, data.data);
             }
@@ -109,7 +109,7 @@ export class Channel {
             socket.join(data.channel);
 
             if (this.isPresence(data.channel)) {
-                var member = res.channel_data;
+                let member = res.channel_data;
                 try {
                     member = JSON.parse(res.channel_data);
                 } catch (e) { }
