@@ -1,17 +1,21 @@
-# Laravel Echo Server
+# Laravel Echo Server - Laravel Adapter
 
-NodeJs server for Laravel Echo broadcasting with Socket.io.
+NodeJs server for Laravel Echo broadcasting with Socket.io - It is also integrated with Redis Adapter that makes it horizontally scaleable 
 
 ## System Requirements
 
 The following are required to function properly.
 
 *   Laravel 5.3
-*   Node 6.0+
-*   Redis 3+
+*   Node 12+
+*   Redis 4+
+*   Socket.io 4+
 
 Additional information on broadcasting with Laravel can be found on the
 official docs: <https://laravel.com/docs/master/broadcasting>
+
+Redis Adapter event broadcasting information can be found on the 
+Official docs: <https://socket.io/docs/v4/redis-adapter>
 
 ## Getting Started
 
