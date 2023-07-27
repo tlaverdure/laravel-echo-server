@@ -6,6 +6,8 @@ import { Log } from './log';
 import * as fs from 'fs';
 const packageFile = require('../package.json');
 const { constants } = require('crypto');
+const { createAdapter } = require("@socket.io/redis-adapter");
+const { createClient } = require("redis");
 
 /**
  * Echo server class.
@@ -83,13 +85,21 @@ export class EchoServer {
     run(options: any): Promise<any> {
         return new Promise((resolve, reject) => {
             this.options = Object.assign(this.defaultOptions, options);
+            Log.info("Echo Server Options: " + JSON.stringify(this.options));
             this.startup();
             this.server = new Server(this.options);
 
             this.server.init().then(io => {
-                this.init(io).then(() => {
+                this.init(io).then(async () => {
                     Log.info('\nServer ready!\n');
-                    resolve(this);
+                    const pubClient = createClient({ url: "redis://redis5:5010" });
+                    const subClient = pubClient.duplicate();
+                    await Promise.all([pubClient.connect(), subClient.connect()]).then(() => {
+                        Log.info('Pub/Sub Created');
+                        io.adapter(createAdapter(pubClient, subClient));
+                        Log.info('Redis Adapter Connected');
+                        resolve(this);
+                    });
                 }, error => Log.error(error));
             }, error => Log.error(error));
         });
