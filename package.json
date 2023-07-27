@@ -1,5 +1,5 @@
 {
-  "name": "laravel-echo-server-redis-adapter",
+  "name": "laravel-echo-server",
   "version": "1.6.3",
   "description": "Laravel Echo Node JS Server for Socket.io",
   "repository": {
@@ -11,7 +11,7 @@
     "laravel",
     "socket.io"
   ],
-  "author": "Huzaifa Asif <huzaifa8580@gmail.com>",
+  "author": "Thiery Laverdure",
   "license": "MIT",
   "jshintConfig": {
     "esversion": 6
