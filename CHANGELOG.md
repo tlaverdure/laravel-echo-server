@@ -1,3 +1,9 @@
+# 1.6.3
+
+## Fixed
+
+-   Security patch - update dependencies
+
 # 1.6.2
 
 ## Added
